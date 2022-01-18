@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 
-from base_scheme import EPC_SCHEME
+from base_scheme import EPCScheme
 from common import (
     BinaryCodingSchemes,
     BinaryHeaders,
@@ -91,7 +91,7 @@ class GSRNFilterValues(Enum):
     RESERVED_7 = "7"
 
 
-class GSRN(EPC_SCHEME):
+class GSRN(EPCScheme):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 

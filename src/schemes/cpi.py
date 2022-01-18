@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 
-from base_scheme import EPC_SCHEME
+from base_scheme import EPCScheme
 from common import (
     BinaryCodingSchemes,
     BinaryHeaders,
@@ -154,7 +154,7 @@ def replace_cpi_escapes(cpi: str) -> str:
     return cpi.replace("%23", "#").replace("%2F", "/")
 
 
-class CPI(EPC_SCHEME):
+class CPI(EPCScheme):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 

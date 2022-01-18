@@ -3,12 +3,17 @@ from typing import Any
 from common import BinaryCodingSchemes, hex_to_base64
 
 
-class EPC_SCHEME:
+class EPCScheme:
     def __init__(self) -> None:
         self._base64 = None
         self._binary = None
         self._hex = None
         self._tag_uri = None
+
+    def binary(
+        self, binary_coding_scheme: BinaryCodingSchemes = None, filter_value: Any = None
+    ) -> Any:
+        return self._binary
 
     def hex(
         self, binary_coding_scheme: BinaryCodingSchemes = None, filter_value: Any = None
@@ -39,3 +44,34 @@ class EPC_SCHEME:
         self._base64 = hex_to_base64(hex_string)
 
         return self._base64
+
+
+class EPCSchemeNoTagURI(EPCScheme):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def tag_uri(
+        self, binary_coding_scheme: BinaryCodingSchemes = None, filter_value: Any = None
+    ) -> str:
+        raise AttributeError(
+            message="Tag URI scheme not available for provided EPC scheme"
+        )
+
+    def binary(
+        self, binary_coding_scheme: BinaryCodingSchemes = None, filter_value: Any = None
+    ) -> str:
+        raise AttributeError(
+            message="Binary scheme not available for provided EPC scheme"
+        )
+
+    def hex(
+        self, binary_coding_scheme: BinaryCodingSchemes = None, filter_value: Any = None
+    ) -> str:
+        raise AttributeError(message="Hex scheme not available for provided EPC scheme")
+
+    def base64(
+        self, binary_coding_scheme: BinaryCodingSchemes = None, filter_value: Any = None
+    ) -> str:
+        raise AttributeError(
+            message="Base64 scheme not available for provided EPC scheme"
+        )

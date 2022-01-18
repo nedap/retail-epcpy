@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 
-from base_scheme import EPC_SCHEME
+from base_scheme import EPCScheme
 from common import (
     BinaryCodingSchemes,
     BinaryHeaders,
@@ -93,7 +93,7 @@ class SGCNFilterValues(Enum):
     RESERVED_7 = "7"
 
 
-class SGCN(EPC_SCHEME):
+class SGCN(EPCScheme):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
