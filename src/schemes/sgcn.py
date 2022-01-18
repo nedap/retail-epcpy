@@ -7,6 +7,7 @@ from common import (
     BinaryHeaders,
     ConvertException,
     binary_to_int,
+    calculate_checksum,
     decode_numeric_string,
     decode_partition_table,
     encode_numeric_string,
@@ -110,7 +111,7 @@ class SGCN(EPC_SCHEME):
 
     def gs1_element_string(self) -> str:
         company_prefix, coupon_ref, serial = self.epc_uri.split(":")[4].split(".")
-        check_digit = self.calculate_checksum(f"{company_prefix}{coupon_ref}")
+        check_digit = calculate_checksum(f"{company_prefix}{coupon_ref}")
 
         return f"(255){company_prefix}{coupon_ref}{check_digit}{serial}"
 

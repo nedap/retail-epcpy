@@ -7,6 +7,7 @@ from common import (
     BinaryHeaders,
     ConvertException,
     binary_to_int,
+    calculate_checksum,
     decode_partition_table,
     encode_partition_table,
     str_to_binary,
@@ -108,9 +109,7 @@ class SSCC(EPC_SCHEME):
         company_prefix, serial = self.epc_uri.split(":")[-1].split(".")
         extension = serial[0]
         serial_ref = serial[1:]
-        check_digit = self.calculate_checksum(
-            f"{extension}{company_prefix}{serial_ref}"
-        )
+        check_digit = calculate_checksum(f"{extension}{company_prefix}{serial_ref}")
 
         return f"(00){extension}{company_prefix}{serial_ref}{check_digit}"
 

@@ -8,6 +8,7 @@ from common import (
     ConvertException,
     base64_to_hex,
     binary_to_int,
+    calculate_checksum,
     decode_partition_table,
     decode_string,
     encode_partition_table,
@@ -206,7 +207,7 @@ class SGTIN(EPC_SCHEME):
         indicator = value.split(".")[1][0]
         item_ref = value.split(".")[1][1:]
         digits = (indicator + company_pref + item_ref).zfill(13)
-        checksum = self.calculate_checksum(digits)
+        checksum = calculate_checksum(digits)
 
         self._gtin = f"{digits}{checksum}"
         return self._gtin
@@ -222,7 +223,7 @@ def sgtin_to_gtin(sgtin: str) -> str:
     indicator = value.split(".")[1][0]
     item_ref = value.split(".")[1][1:]
     digits = (indicator + company_pref + item_ref).zfill(13)
-    checksum = EPC_SCHEME().calculate_checksum(digits)
+    checksum = calculate_checksum(digits)
 
     return f"{digits}{checksum}"
 

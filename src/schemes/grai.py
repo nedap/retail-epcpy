@@ -7,6 +7,7 @@ from common import (
     BinaryHeaders,
     ConvertException,
     binary_to_int,
+    calculate_checksum,
     decode_partition_table,
     decode_string,
     encode_partition_table,
@@ -114,7 +115,7 @@ class GRAI(EPC_SCHEME):
         company_prefix, asset_type, *serial = ":".join(
             self.epc_uri.split(":")[4:]
         ).split(".")
-        check_digit = self.calculate_checksum(f"{company_prefix}{asset_type}")
+        check_digit = calculate_checksum(f"{company_prefix}{asset_type}")
 
         serial = replace_uri_escapes(".".join(serial))
 

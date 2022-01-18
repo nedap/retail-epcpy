@@ -7,6 +7,7 @@ from common import (
     BinaryHeaders,
     ConvertException,
     binary_to_int,
+    calculate_checksum,
     decode_partition_table,
     encode_partition_table,
     str_to_binary,
@@ -106,7 +107,7 @@ class GSRN(EPC_SCHEME):
 
     def gs1_element_string(self) -> str:
         company_prefix, service_reference = self.epc_uri.split(":")[4].split(".")
-        check_digit = self.calculate_checksum(f"{company_prefix}{service_reference}")
+        check_digit = calculate_checksum(f"{company_prefix}{service_reference}")
 
         return f"(8018){company_prefix}{service_reference}{check_digit}"
 

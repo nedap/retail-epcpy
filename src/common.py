@@ -261,3 +261,19 @@ def verify_gs3a3_component(serial):
 
     if not VERIFY_GS3A3_CHARS_REGEX.fullmatch(res):
         raise ConvertException()
+
+
+def calculate_checksum(digits: str) -> int:
+    digits = [int(d) for d in digits]
+    odd, even = digits[1::2], digits[0::2]
+
+    if len(digits) % 2 == 0:
+        val1 = sum(even)
+        val2 = sum(odd)
+    else:
+        val1 = sum(odd)
+        val2 = sum(even)
+
+    checksum = (10 - ((3 * (val1) + (val2)) % 10)) % 10
+
+    return checksum
