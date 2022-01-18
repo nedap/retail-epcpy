@@ -1,6 +1,7 @@
 import base64
 import re
 from enum import Enum
+from math import log
 
 from regex import VERIFY_GS3A3_CHARS
 
@@ -22,6 +23,8 @@ class BinaryHeaders(Enum):
     CPI_96 = "00111100"
     CPI_VAR = "00111101"
     SGCN_96 = "00111111"
+    ITIP_110 = "01000000"
+    ITIP_212 = "01000001"
 
 
 class BinaryCodingSchemes(Enum):
@@ -41,6 +44,8 @@ class BinaryCodingSchemes(Enum):
     CPI_96 = "cpi-96"
     CPI_VAR = "cpi-var"
     SGCN_96 = "sgcn-96"
+    ITIP_110 = "itip-110"
+    ITIP_212 = "itip-212"
 
 
 ESCAPE_CHARACTERS = {
@@ -249,6 +254,21 @@ def decode_numeric_string(binary: str) -> str:
     return string[1:]
 
 
+def encode_fixed_width_integer(string: str, bit_count: int) -> str:
+    if int(string) >= (pow(10, int(bit_count * log(2) / log(10))) - 1):
+        raise ConvertException(message="Fixed width numeric integer too large")
+
+    return str_to_binary(string, bit_count)
+
+
+def decode_fixed_width_integer(binary: str) -> str:
+    D = int(len(binary) * log(2) / log(10))
+    if int(binary, 2) > pow(10, D) - 1:
+        raise ConvertException(message=f"Bits cannot be converted to {D} digits")
+
+    return f"{int(binary, 2):0>{D}}"
+
+
 def verify_gs3a3_component(serial):
     res = ""
     for g in re.split("(%\d\d)", serial):
@@ -268,11 +288,11 @@ def calculate_checksum(digits: str) -> int:
     odd, even = digits[1::2], digits[0::2]
 
     if len(digits) % 2 == 0:
-        val1 = sum(even)
-        val2 = sum(odd)
-    else:
         val1 = sum(odd)
         val2 = sum(even)
+    else:
+        val1 = sum(even)
+        val2 = sum(odd)
 
     checksum = (10 - ((3 * (val1) + (val2)) % 10)) % 10
 
