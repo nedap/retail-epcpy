@@ -7,6 +7,8 @@ from common import (
     BinaryHeaders,
     ConvertException,
     binary_to_int,
+    decode_cage_code,
+    encode_cage_code,
     str_to_binary,
 )
 from regex import USDOD_URI
@@ -31,16 +33,6 @@ class USDODFilterValues(Enum):
     RESERVED_13 = "13"
     RESERVED_14 = "14"
     RESERVED_15 = "15"
-
-
-def decode_cage_code(binary: str) -> str:
-    return "".join(
-        [chr(int(g, 2)) if g != "" else "" for g in re.split("([0-1]{8})", binary)]
-    ).replace(" ", "")
-
-
-def encode_cage_code(chars: str) -> str:
-    return "".join([f"{ord(char):0>8b}" for char in chars])
 
 
 class USDOD(EPCScheme):

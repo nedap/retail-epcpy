@@ -1,3 +1,4 @@
+from schemes.adi import binary_to_value_adivar, tag_to_value_adivar
 from schemes.cpi import (
     binary_to_value_cpi96,
     binary_to_value_cpivar,
@@ -68,6 +69,7 @@ BINARY_CONVERTERS = {
     "itip-212": binary_to_value_itip212,
     "gid-96": binary_to_value_gid96,
     "usdod-96": binary_to_value_usdod96,
+    "adi-var": binary_to_value_adivar,
 }
 
 TAG_CONVERTERS = {
@@ -91,4 +93,5 @@ TAG_CONVERTERS = {
     "itip-212": tag_to_value_itip212,
     "gid-96": tag_to_value_gid96,
     "usdod-96": tag_to_value_usdod96,
+    "adi-var": tag_to_value_adivar,
 }

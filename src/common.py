@@ -1,7 +1,7 @@
 import base64
 import re
 from enum import Enum
-from math import log
+from math import inf, log
 
 from regex import VERIFY_GS3A3_CHARS
 
@@ -27,6 +27,7 @@ class BinaryHeaders(Enum):
     ITIP_212 = "01000001"
     GID_96 = "00110101"
     USDOD_96 = "00101111"
+    ADI_VAR = "00111011"
 
 
 class BinaryCodingSchemes(Enum):
@@ -50,6 +51,7 @@ class BinaryCodingSchemes(Enum):
     ITIP_212 = "itip-212"
     GID_96 = "gid-96"
     USDOD_96 = "usdod-96"
+    ADI_VAR = "adi-var"
 
 
 ESCAPE_CHARACTERS = {
@@ -271,6 +273,30 @@ def decode_fixed_width_integer(binary: str) -> str:
         raise ConvertException(message=f"Bits cannot be converted to {D} digits")
 
     return f"{int(binary, 2):0>{D}}"
+
+
+def decode_cage_code(binary: str) -> str:
+    return "".join(
+        [chr(int(g, 2)) if g != "" else "" for g in re.split("([0-1]{8})", binary)]
+    ).replace(" ", "")
+
+
+def encode_cage_code(chars: str) -> str:
+    return "".join([f"{ord(char):0>8b}" for char in chars])
+
+
+def decode_cage_code_six_bits(binary: str) -> str:
+    if binary.startswith("100000"):
+        binary = binary[6:]
+
+    return decode_string_six_bits(binary, inf)
+
+
+def encode_cage_code_six_bits(chars: str) -> str:
+    binary = f"{encode_string_six_bits(chars)[:-6]}"
+    if len(binary) == 30:
+        binary = "100000" + binary
+    return binary
 
 
 def verify_gs3a3_component(serial):
