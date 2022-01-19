@@ -1,5 +1,4 @@
 import re
-from enum import Enum
 
 from base_scheme import EPCScheme
 from common import (
@@ -7,9 +6,6 @@ from common import (
     BinaryHeaders,
     ConvertException,
     binary_to_int,
-    calculate_checksum,
-    decode_partition_table,
-    encode_partition_table,
     str_to_binary,
 )
 from regex import GID_URI

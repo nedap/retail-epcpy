@@ -45,6 +45,7 @@ from schemes.sgtin import (
     tag_to_value_sgtin198,
 )
 from schemes.sscc import binary_to_value_sscc96, tag_to_value_sscc96
+from schemes.usdod import binary_to_value_usdod96, tag_to_value_usdod96
 
 BINARY_CONVERTERS = {
     "sgtin-96": binary_to_value_sgtin96,
@@ -66,6 +67,7 @@ BINARY_CONVERTERS = {
     "itip-110": binary_to_value_itip110,
     "itip-212": binary_to_value_itip212,
     "gid-96": binary_to_value_gid96,
+    "usdod-96": binary_to_value_usdod96,
 }
 
 TAG_CONVERTERS = {
@@ -88,4 +90,5 @@ TAG_CONVERTERS = {
     "itip-110": tag_to_value_itip110,
     "itip-212": tag_to_value_itip212,
     "gid-96": tag_to_value_gid96,
+    "usdod-96": tag_to_value_usdod96,
 }

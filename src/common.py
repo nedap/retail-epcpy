@@ -26,6 +26,7 @@ class BinaryHeaders(Enum):
     ITIP_110 = "01000000"
     ITIP_212 = "01000001"
     GID_96 = "00110101"
+    USDOD_96 = "00101111"
 
 
 class BinaryCodingSchemes(Enum):
@@ -48,6 +49,7 @@ class BinaryCodingSchemes(Enum):
     ITIP_110 = "itip-110"
     ITIP_212 = "itip-212"
     GID_96 = "gid-96"
+    USDOD_96 = "usdod-96"
 
 
 ESCAPE_CHARACTERS = {
