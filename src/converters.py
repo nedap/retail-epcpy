@@ -16,6 +16,7 @@ from schemes.giai import (
     tag_to_value_giai96,
     tag_to_value_giai202,
 )
+from schemes.gid import binary_to_value_gid96, tag_to_value_gid96
 from schemes.grai import (
     binary_to_value_grai96,
     binary_to_value_grai170,
@@ -64,6 +65,7 @@ BINARY_CONVERTERS = {
     "sgcn-96": binary_to_value_sgcn96,
     "itip-110": binary_to_value_itip110,
     "itip-212": binary_to_value_itip212,
+    "gid-96": binary_to_value_gid96,
 }
 
 TAG_CONVERTERS = {
@@ -85,4 +87,5 @@ TAG_CONVERTERS = {
     "sgcn-96": tag_to_value_sgcn96,
     "itip-110": tag_to_value_itip110,
     "itip-212": tag_to_value_itip212,
+    "gid-96": tag_to_value_gid96,
 }

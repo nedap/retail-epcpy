@@ -21,10 +21,16 @@ class EPCScheme:
         if self._hex:
             return self._hex
 
-        if binary_coding_scheme:
-            binary = self.binary(binary_coding_scheme, filter_value)
+        if binary_coding_scheme and filter_value:
+            binary = self.binary(
+                binary_coding_scheme=binary_coding_scheme, filter_value=filter_value
+            )
+        elif binary_coding_scheme:
+            binary = self.binary(binary_coding_scheme=binary_coding_scheme)
+        elif filter_value:
+            binary = self.binary(filter_value=filter_value)
         else:
-            binary = self.binary(filter_value)
+            binary = self.binary()
 
         padding = (16 - (len(binary) % 16)) % 16
         padded_binary = f"{binary:<0{len(binary) + padding}}"

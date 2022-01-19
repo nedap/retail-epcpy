@@ -25,6 +25,7 @@ class BinaryHeaders(Enum):
     SGCN_96 = "00111111"
     ITIP_110 = "01000000"
     ITIP_212 = "01000001"
+    GID_96 = "00110101"
 
 
 class BinaryCodingSchemes(Enum):
@@ -46,6 +47,7 @@ class BinaryCodingSchemes(Enum):
     SGCN_96 = "sgcn-96"
     ITIP_110 = "itip-110"
     ITIP_212 = "itip-212"
+    GID_96 = "gid-96"
 
 
 ESCAPE_CHARACTERS = {
