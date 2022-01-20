@@ -98,7 +98,6 @@ PARTITION_TABLE_L = {
     7: PARTITION_TABLE_P[5],
     6: PARTITION_TABLE_P[6],
 }
-# TODO: GTIN 8/12/13
 
 
 class SGTINFilterValues(Enum):
@@ -117,11 +116,11 @@ class SGTIN(EPCScheme):
         super().__init__()
 
         if not SGTIN_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid SGTIN URI {epc_uri}")
 
         if len("".join(epc_uri.split(":")[4].split(".")[:2])) != 13:
             raise ConvertException(
-                message=f"Invalid EPC URI {epc_uri} | Company prefix + item reference must be 13 digits"
+                message=f"Invalid SGTIN URI {epc_uri} | Company prefix + item reference must be 13 digits"
             )
 
         serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])

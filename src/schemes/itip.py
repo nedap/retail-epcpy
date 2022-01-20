@@ -101,7 +101,7 @@ class ITIP(EPCScheme):
         super().__init__()
 
         if not ITIP_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid ITIP URI {epc_uri}")
 
         company_prefix, item_ref, piece, total, *serial = ":".join(
             epc_uri.split(":")[4:]
@@ -112,7 +112,7 @@ class ITIP(EPCScheme):
 
         if len(f"{company_prefix}{item_ref}{piece}{total}") != 17:
             raise ConvertException(
-                message=f"Invalid EPC URI {epc_uri} | first four components must be 17 digits"
+                message=f"Invalid ITIP URI {epc_uri} | first four components must be 17 digits"
             )
 
         if not (1 <= len(serial) <= 20):

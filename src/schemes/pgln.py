@@ -12,7 +12,7 @@ class PGLN(EPCSchemeNoTagURI):
         super().__init__()
 
         if not PGLN_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid PGLN URI {epc_uri}")
 
         if len(epc_uri.split(":")[4].replace(".", "")) != 12:
             raise ConvertException(

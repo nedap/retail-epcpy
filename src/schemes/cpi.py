@@ -159,13 +159,13 @@ class CPI(EPCScheme):
         super().__init__()
 
         if not CPI_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid CPI URI {epc_uri}")
 
         company_prefix, cp_ref, serial = epc_uri.split(":")[4].split(".")
 
         if len("".join([company_prefix, cp_ref])) > 30 or len(serial) > 12:
             raise ConvertException(
-                message=f"Invalid EPC URI {epc_uri} | wrong number of characters"
+                message=f"Invalid CPI URI {epc_uri} | wrong number of characters"
             )
 
         serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])

@@ -40,7 +40,7 @@ class USDOD(EPCScheme):
         super().__init__()
 
         if not USDOD_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid USDOD URI {epc_uri}")
 
         self.cage_dodaac, self.serial = epc_uri.split(":")[4].split(".")
 

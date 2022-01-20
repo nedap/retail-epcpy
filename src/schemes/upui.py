@@ -17,7 +17,7 @@ class UPUI(EPCSchemeNoTagURI):
         super().__init__()
 
         if not UPUI_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid UPUI URI {epc_uri}")
 
         company_prefix, item_ref, *tpx = ":".join(epc_uri.split(":")[4:]).split(".")
 

@@ -99,11 +99,11 @@ class GDTI(EPCScheme):
         super().__init__()
 
         if not GDTI_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid GDTI URI {epc_uri}")
 
         if len("".join(epc_uri.split(":")[4].split(".")[:2])) != 12:
             raise ConvertException(
-                message=f"Invalid EPC URI {epc_uri} | Company prefix + document type must be 12 digits"
+                message=f"Invalid GDTI URI {epc_uri} | Company prefix + document type must be 12 digits"
             )
 
         serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])

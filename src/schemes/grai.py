@@ -99,7 +99,7 @@ class GRAI(EPCScheme):
         super().__init__()
 
         if not GRAI_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid GRAI URI {epc_uri}")
 
         if len("".join(epc_uri.split(":")[4].split(".")[:2])) != 12:
             raise ConvertException(

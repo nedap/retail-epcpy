@@ -96,11 +96,11 @@ class GSRNP(EPCScheme):
         super().__init__()
 
         if not GSRNP_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid GSRNP URI {epc_uri}")
 
         if len(epc_uri.split(":")[4].replace(".", "")) != 17:
             raise ConvertException(
-                message=f"Invalid EPC URI {epc_uri} | wrong number of digits"
+                message=f"Invalid GSRNP URI {epc_uri} | wrong number of digits"
             )
 
         self.epc_uri = epc_uri

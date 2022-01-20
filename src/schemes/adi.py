@@ -91,7 +91,7 @@ class ADI(EPCScheme):
         super().__init__()
 
         if not ADI_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid ADI URI {epc_uri}")
 
         self.cage_dodaac, self.part_number, self.serial = epc_uri.split(":")[4].split(
             "."

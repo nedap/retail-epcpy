@@ -9,6 +9,7 @@ class EPCScheme:
         self._binary = None
         self._hex = None
         self._tag_uri = None
+        self.epc_uri = None
 
     def binary(
         self, binary_coding_scheme: BinaryCodingSchemes = None, filter_value: Any = None

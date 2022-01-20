@@ -98,13 +98,13 @@ class SGCN(EPCScheme):
         super().__init__()
 
         if not SGCN_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid SGCN URI {epc_uri}")
 
         company_prefix, coupon_ref, serial = epc_uri.split(":")[4].split(".")
 
         if len(f"{company_prefix}{coupon_ref}") != 12 or len(serial) > 12:
             raise ConvertException(
-                message=f"Invalid EPC URI {epc_uri} | wrong number of digits"
+                message=f"Invalid SGCN URI {epc_uri} | wrong number of digits"
             )
 
         self.epc_uri = epc_uri

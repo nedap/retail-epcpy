@@ -12,7 +12,7 @@ class GINC(EPCSchemeNoTagURI):
         super().__init__()
 
         if not GINC_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid GINC URI {epc_uri}")
 
         company_prefix, *consignment_reference = ":".join(epc_uri.split(":")[4:]).split(
             "."

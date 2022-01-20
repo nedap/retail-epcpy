@@ -18,7 +18,7 @@ class GID(EPCScheme):
         super().__init__()
 
         if not GID_URI_REGEX.match(epc_uri):
-            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
+            raise ConvertException(message=f"Invalid GID URI {epc_uri}")
 
         self.manager, self.object, self.serial = epc_uri.split(":")[4].split(".")
 
