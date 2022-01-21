@@ -9,7 +9,12 @@ class EPCScheme:
         self._binary = None
         self._hex = None
         self._tag_uri = None
+        self._gs1_key = None
+
         self.epc_uri = None
+
+    def gs1_key(self, *args, **kwargs) -> str:
+        return self._gs1_key
 
     def binary(
         self, binary_coding_scheme: BinaryCodingSchemes = None, filter_value: Any = None

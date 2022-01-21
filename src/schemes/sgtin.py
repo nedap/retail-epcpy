@@ -6,36 +6,19 @@ from common import (
     BinaryCodingSchemes,
     BinaryHeaders,
     ConvertException,
-    base64_to_hex,
     binary_to_int,
     calculate_checksum,
     decode_partition_table,
     decode_string,
     encode_partition_table,
     encode_string,
-    hex_to_binary,
     replace_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
 )
 from regex import SGTIN_URI
 
-SGTIN_PREFIX = "urn:epc:id:sgtin:"
-COMPANY_PREFIX_REGEX = "\d+"
-ITEM_REFERENCE_REGEX = "\d+"
-SERIAL_REGEX = ".+"
-
 SGTIN_REGEX = re.compile(SGTIN_URI)
-
-SGTIN_PAT_PREFIX = "urn:epc:idpat:sgtin:"
-SGTIN_PAT_REGEX = re.compile(
-    f"^{SGTIN_PAT_PREFIX}((\d+\.\d+\..+)|(\d+\.\d+\.\*)|(\d+\.\*\.\*)|(\*\.\*\.\*))$"
-)
-
-TAG_URI_SGTIN_REGEX = re.compile("^urn:epc:tag:(sgtin-96|sgtin-198):\d.\d+\.\d+\..+$")
-GTIN_CONVERTABLE_URIS_REGEX = re.compile(
-    f"^({SGTIN_PREFIX}{COMPANY_PREFIX_REGEX}\.{ITEM_REFERENCE_REGEX}\.{SERIAL_REGEX})|({SGTIN_PAT_PREFIX}((\d+\.\d+\..+)|(\d+\.\d+\.\*)))$"
-)
 
 PARTITION_TABLE_P = {
     0: {
@@ -128,11 +111,40 @@ class SGTIN(EPCScheme):
 
         self.epc_uri = epc_uri
 
-        self._gtin = None
+        value = self.epc_uri.split(":")[4]
+        self._company_pref = value.split(".")[0]
+        self._indicator = value.split(".")[1][0]
+        self._item_ref = value.split(".")[1][1:]
+        check_digit = calculate_checksum(
+            f"{self._indicator}{self._company_pref}{self._item_ref}"
+        )
+
+        self._serial = serial
+        self._gtin = (
+            f"{self._indicator}{self._company_pref}{self._item_ref}{check_digit}".zfill(
+                14
+            )
+        )
+
+    def gs1_key(self, gtin_8=False, gtin_12=False, gtin_13=False) -> str:
+        if gtin_8:
+            if not self._gtin.startswith("000000"):
+                raise ConvertException(message="Invalid GTIN8")
+            return self._gtin[6:]
+        elif gtin_12:
+            if not self._gtin.startswith("00"):
+                raise ConvertException(message="Invalid GTIN12")
+            return self._gtin[2:]
+        elif gtin_13:
+            if not self._gtin.startswith("0"):
+                raise ConvertException(message="Invalid GTIN13")
+            return self._gtin[1:]
+
+        return self._gtin
 
     def gs1_element_string(self) -> str:
-        gtin = self.gtin()
-        serial = replace_uri_escapes(".".join(self.epc_uri.split(".")[2:]))
+        gtin = self._gtin
+        serial = replace_uri_escapes(self._serial)
 
         return f"(01){gtin}(21){serial}"
 
@@ -149,23 +161,21 @@ class SGTIN(EPCScheme):
 
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
-        value = ":".join(self.epc_uri.split(":")[4:])
-        serial = ".".join(value.split(".")[2:])
 
         if (
             scheme == BinaryCodingSchemes.SGTIN_198.value
-            and len(replace_uri_escapes(serial)) > 20
+            and len(replace_uri_escapes(self._serial)) > 20
         ) or (
             scheme == BinaryCodingSchemes.SGTIN_96.value
             and (
-                not serial.isnumeric()
-                or int(serial) >= pow(2, 38)
-                or (len(serial) > 1 and serial[0] == "0")
+                not self._serial.isnumeric()
+                or int(self._serial) >= pow(2, 38)
+                or (len(self._serial) > 1 and self._serial[0] == "0")
             )
         ):
-            raise ConvertException(message=f"Invalid serial value {serial}")
+            raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{value}"
+        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._indicator}{self._item_ref}.{self._serial}"
 
         return self._tag_uri
 
@@ -195,43 +205,6 @@ class SGTIN(EPCScheme):
 
         _binary = header + filter_binary + gtin_binary + serial_binary
         return _binary
-
-    def gtin(self) -> str:
-        if self._gtin:
-            return self._gtin
-
-        value = self.epc_uri.split(":")[4]
-
-        company_pref = value.split(".")[0]
-        indicator = value.split(".")[1][0]
-        item_ref = value.split(".")[1][1:]
-        digits = (indicator + company_pref + item_ref).zfill(13)
-        checksum = calculate_checksum(digits)
-
-        self._gtin = f"{digits}{checksum}"
-        return self._gtin
-
-
-def sgtin_to_gtin(sgtin: str) -> str:
-    if not GTIN_CONVERTABLE_URIS_REGEX.match(sgtin):
-        raise ConvertException(message=f"Invalid SGTIN {sgtin}")
-
-    value = sgtin.split(":")[4]
-
-    company_pref = value.split(".")[0]
-    indicator = value.split(".")[1][0]
-    item_ref = value.split(".")[1][1:]
-    digits = (indicator + company_pref + item_ref).zfill(13)
-    checksum = calculate_checksum(digits)
-
-    return f"{digits}{checksum}"
-
-
-def sgtin_to_gs1_element_string(sgtin: str) -> str:
-    gtin = sgtin_to_gtin(sgtin)
-    serial = replace_uri_escapes(sgtin.split(".")[-1])
-
-    return f"(01){gtin}(21){serial}"
 
 
 def binary_to_value_sgtin96(truncated_binary: str) -> str:
@@ -264,37 +237,3 @@ def tag_to_value_sgtin96(epc_tag_uri: str) -> str:
 
 def tag_to_value_sgtin198(epc_tag_uri: str) -> str:
     return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
-
-
-def binary_to_gtin14(binary: str) -> str:
-    header = binary[:8]
-    try:
-        scheme = BinaryHeaders(header).name.replace("_", "-").lower()
-    except ValueError:
-        raise ConvertException(message=f"{header} is not a valid header")
-
-    size = int(scheme.split("-")[-1])
-
-    if not size <= len(binary):
-        raise ConvertException(
-            message=f"Invalid binary size, expected (<=): {size} actual: {len(binary)}"
-        )
-
-    truncated_binary = binary[:size]
-
-    gtin_binary = truncated_binary[11:58]
-    gtin_string = decode_partition_table(gtin_binary, PARTITION_TABLE_P)
-
-    return sgtin_to_gtin(f"urn:epc:id:sgtin:{gtin_string}.*")
-
-
-def hex_to_gtin14(hex_string: str) -> str:
-    binary = hex_to_binary(hex_string)
-
-    return binary_to_gtin14(binary)
-
-
-def base64_to_gtin14(base64_string: str) -> str:
-    hex_string = base64_to_hex(base64_string)
-
-    return hex_to_gtin14(hex_string)
