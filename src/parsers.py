@@ -1,7 +1,8 @@
 import re
 
+from base_scheme import EPCScheme
 from common import BinaryHeaders, ConvertException, base64_to_hex, hex_to_binary
-from converters import BINARY_CONVERTERS, TAG_CONVERTERS
+from converters import BINARY_CONVERTERS, TAG_CONVERTERS, URI_TO_SCHEME
 from regex import TAG_URI
 
 TAG_URI_REGEX = re.compile(TAG_URI)
@@ -34,6 +35,16 @@ def binary_to_epc_pure_identity(binary: str) -> str:
     epc_tag_uri = binary_to_epc_tag_uri(binary)
 
     return epc_tag_uri_to_pure_identity_uri(epc_tag_uri)
+
+
+def binary_to_epc_scheme(binary: str) -> EPCScheme:
+    epc_pure_identity_uri = binary_to_epc_pure_identity(binary)
+    return URI_TO_SCHEME(epc_pure_identity_uri.split(":")[3])(epc_pure_identity_uri)
+
+
+def binary_to_gs1_key(binary: str) -> str:
+    scheme = binary_to_epc_scheme(binary)
+    return scheme.gs1_key()
 
 
 def hex_to_epc_tag_uri(hex_string: str) -> str:
