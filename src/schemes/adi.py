@@ -93,43 +93,39 @@ class ADI(EPCScheme):
         if not ADI_URI_REGEX.match(epc_uri):
             raise ConvertException(message=f"Invalid ADI URI {epc_uri}")
 
-        self.cage_dodaac, self.part_number, self.serial = epc_uri.split(":")[4].split(
-            "."
-        )
-        self.part_number = self.part_number.replace("%2F", "/")
-        self.serial = self.serial.replace("%2F", "/").replace("%23", "#")
+        self._cage_dodaac, self._part_number, self._serial = epc_uri.split(":")[
+            4
+        ].split(".")
 
-        if not (0 <= len(self.part_number) <= 32):
+        if not (0 <= len(self._part_number.replace("%2F", "/")) <= 32):
             raise ConvertException(
-                message=f"Invalid number of characters in part number: {len(self.part_number)}"
+                message=f"Invalid number of characters in part number: {len(self._part_number.replace('%2F', '/'))}"
             )
 
-        if not (1 <= len(self.serial) <= 30):
+        if not (1 <= len(self._serial.replace("%2F", "/").replace("%23", "#")) <= 30):
             raise ConvertException(
-                message=f"Invalid number of characters in serial: {len(self.serial)}"
+                message=f"Invalid number of characters in serial: {len(self._serial.replace('%2F', '/').replace('%23', '#'))}"
             )
 
         self.epc_uri = epc_uri
 
     def tag_uri(self, filter_value: ADIFilterValues) -> str:
-        if self._tag_uri:
-            return self._tag_uri
-
-        if filter_value is None:
+        if filter_value is None and self._tag_uri is None:
             raise ConvertException(
                 message="Either tag_uri should be set or a filter value should be provided"
             )
+        elif self._tag_uri:
+            return self._tag_uri
 
         scheme = BinaryCodingSchemes.ADI_VAR.value
         filter_val = filter_value.value
-        value = self.epc_uri.split(":")[4]
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{value}"
+        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._cage_dodaac}.{self._part_number}.{self._serial}"
 
         return self._tag_uri
 
     def binary(self, filter_value: ADIFilterValues = None) -> str:
-        if self._binary:
+        if filter_value is None and self._binary:
             return self._binary
 
         self.tag_uri(filter_value)
@@ -139,13 +135,9 @@ class ADI(EPCScheme):
 
         header = BinaryHeaders[scheme].value
         filter_binary = str_to_binary(filter_val, 6)
-        cage_code_binary = encode_cage_code_six_bits(self.cage_dodaac)
-        part_number_binary = encode_string_six_bits(
-            self.part_number.replace("/", "%2F")
-        )
-        serial_binary = encode_string_six_bits(
-            self.serial.replace("/", "%2F").replace("#", "%23")
-        )
+        cage_code_binary = encode_cage_code_six_bits(self._cage_dodaac)
+        part_number_binary = encode_string_six_bits(self._part_number)
+        serial_binary = encode_string_six_bits(self._serial)
 
         self._binary = (
             header

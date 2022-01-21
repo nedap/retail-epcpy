@@ -20,16 +20,16 @@ class GID(EPCScheme):
         if not GID_URI_REGEX.match(epc_uri):
             raise ConvertException(message=f"Invalid GID URI {epc_uri}")
 
-        self.manager, self.object, self.serial = epc_uri.split(":")[4].split(".")
+        self._manager, self._object, self._serial = epc_uri.split(":")[4].split(".")
 
-        if int(self.manager) >= pow(2, 28):
+        if int(self._manager) >= pow(2, 28):
             raise ConvertException(message=f"Manager out of range: (max: {pow(2, 28)})")
 
-        if int(self.object) >= pow(2, 24):
+        if int(self._object) >= pow(2, 24):
             raise ConvertException(message=f"Object out of range: (max: {pow(2, 24)})")
 
-        if int(self.serial) >= pow(2, 36) or (
-            len(self.serial) > 1 and self.serial[0] == "0"
+        if int(self._serial) >= pow(2, 36) or (
+            len(self._serial) > 1 and self._serial[0] == "0"
         ):
             raise ConvertException(message=f"Serial out of range: (max: {pow(2, 36)})")
 
@@ -40,9 +40,10 @@ class GID(EPCScheme):
             return self._tag_uri
 
         scheme = BinaryCodingSchemes.GID_96.value
-        value = self.epc_uri.split(":")[4]
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{value}"
+        self._tag_uri = (
+            f"urn:epc:tag:{scheme}:{self._manager}.{self._object}.{self._serial}"
+        )
 
         return self._tag_uri
 
@@ -55,9 +56,9 @@ class GID(EPCScheme):
         scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
 
         header = BinaryHeaders[scheme].value
-        manager_binary = str_to_binary(self.manager, 28)
-        object_binary = str_to_binary(self.object, 24)
-        serial_binary = str_to_binary(self.serial, 36)
+        manager_binary = str_to_binary(self._manager, 28)
+        object_binary = str_to_binary(self._object, 24)
+        serial_binary = str_to_binary(self._serial, 36)
 
         self._binary = header + manager_binary + object_binary + serial_binary
         return self._binary

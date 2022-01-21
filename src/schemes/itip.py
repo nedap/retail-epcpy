@@ -122,47 +122,49 @@ class ITIP(EPCScheme):
 
         self.epc_uri = epc_uri
 
-        self.company_prefix = company_prefix
-        self.item_ref = item_ref
-        self.piece = piece
-        self.total = total
-        self.serial = replace_uri_escapes(serial)
+        self._company_pref = company_prefix
+        self._item_ref = item_ref
+        self._piece = piece
+        self._total = total
+        self._serial = serial
 
     def gs1_element_string(self) -> str:
-        indicator = self.item_ref[0]
+        indicator = self._item_ref[0]
 
         check_digit = calculate_checksum(
-            f"{indicator}{self.company_prefix}{self.item_ref[1:]}"
+            f"{indicator}{self._company_pref}{self._item_ref[1:]}"
         )
-        return f"(8006){indicator}{self.company_prefix}{self.item_ref[1:]}{check_digit}{self.piece}{self.total}(21){self.serial}"
+        return f"(8006){indicator}{self._company_pref}{self._item_ref[1:]}{check_digit}{self._piece}{self._total}(21){replace_uri_escapes(self._serial)}"
 
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingSchemes, filter_value: ITIPFilterValues
     ) -> str:
-        if self._tag_uri:
-            return self._tag_uri
-
-        if binary_coding_scheme is None or filter_value is None:
+        if (
+            binary_coding_scheme is None or filter_value is None
+        ) and self._tag_uri is None:
             raise ConvertException(
-                message="Both a binary coding scheme and a filter value should be provided!"
+                message="Either both a binary coding scheme and a filter value should be provided, or tag_uri should be set."
             )
+        elif self._tag_uri:
+            return self._tag_uri
 
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
-        serial = ":".join(self.epc_uri.split(":")[4:]).split(".")[4:]
-        serial = ".".join(serial)
 
-        if (scheme == BinaryCodingSchemes.ITIP_212.value and len(self.serial) > 20) or (
+        if (
+            scheme == BinaryCodingSchemes.ITIP_212.value
+            and len(replace_uri_escapes(self._serial)) > 20
+        ) or (
             scheme == BinaryCodingSchemes.ITIP_110.value
             and (
-                not self.serial.isnumeric()
-                or int(self.serial) >= pow(2, 38)
-                or (len(self.serial) > 1 and self.serial[0] == "0")
+                not self._serial.isnumeric()
+                or int(self._serial) >= pow(2, 38)
+                or (len(self._serial) > 1 and self._serial[0] == "0")
             )
         ):
-            raise ConvertException(message=f"Invalid serial value {self.serial}")
+            raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self.company_prefix}.{self.item_ref}.{self.piece}.{self.total}.{serial}"
+        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._item_ref}.{self._piece}.{self._total}.{self._serial}"
 
         return self._tag_uri
 
@@ -171,25 +173,24 @@ class ITIP(EPCScheme):
         binary_coding_scheme: BinaryCodingSchemes = None,
         filter_value: ITIPFilterValues = None,
     ) -> str:
-        if self._binary:
+        if (binary_coding_scheme is None or filter_value is None) and self._binary:
             return self._binary
 
         self.tag_uri(binary_coding_scheme, filter_value)
 
         scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
         filter_value = self._tag_uri.split(":")[4].split(".")[0]
+        parts = [self._company_pref, self._item_ref]
 
         header = BinaryHeaders[scheme].value
         filter_binary = str_to_binary(filter_value, 3)
-        gtin_binary = encode_partition_table(
-            [self.company_prefix, self.item_ref], PARTITION_TABLE_L
-        )
-        piece_binary = encode_fixed_width_integer(self.piece, 7)
-        total_binary = encode_fixed_width_integer(self.total, 7)
+        gtin_binary = encode_partition_table(parts, PARTITION_TABLE_L)
+        piece_binary = encode_fixed_width_integer(self._piece, 7)
+        total_binary = encode_fixed_width_integer(self._total, 7)
         serial_binary = (
-            str_to_binary(self.serial, 38)
+            str_to_binary(self._serial, 38)
             if scheme == "ITIP_110"
-            else encode_string(self.serial, 140)
+            else encode_string(self._serial, 140)
         )
 
         _binary = (

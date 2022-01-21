@@ -161,58 +161,57 @@ class CPI(EPCScheme):
         if not CPI_URI_REGEX.match(epc_uri):
             raise ConvertException(message=f"Invalid CPI URI {epc_uri}")
 
-        company_prefix, cp_ref, serial = epc_uri.split(":")[4].split(".")
+        self._company_pref, self._cp_ref, self._serial = epc_uri.split(":")[4].split(
+            "."
+        )
 
-        if len("".join([company_prefix, cp_ref])) > 30 or len(serial) > 12:
+        if (
+            len("".join([self._company_pref, self._cp_ref])) > 30
+            or len(self._serial) > 12
+        ):
             raise ConvertException(
                 message=f"Invalid CPI URI {epc_uri} | wrong number of characters"
             )
 
-        serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])
-
         self.epc_uri = epc_uri
 
     def gs1_element_string(self) -> str:
-        company_prefix, cp_ref, serial = self.epc_uri.split(":")[4].split(".")
+        cp_ref = replace_cpi_escapes(self._cp_ref)
 
-        cp_ref = replace_cpi_escapes(cp_ref)
-
-        return f"(8010){company_prefix}{cp_ref}(8011){serial}"
+        return f"(8010){self._company_pref}{cp_ref}(8011){self._serial}"
 
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingSchemes, filter_value: CPIFilterValues
     ) -> str:
-        if self._tag_uri:
-            return self._tag_uri
-
-        if binary_coding_scheme is None or filter_value is None:
+        if (
+            binary_coding_scheme is None or filter_value is None
+        ) and self._tag_uri is None:
             raise ConvertException(
-                message="Both a binary coding scheme and a filter value should be provided!"
+                message="Either both a binary coding scheme and a filter value should be provided, or tag_uri should be set."
             )
+        elif self._tag_uri:
+            return self._tag_uri
 
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
-        company_prefix, cp_ref, serial = self.epc_uri.split(":")[4].split(".")
 
         if (
             scheme == BinaryCodingSchemes.CPI_VAR.value
-            and len(serial) > 12
-            or (len(serial) > 1 and serial[0] == "0")
+            and len(self._serial) > 12
+            or (len(self._serial) > 1 and self._serial[0] == "0")
         ) or (
             scheme == BinaryCodingSchemes.CPI_96.value
             and (
-                int(serial) >= pow(2, 31)
-                or (len(serial) > 1 and serial[0] == "0")
-                or not cp_ref.isnumeric()
-                or (len(cp_ref) > 1 and cp_ref[0] == "0")
-                or len(cp_ref) > 15 - len(company_prefix)
+                int(self._serial) >= pow(2, 31)
+                or (len(self._serial) > 1 and self._serial[0] == "0")
+                or not self._cp_ref.isnumeric()
+                or (len(self._cp_ref) > 1 and self._cp_ref[0] == "0")
+                or len(self._cp_ref) > 15 - len(self._company_pref)
             )
         ):
-            raise ConvertException(message=f"Invalid serial value {serial}")
+            raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        self._tag_uri = (
-            f"urn:epc:tag:{scheme}:{filter_val}.{company_prefix}.{cp_ref}.{serial}"
-        )
+        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._cp_ref}.{self._serial}"
 
         return self._tag_uri
 
@@ -221,23 +220,23 @@ class CPI(EPCScheme):
         binary_coding_scheme: BinaryCodingSchemes = None,
         filter_value: CPIFilterValues = None,
     ) -> str:
-        if self._binary:
+        if (binary_coding_scheme is None or filter_value is None) and self._binary:
             return self._binary
 
         self.tag_uri(binary_coding_scheme, filter_value)
 
         scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
         filter_value = self._tag_uri.split(":")[4].split(".")[0]
-        cpi = self._tag_uri.split(":")[4].split(".")[1:3]
-        serial = ".".join(self._tag_uri.split(".")[3:])
+        parts = [self._company_pref, self._cp_ref]
+        serial = self._serial
 
         header = BinaryHeaders[scheme].value
         filter_binary = str_to_binary(filter_value, 3)
         cpi_binary = (
-            encode_partition_table(cpi, PARTITION_TABLE_L_96)
+            encode_partition_table(parts, PARTITION_TABLE_L_96)
             if scheme == "CPI_96"
             else encode_partition_table(
-                cpi, PARTITION_TABLE_L_VAR, six_bit_variable_partition=True
+                parts, PARTITION_TABLE_L_VAR, six_bit_variable_partition=True
             )
         )
         serial_binary = str_to_binary(serial, 31 if scheme == "CPI_96" else 40)

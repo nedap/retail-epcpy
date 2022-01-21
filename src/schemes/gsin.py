@@ -33,9 +33,13 @@ class GSIN(EPCSchemeNoTagURI):
 
         self.epc_uri = epc_uri
 
-    def gs1_element_string(self) -> str:
         company_prefix, shipper_ref = self.epc_uri.split(":")[4].split(".")
-
         check_digit = calculate_checksum(f"{company_prefix}{shipper_ref}")
 
-        return f"(401){company_prefix}{shipper_ref}{check_digit}"
+        self._gsin = f"{company_prefix}{shipper_ref}{check_digit}"
+
+    def gs1_key(self) -> str:
+        return self._gsin
+
+    def gs1_element_string(self) -> str:
+        return f"(401){self._gsin}"

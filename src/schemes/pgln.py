@@ -21,9 +21,13 @@ class PGLN(EPCSchemeNoTagURI):
 
         self.epc_uri = epc_uri
 
-    def gs1_element_string(self) -> str:
         company_prefix, party_ref = self.epc_uri.split(":")[4].split(".")
-
         check_digit = calculate_checksum(f"{company_prefix}{party_ref}")
 
-        return f"(417){company_prefix}{party_ref}{check_digit}"
+        self._pgln = f"{company_prefix}{party_ref}{check_digit}"
+
+    def gs1_key(self) -> str:
+        return self._pgln
+
+    def gs1_element_string(self) -> str:
+        return f"(417){self._pgln}"

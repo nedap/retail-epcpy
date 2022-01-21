@@ -111,47 +111,52 @@ class SGLN(EPCScheme):
 
         self.epc_uri = epc_uri
 
-    def gs1_element_string(self) -> str:
-        company_prefix, location_ref, *extension = ":".join(
-            self.epc_uri.split(":")[4:]
-        ).split(".")
-        check_digit = calculate_checksum(f"{company_prefix}{location_ref}")
+        self._company_prefix, self._location_ref = self.epc_uri.split(":")[4].split(
+            "."
+        )[:2]
+        self._serial = serial
 
-        extension = replace_uri_escapes(".".join(extension))
+        check_digit = calculate_checksum(f"{self._company_prefix}{self._location_ref}")
+        self._gln = f"{self._company_prefix}{self._location_ref}{check_digit}"
+
+    def gs1_key(self) -> str:
+        return self._gln
+
+    def gs1_element_string(self) -> str:
+        extension = replace_uri_escapes(self._serial)
         ext = "" if extension == "0" else f"(254){extension}"
 
-        return f"(414){company_prefix}{location_ref}{check_digit}{ext}"
+        return f"(414){self._gln}{ext}"
 
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingSchemes, filter_value: SGLNFilterValues
     ) -> str:
-        if self._tag_uri:
-            return self._tag_uri
-
-        if binary_coding_scheme is None or filter_value is None:
+        if (
+            binary_coding_scheme is None or filter_value is None
+        ) and self._tag_uri is None:
             raise ConvertException(
-                message="Both a binary coding scheme and a filter value should be provided!"
+                message="Either both a binary coding scheme and a filter value should be provided, or tag_uri should be set."
             )
+        elif self._tag_uri:
+            return self._tag_uri
 
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
-        value = ":".join(self.epc_uri.split(":")[4:])
-        serial = ".".join(value.split(".")[2:])
 
         if (
             scheme == BinaryCodingSchemes.SGLN_195.value
-            and len(replace_uri_escapes(serial)) > 20
+            and len(replace_uri_escapes(self._serial)) > 20
         ) or (
             scheme == BinaryCodingSchemes.SGLN_96.value
             and (
-                not serial.isnumeric()
-                or int(serial) >= pow(2, 41)
-                or (len(serial) > 1 and serial[0] == "0")
+                not self._serial.isnumeric()
+                or int(self._serial) >= pow(2, 41)
+                or (len(self._serial) > 1 and self._serial[0] == "0")
             )
         ):
-            raise ConvertException(message=f"Invalid serial value {serial}")
+            raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{value}"
+        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_prefix}.{self._location_ref}.{self._serial}"
 
         return self._tag_uri
 
@@ -160,23 +165,22 @@ class SGLN(EPCScheme):
         binary_coding_scheme: BinaryCodingSchemes = None,
         filter_value: SGLNFilterValues = None,
     ) -> str:
-        if self._binary:
+        if (binary_coding_scheme is None or filter_value is None) and self._binary:
             return self._binary
 
         self.tag_uri(binary_coding_scheme, filter_value)
 
         scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
         filter_value = self._tag_uri.split(":")[4].split(".")[0]
-        gln = self._tag_uri.split(":")[4].split(".")[1:3]
-        serial = ".".join(self._tag_uri.split(".")[3:])
+        parts = [self._company_prefix, self._location_ref]
 
         header = BinaryHeaders[scheme].value
         filter_binary = str_to_binary(filter_value, 3)
-        gln_binary = encode_partition_table(gln, PARTITION_TABLE_L)
+        gln_binary = encode_partition_table(parts, PARTITION_TABLE_L)
         serial_binary = (
-            str_to_binary(serial, 41)
+            str_to_binary(self._serial, 41)
             if scheme == "SGLN_96"
-            else encode_string(serial, 140)
+            else encode_string(self._serial, 140)
         )
 
         _binary = header + filter_binary + gln_binary + serial_binary

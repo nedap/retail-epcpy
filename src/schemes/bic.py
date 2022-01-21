@@ -17,8 +17,9 @@ class BIC(EPCSchemeNoTagURI):
         self.epc_uri = epc_uri
 
         container_code = epc_uri.split(":")[4]
-        self.owner_code = container_code[0:3]
-        self.equipment_category_identifier = container_code[3]
-        self.serial = container_code[4:10]
-        self.check_digit = container_code[10]
-        self.container_code = container_code
+        self._container_code = container_code
+
+        self._owner_code = container_code[0:3]
+        self._equipment_category_identifier = container_code[3]
+        self._serial = container_code[4:10]
+        self._check_digit = container_code[10]

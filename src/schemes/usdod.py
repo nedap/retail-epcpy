@@ -42,34 +42,34 @@ class USDOD(EPCScheme):
         if not USDOD_URI_REGEX.match(epc_uri):
             raise ConvertException(message=f"Invalid USDOD URI {epc_uri}")
 
-        self.cage_dodaac, self.serial = epc_uri.split(":")[4].split(".")
+        self._cage_dodaac, self._serial = epc_uri.split(":")[4].split(".")
 
-        if int(self.serial) >= pow(2, 36) or (
-            len(self.serial) > 1 and self.serial[0] == "0"
+        if int(self._serial) >= pow(2, 36) or (
+            len(self._serial) > 1 and self._serial[0] == "0"
         ):
             raise ConvertException(message=f"Serial out of range: (max: {pow(2, 36)})")
 
         self.epc_uri = epc_uri
 
     def tag_uri(self, filter_value: USDODFilterValues) -> str:
-        if self._tag_uri:
-            return self._tag_uri
-
-        if filter_value is None:
+        if filter_value is None and self._tag_uri is None:
             raise ConvertException(
                 message="Either tag_uri should be set or a filter value should be provided"
             )
+        elif self._tag_uri:
+            return self._tag_uri
 
         scheme = BinaryCodingSchemes.USDOD_96.value
         filter_val = filter_value.value
-        value = self.epc_uri.split(":")[4]
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{value}"
+        self._tag_uri = (
+            f"urn:epc:tag:{scheme}:{filter_val}.{self._cage_dodaac}.{self._serial}"
+        )
 
         return self._tag_uri
 
     def binary(self, filter_value: USDODFilterValues = None) -> str:
-        if self._binary:
+        if filter_value is None and self._binary:
             return self._binary
 
         self.tag_uri(filter_value)
@@ -79,8 +79,8 @@ class USDOD(EPCScheme):
 
         header = BinaryHeaders[scheme].value
         filter_binary = str_to_binary(filter_val, 4)
-        cage_code_binary = encode_cage_code(f"{self.cage_dodaac:>6}")
-        serial_binary = str_to_binary(self.serial, 36)
+        cage_code_binary = encode_cage_code(f"{self._cage_dodaac:>6}")
+        serial_binary = str_to_binary(self._serial, 36)
 
         self._binary = header + filter_binary + cage_code_binary + serial_binary
         return self._binary

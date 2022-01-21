@@ -160,60 +160,64 @@ class GIAI(EPCScheme):
         if not GIAI_URI_REGEX.match(epc_uri):
             raise ConvertException(message=f"Invalid GIAI URI {epc_uri}")
 
-        company_prefix = epc_uri.split(":")[4].split(".")[0]
-        if len(company_prefix) < 6 or len(company_prefix) > 12:
+        company_prefix, *asset_reference = epc_uri.split(":")[4].split(".")
+        if not (6 <= len(company_prefix) <= 12):
             raise ConvertException(
                 message=f"Invalid company prefix length {len(company_prefix)}"
             )
 
-        asset_reference = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[1:])
+        asset_reference = ".".join(asset_reference)
         verify_gs3a3_component(asset_reference)
 
         self.epc_uri = epc_uri
 
+        self._company_pref = company_prefix
+        self._asset_ref = asset_reference
+        self._giai = f"{company_prefix}{replace_uri_escapes(asset_reference)}"
+
+    def gs1_key(self) -> str:
+        return self._giai
+
     def gs1_element_string(self) -> str:
-        company_prefix, *asset_reference = ":".join(self.epc_uri.split(":")[4:]).split(
-            "."
-        )
-
-        asset_reference = replace_uri_escapes(".".join(asset_reference))
-
-        return f"(8004){company_prefix}{asset_reference}"
+        return f"(8004){self._giai}"
 
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingSchemes, filter_value: GIAIFilterValues
     ) -> str:
-        if self._tag_uri:
-            return self._tag_uri
-
-        if binary_coding_scheme is None or filter_value is None:
+        if (
+            binary_coding_scheme is None or filter_value is None
+        ) and self._tag_uri is None:
             raise ConvertException(
-                message="Both a binary coding scheme and a filter value should be provided!"
+                message="Either both a binary coding scheme and a filter value should be provided, or tag_uri should be set."
             )
+        elif self._tag_uri:
+            return self._tag_uri
 
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
-        value = ":".join(self.epc_uri.split(":")[4:])
-        serial = ".".join(value.split(".")[1:])
-        company_prefix_length = len(value.split(".")[0])
 
         if (
             scheme == BinaryCodingSchemes.GIAI_202.value
-            and len(replace_uri_escapes(serial))
-            > PARTITION_TABLE_L_202[company_prefix_length]["K"]
+            and len(replace_uri_escapes(self._asset_ref))
+            > PARTITION_TABLE_L_202[len(self._company_pref)]["K"]
         ) or (
             scheme == BinaryCodingSchemes.GIAI_96.value
             and (
-                not serial.isnumeric()
-                or len(serial) > PARTITION_TABLE_L_96[company_prefix_length]["K"]
-                or int(serial)
-                >= pow(2, PARTITION_TABLE_L_96[company_prefix_length]["N"])
-                or (len(serial) > 1 and serial[0] == "0")
+                not self._asset_ref.isnumeric()
+                or len(self._asset_ref)
+                > PARTITION_TABLE_L_96[len(self._company_pref)]["K"]
+                or int(self._asset_ref)
+                >= pow(2, PARTITION_TABLE_L_96[len(self._company_pref)]["N"])
+                or (len(self._asset_ref) > 1 and self._asset_ref[0] == "0")
             )
         ):
-            raise ConvertException(message=f"Invalid serial value {serial}")
+            raise ConvertException(
+                message=f"Invalid asset reference value {self._asset_ref}"
+            )
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{value}"
+        self._tag_uri = (
+            f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._asset_ref}"
+        )
 
         return self._tag_uri
 
@@ -222,26 +226,23 @@ class GIAI(EPCScheme):
         binary_coding_scheme: BinaryCodingSchemes = None,
         filter_value: GIAIFilterValues = None,
     ) -> str:
-        if self._binary:
+        if (binary_coding_scheme is None or filter_value is None) and self._binary:
             return self._binary
 
         self.tag_uri(binary_coding_scheme, filter_value)
 
         scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
         filter_value = self._tag_uri.split(":")[4].split(".")[0]
-        company_prefix = self._tag_uri.split(":")[4].split(".")[1]
-        asset_reference = ".".join(self._tag_uri.split(":")[4].split(".")[2:])
 
         header = BinaryHeaders[scheme].value
         filter_binary = str_to_binary(filter_value, 3)
+        parts = [self._company_pref, self._asset_ref]
 
         giai_binary = (
-            encode_partition_table(
-                [company_prefix, asset_reference], PARTITION_TABLE_L_96
-            )
+            encode_partition_table(parts, PARTITION_TABLE_L_96)
             if scheme == "GIAI_96"
             else encode_partition_table(
-                [company_prefix, asset_reference],
+                parts,
                 PARTITION_TABLE_L_202,
                 string_partition=True,
             )

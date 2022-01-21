@@ -105,42 +105,45 @@ class GSRN(EPCScheme):
 
         self.epc_uri = epc_uri
 
-    def gs1_element_string(self) -> str:
-        company_prefix, service_reference = self.epc_uri.split(":")[4].split(".")
-        check_digit = calculate_checksum(f"{company_prefix}{service_reference}")
+        self._company_pref, self._service_ref = self.epc_uri.split(":")[4].split(".")
+        check_digit = calculate_checksum(f"{self._company_pref}{self._service_ref}")
 
-        return f"(8018){company_prefix}{service_reference}{check_digit}"
+        self._gsrn = f"{self._company_pref}{self._service_ref}{check_digit}"
+
+    def gs1_key(self) -> str:
+        return self._gsrn
+
+    def gs1_element_string(self) -> str:
+        return f"(8018){self._gsrn}"
 
     def tag_uri(self, filter_value: GSRNFilterValues) -> str:
-        if self._tag_uri:
-            return self._tag_uri
-
-        if filter_value is None:
+        if filter_value is None and self._tag_uri is None:
             raise ConvertException(
                 message="Either tag_uri should be set or a filter value should be provided"
             )
+        elif self._tag_uri:
+            return self._tag_uri
 
         scheme = BinaryCodingSchemes.GSRN_96.value
         filter_val = filter_value.value
-        value = self.epc_uri.split(":")[4]
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{value}"
+        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._service_ref}"
 
         return self._tag_uri
 
     def binary(self, filter_value: GSRNFilterValues = None) -> str:
-        if self._binary:
+        if filter_value is None and self._binary:
             return self._binary
 
         self.tag_uri(filter_value)
 
         scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
         filter_value = self._tag_uri.split(":")[4].split(".")[0]
-        gsrn = self._tag_uri.split(":")[4].split(".")[1:]
+        parts = [self._company_pref, self._service_ref]
 
         header = BinaryHeaders[scheme].value
         filter_binary = str_to_binary(filter_value, 3)
-        gsrn_binary = encode_partition_table(gsrn, PARTITION_TABLE_L)
+        gsrn_binary = encode_partition_table(parts, PARTITION_TABLE_L)
 
         self._binary = header + filter_binary + gsrn_binary + "0" * 24
         return self._binary

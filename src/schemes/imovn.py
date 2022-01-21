@@ -16,4 +16,4 @@ class IMOVN(EPCSchemeNoTagURI):
 
         self.epc_uri = epc_uri
 
-        self.vessel_number = epc_uri.split(":")[4]
+        self._vessel_number = epc_uri.split(":")[4]
