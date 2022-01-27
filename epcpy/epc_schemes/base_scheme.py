@@ -3,16 +3,16 @@ from epcpy.utils.common import hex_to_base64
 
 class EPCScheme:
     def __init__(self) -> None:
+        super().__init__()
+        self.epc_uri = None
+
+class TagEncodable:
+    def __init__(self) -> None:
+        super().__init__()
         self._base64 = None
         self._binary = None
         self._hex = None
         self._tag_uri = None
-        self._gs1_key = None
-
-        self.epc_uri = None
-
-    def gs1_key(self, *args, **kwargs) -> str:
-        return self._gs1_key
 
     def binary(self, **kwargs) -> str:
         return self._binary
@@ -34,25 +34,10 @@ class EPCScheme:
 
         return self._base64
 
-
-class EPCSchemeNoTagURI(EPCScheme):
+class GS1Keyed:
     def __init__(self) -> None:
         super().__init__()
+        self._gs1_key = None
 
-    def tag_uri(self, **kwargs) -> str:
-        raise AttributeError(
-            message="Tag URI scheme not available for provided EPC scheme"
-        )
-
-    def binary(self, **kwargs) -> str:
-        raise AttributeError(
-            message="Binary scheme not available for provided EPC scheme"
-        )
-
-    def hex(self, **kwargs) -> str:
-        raise AttributeError(message="Hex scheme not available for provided EPC scheme")
-
-    def base64(self, **kwargs) -> str:
-        raise AttributeError(
-            message="Base64 scheme not available for provided EPC scheme"
-        )
+    def gs1_key(self, *args, **kwargs) -> str:
+        return self._gs1_key

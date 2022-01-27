@@ -1,6 +1,6 @@
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCSchemeNoTagURI
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
 from epcpy.utils.common import ConvertException
 from epcpy.utils.regex import GSIN_URI
 
@@ -19,7 +19,7 @@ def calculate_checksum(digits: str) -> int:
     return checksum
 
 
-class GSIN(EPCSchemeNoTagURI):
+class GSIN(EPCScheme, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 

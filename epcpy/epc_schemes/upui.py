@@ -1,6 +1,6 @@
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCSchemeNoTagURI
+from epcpy.epc_schemes.base_scheme import GS1Keyed, EPCScheme
 from epcpy.utils.common import (
     ConvertException,
     calculate_checksum,
@@ -12,7 +12,7 @@ from epcpy.utils.regex import UPUI_URI
 UPUI_URI_REGEX = re.compile(UPUI_URI)
 
 
-class UPUI(EPCSchemeNoTagURI):
+class UPUI(EPCScheme, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 

@@ -1,6 +1,6 @@
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCScheme
+from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
 from epcpy.utils.common import (
     BinaryCodingSchemes,
     BinaryHeaders,
@@ -13,7 +13,7 @@ from epcpy.utils.regex import GID_URI
 GID_URI_REGEX = re.compile(GID_URI)
 
 
-class GID(EPCScheme):
+class GID(EPCScheme, TagEncodable):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 

@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme
+from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
 from epcpy.utils.common import (
     BinaryCodingSchemes,
     BinaryHeaders,
@@ -154,7 +154,7 @@ def replace_cpi_escapes(cpi: str) -> str:
     return cpi.replace("%23", "#").replace("%2F", "/")
 
 
-class CPI(EPCScheme):
+class CPI(EPCScheme, TagEncodable):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 

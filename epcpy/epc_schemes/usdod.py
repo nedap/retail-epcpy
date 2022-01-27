@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme
+from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
 from epcpy.utils.common import (
     BinaryCodingSchemes,
     BinaryHeaders,
@@ -35,7 +35,7 @@ class USDODFilterValues(Enum):
     RESERVED_15 = "15"
 
 
-class USDOD(EPCScheme):
+class USDOD(EPCScheme, TagEncodable):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 

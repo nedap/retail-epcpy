@@ -1,13 +1,13 @@
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCSchemeNoTagURI
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
 from epcpy.utils.common import ConvertException, calculate_checksum
 from epcpy.utils.regex import PGLN_URI
 
 PGLN_URI_REGEX = re.compile(PGLN_URI)
 
 
-class PGLN(EPCSchemeNoTagURI):
+class PGLN(EPCScheme, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 

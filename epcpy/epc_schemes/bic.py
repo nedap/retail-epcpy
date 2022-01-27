@@ -1,13 +1,13 @@
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCSchemeNoTagURI
+from epcpy.epc_schemes.base_scheme import EPCScheme
 from epcpy.utils.common import ConvertException
 from epcpy.utils.regex import BIC_URI
 
 BIC_URI_REGEX = re.compile(BIC_URI)
 
 
-class BIC(EPCSchemeNoTagURI):
+class BIC(EPCScheme):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 

@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
     BinaryCodingSchemes,
     BinaryHeaders,
@@ -94,7 +94,7 @@ class SGLNFilterValues(Enum):
     RESERVED_7 = "7"
 
 
-class SGLN(EPCScheme):
+class SGLN(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
