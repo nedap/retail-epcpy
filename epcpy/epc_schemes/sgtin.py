@@ -116,6 +116,11 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])
         verify_gs3a3_component(serial)
 
+        if not (1 <= len(replace_uri_escapes(serial)) <= 20):
+            raise ConvertException(
+                message=f"Invalid number of characters in serial: {len(replace_uri_escapes(serial))}"
+            )
+
         self.epc_uri = epc_uri
 
         value = self.epc_uri.split(":")[4]
