@@ -6,10 +6,8 @@ class TestSGTINScheme(unittest.TestCase):
 
     def test_sgtin_to_gs1(self):
         sgtin = SGTIN("urn:epc:id:sgtin:00000950.01093.Serial")
-
         self.assertEqual(sgtin.gs1_element_string(), '(01)00000095010939(21)Serial')
         self.assertEqual(sgtin.gs1_key(), '00000095010939')
-        self.assertEqual('foo'.upper(), 'FOO')
 
     def test_sgtin_to_tag(self):
         sgtin = SGTIN("urn:epc:id:sgtin:00000950.01093.Serial")
