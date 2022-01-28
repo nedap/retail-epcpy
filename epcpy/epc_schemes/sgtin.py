@@ -1,5 +1,5 @@
 import re
-from enum import Enum
+from enum import Enum, IntEnum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
@@ -94,6 +94,13 @@ class SGTINFilterValues(Enum):
     COMPONENT = "7"
 
 
+class GTIN_TYPE(IntEnum):
+    GTIN8 = (8,)
+    GTIN12 = (12,)
+    GTIN13 = (13,)
+    GTIN14 = 14
+
+
 class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
@@ -123,21 +130,15 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
             14
         )
 
-    def gs1_key(self, gtin_8=False, gtin_12=False, gtin_13=False) -> str:
-        if gtin_8:
-            if not self._gtin.startswith("000000"):
-                raise ConvertException(message="Invalid GTIN8")
-            return self._gtin[6:]
-        elif gtin_12:
-            if not self._gtin.startswith("00"):
-                raise ConvertException(message="Invalid GTIN12")
-            return self._gtin[2:]
-        elif gtin_13:
-            if not self._gtin.startswith("0"):
-                raise ConvertException(message="Invalid GTIN13")
-            return self._gtin[1:]
+    def gs1_key(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
+        return self.gtin(gtin_type=gtin_type)
 
-        return self._gtin
+    def gtin(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
+        if gtin_type != GTIN_TYPE.GTIN14:
+            if not self._gtin.startswith((14 - gtin_type) * "0"):
+                raise ConvertException(message=f"Invalid GTIN{gtin_type}")
+
+        return self._gtin[14 - gtin_type : 14]
 
     def gs1_element_string(self) -> str:
         gtin = self._gtin
