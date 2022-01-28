@@ -93,7 +93,7 @@ class SGTINFilterValues(Enum):
     UNIT_LOAD = "6"
     COMPONENT = "7"
 
-class GTIN(IntEnum):
+class GTIN_TYPE(IntEnum):
     GTIN8 = 8,
     GTIN12 = 12,
     GTIN13 = 13,
@@ -128,11 +128,11 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
             14
         )
 
-    def gs1_key(self, gtin=GTIN.GTIN14) -> str:
-        return self.gtin(gtin=gtin)
+    def gs1_key(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
+        return self.gtin(gtin_type=gtin_type)
 
-    def gtin(self, gtin=GTIN.GTIN14) -> str:
-        return self._gtin[14 - gtin: 14]
+    def gtin(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
+        return self._gtin[14 - gtin_type: 14]
 
     def gs1_element_string(self) -> str:
         gtin = self._gtin
