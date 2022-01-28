@@ -1,5 +1,5 @@
 import re
-from enum import Enum
+from enum import Enum, IntEnum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
@@ -93,7 +93,7 @@ class SGTINFilterValues(Enum):
     UNIT_LOAD = "6"
     COMPONENT = "7"
 
-class GTIN(Enum):
+class GTIN(IntEnum):
     GTIN8 = 8,
     GTIN12 = 12,
     GTIN13 = 13,
@@ -132,7 +132,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         return self.gtin(gtin=gtin)
 
     def gtin(self, gtin=GTIN.GTIN14) -> str:
-        return self._gtin[14 - gtin.value: gtin.value]
+        return self._gtin[14 - gtin: 14]
 
     def gs1_element_string(self) -> str:
         gtin = self._gtin
