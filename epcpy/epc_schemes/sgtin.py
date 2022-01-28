@@ -93,6 +93,11 @@ class SGTINFilterValues(Enum):
     UNIT_LOAD = "6"
     COMPONENT = "7"
 
+class GTIN(Enum):
+    GTIN8 = 8,
+    GTIN12 = 12,
+    GTIN13 = 13,
+    GTIN14 = 14
 
 class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
@@ -123,21 +128,11 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
             14
         )
 
-    def gs1_key(self, gtin_8=False, gtin_12=False, gtin_13=False) -> str:
-        if gtin_8:
-            if not self._gtin.startswith("000000"):
-                raise ConvertException(message="Invalid GTIN8")
-            return self._gtin[6:]
-        elif gtin_12:
-            if not self._gtin.startswith("00"):
-                raise ConvertException(message="Invalid GTIN12")
-            return self._gtin[2:]
-        elif gtin_13:
-            if not self._gtin.startswith("0"):
-                raise ConvertException(message="Invalid GTIN13")
-            return self._gtin[1:]
+    def gs1_key(self, gtin=GTIN.GTIN14) -> str:
+        return self.gtin(gtin=gtin)
 
-        return self._gtin
+    def gtin(self, gtin=GTIN.GTIN14) -> str:
+        return self._gtin[14 - gtin.value: gtin.value]
 
     def gs1_element_string(self) -> str:
         gtin = self._gtin
