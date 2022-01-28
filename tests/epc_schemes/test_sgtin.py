@@ -1,26 +1,107 @@
 import unittest
-from epcpy.epc_schemes.sgtin import *
-from epcpy.utils.parsers import binary_to_epc_tag_uri, binary_to_epc_pure_identity
 
-class TestSGTINScheme(unittest.TestCase):
+from epcpy.epc_schemes.sgtin import GTIN_TYPE, SGTIN
+from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1KeyedMeta
 
-    def test_sgtin_to_gs1(self):
-        sgtin = SGTIN("urn:epc:id:sgtin:00000950.01093.Serial")
-        self.assertEqual(sgtin.gs1_element_string(), '(01)00000095010939(21)Serial')
-        self.assertEqual(sgtin.gs1_key(), '00000095010939')
-        self.assertEqual(sgtin.gtin(gtin_type=GTIN_TYPE.GTIN8), '95010939')
 
-    def test_sgtin_to_tag(self):
-        sgtin = SGTIN("urn:epc:id:sgtin:00000950.01093.Serial")
-        self.assertEqual(sgtin.tag_uri(BinaryCodingSchemes.SGTIN_198, SGTINFilterValues.POS_ITEM), 'urn:epc:tag:sgtin-198:1.00000950.01093.Serial')
-        self.assertEqual(sgtin.hex(), '36300001DB011169E5E5A70EC000000000000000000000000000')
+class TestSGTINInit(
+    unittest.TestCase,
+    metaclass=TestEPCSchemeInitMeta,
+    scheme=SGTIN,
+    valid_data=[
+        {
+            "name": "test_valid_sgtin_1",
+            "uri": "urn:epc:id:sgtin:50712192365.88..%25:.13%26",
+        },
+        {
+            "name": "test_valid_sgtin_2",
+            "uri": "urn:epc:id:sgtin:00000000000.00.0",
+        },
+    ],
+    invalid_data=[
+        {
+            "name": "test_invalid_sgtin_hex_serial",
+            "uri": "urn:epc:id:sgtin:50712192365.88..%23:.13%26",
+        },
+        {
+            "name": "test_invalid_sgtin_identifier",
+            "uri": "urn:epc:id:sg:50712192365.88..%25:.13%26",
+        },
+        {
+            "name": "test_invalid_sgtin_too_many_digits",
+            "uri": "urn:epc:id:sgtin:000000000000.00.0",
+        },
+        {
+            "name": "test_invalid_sgtin_missing_semicolon",
+            "uri": "urn:epcid:sgtin:00000000000.00.0",
+        },
+        {
+            "name": "test_invalid_sgtin_serial_too_large",
+            "uri": "urn:epc:id:sgtin:00000000000.00.123456789012345678901",
+        },
+    ],
+):
+    pass
 
-    def test_tag_to_sgtin(self):
-        sgtin = SGTIN("urn:epc:id:sgtin:00000950.01093.Serial")
-        sgtin.tag_uri(BinaryCodingSchemes.SGTIN_198, SGTINFilterValues.POS_ITEM)
-        sgtin_binary = sgtin.binary()
-        self.assertEqual(binary_to_epc_tag_uri(sgtin_binary), 'urn:epc:tag:sgtin-198:1.00000950.01093.Serial')
-        self.assertEqual(binary_to_epc_pure_identity(sgtin_binary), 'urn:epc:id:sgtin:00000950.01093.Serial')
 
-if __name__ == '__main__':
-    unittest.main()
+class TestSGTINGS1Key(
+    unittest.TestCase,
+    metaclass=TestGS1KeyedMeta,
+    scheme=SGTIN,
+    valid_data=[
+        {
+            "name": "test_valid_sgtin_gs1_key_1",
+            "uri": "urn:epc:id:sgtin:50712192365.88..%25:.13%26",
+            "kwargs": {},
+            "gs1_key": "85071219236581",
+        },
+        {
+            "name": "test_valid_sgtin_gs1_key_2",
+            "uri": "urn:epc:id:sgtin:00000000000.00.0",
+            "kwargs": {},
+            "gs1_key": "00000000000000",
+        },
+        {
+            "name": "test_valid_sgtin_gs1_key_3",
+            "uri": "urn:epc:id:sgtin:5019265.123588..%25:.13%26",
+            "kwargs": {},
+            "gs1_key": "15019265235883",
+        },
+        {
+            "name": "test_valid_sgtin_gs1_key_4",
+            "uri": "urn:epc:id:sgtin:00000950.01093.Serial",
+            "kwargs": {"gtin_type": GTIN_TYPE.GTIN13},
+            "gs1_key": "0000095010939",
+        },
+        {
+            "name": "test_valid_sgtin_gs1_key_5",
+            "uri": "urn:epc:id:sgtin:00000950.01093.Serial",
+            "kwargs": {"gtin_type": GTIN_TYPE.GTIN12},
+            "gs1_key": "000095010939",
+        },
+        {
+            "name": "test_valid_sgtin_gs1_key_6",
+            "uri": "urn:epc:id:sgtin:00000950.01093.Serial",
+            "kwargs": {"gtin_type": GTIN_TYPE.GTIN8},
+            "gs1_key": "95010939",
+        },
+    ],
+    invalid_data=[
+        {
+            "name": "test_invalid_sgtin_gs1_key_too_little_zeros_gtin13",
+            "uri": "urn:epc:id:sgtin:5019265.123588..%25:.13%26",
+            "kwargs": {"gtin_type": GTIN_TYPE.GTIN13},
+        },
+        {
+            "name": "test_invalid_sgtin_gs1_key_too_little_zeros_gtin12",
+            "uri": "urn:epc:id:sgtin:1519265.023588..%25:.13%26",
+            "kwargs": {"gtin_type": GTIN_TYPE.GTIN12},
+        },
+        {
+            "name": "test_invalid_sgtin_gs1_key_too_little_zeros_gtin8",
+            "uri": "urn:epc:id:sgtin:0000565.023588..%25:.13%26",
+            "kwargs": {"gtin_type": GTIN_TYPE.GTIN8},
+        },
+    ],
+):
+    pass
