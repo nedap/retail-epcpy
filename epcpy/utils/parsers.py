@@ -1,11 +1,29 @@
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCScheme
-from epcpy.utils.common import BinaryHeaders, ConvertException, base64_to_hex, hex_to_binary
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
+from epcpy.utils.common import (
+    BinaryHeaders,
+    ConvertException,
+    base64_to_hex,
+    hex_to_binary,
+)
 from epcpy.utils.converters import BINARY_CONVERTERS, TAG_CONVERTERS, URI_TO_SCHEME
 from epcpy.utils.regex import TAG_URI
 
 TAG_URI_REGEX = re.compile(TAG_URI)
+
+
+def epc_pure_identity_to_scheme(epc_pure_identity_uri: str) -> EPCScheme:
+    return URI_TO_SCHEME[epc_pure_identity_uri.split(":")[3]](epc_pure_identity_uri)
+
+
+def epc_pure_identity_to_gs1_key(epc_pure_identity_uri: str) -> str:
+    scheme = epc_pure_identity_to_scheme(epc_pure_identity_uri)
+
+    if not isinstance(scheme, GS1Keyed):
+        raise ConvertException(message="EPC URI has no GS1 Key")
+
+    return scheme.gs1_key()
 
 
 def binary_to_epc_tag_uri(binary: str) -> str:
