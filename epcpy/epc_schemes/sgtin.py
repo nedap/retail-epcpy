@@ -93,11 +93,13 @@ class SGTINFilterValues(Enum):
     UNIT_LOAD = "6"
     COMPONENT = "7"
 
+
 class GTIN_TYPE(IntEnum):
-    GTIN8 = 8,
-    GTIN12 = 12,
-    GTIN13 = 13,
+    GTIN8 = (8,)
+    GTIN12 = (12,)
+    GTIN13 = (13,)
     GTIN14 = 14
+
 
 class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
@@ -132,7 +134,11 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         return self.gtin(gtin_type=gtin_type)
 
     def gtin(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
-        return self._gtin[14 - gtin_type: 14]
+        if gtin_type != GTIN_TYPE.GTIN14:
+            if not self._gtin.startswith((14 - gtin_type) * "0"):
+                raise ConvertException(message=f"Invalid GTIN{gtin_type}")
+
+        return self._gtin[14 - gtin_type : 14]
 
     def gs1_element_string(self) -> str:
         gtin = self._gtin
