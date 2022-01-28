@@ -6,6 +6,7 @@ class EPCScheme:
         super().__init__()
         self.epc_uri = None
 
+
 class TagEncodable:
     def __init__(self) -> None:
         super().__init__()
@@ -33,6 +34,7 @@ class TagEncodable:
         self._base64 = hex_to_base64(hex_string)
 
         return self._base64
+
 
 class GS1Keyed:
     def __init__(self) -> None:

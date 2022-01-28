@@ -153,6 +153,11 @@ def binary_to_value_adivar(truncated_binary: str) -> str:
     filter_binary = truncated_binary[8:14]
     cage_code_binary = truncated_binary[14:50]
 
+    if not re.match(".*([0]{6})+.*", truncated_binary[50:]):
+        raise ConvertException(
+            message="Invalid binary for ADI, missing 6-bit terminators"
+        )
+
     part_number_binary, _, *serial_binary = re.split("([0]{6})", truncated_binary[50:])
     serial_binary = "".join(serial_binary)[:-6]
 

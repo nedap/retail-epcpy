@@ -1,7 +1,11 @@
 import re
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
-from epcpy.utils.common import ConvertException, replace_uri_escapes, verify_gs3a3_component
+from epcpy.utils.common import (
+    ConvertException,
+    replace_uri_escapes,
+    verify_gs3a3_component,
+)
 from epcpy.utils.regex import GINC_URI
 
 GINC_URI_REGEX = re.compile(GINC_URI)
