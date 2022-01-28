@@ -1,7 +1,12 @@
 import unittest
 
-from epcpy.epc_schemes.sgtin import GTIN_TYPE, SGTIN
-from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1KeyedMeta
+from epcpy.epc_schemes.sgtin import GTIN_TYPE, SGTIN, SGTINFilterValues
+from epcpy.utils.common import BinaryCodingSchemes
+from tests.epc_schemes.test_base_scheme import (
+    TestEPCSchemeInitMeta,
+    TestGS1KeyedMeta,
+    TestTagEncodableMeta,
+)
 
 
 class TestSGTINInit(
@@ -101,6 +106,98 @@ class TestSGTINGS1Key(
             "name": "test_invalid_sgtin_gs1_key_too_little_zeros_gtin8",
             "uri": "urn:epc:id:sgtin:0000565.023588..%25:.13%26",
             "kwargs": {"gtin_type": GTIN_TYPE.GTIN8},
+        },
+    ],
+):
+    pass
+
+
+class TestSGTINTagEncodable(
+    unittest.TestCase,
+    metaclass=TestTagEncodableMeta,
+    scheme=SGTIN,
+    valid_data=[
+        {
+            "name": "test_valid_sgtin_tag_encodable_1",
+            "uri": "urn:epc:id:sgtin:50712192365.88..%25:.13%26",
+            "kwargs": {
+                "binary_coding_scheme": BinaryCodingSchemes.SGTIN_198,
+                "filter_value": SGTINFilterValues.POS_ITEM,
+            },
+            "tag_uri": "urn:epc:tag:sgtin-198:1.50712192365.88..%25:.13%26",
+            "hex": "362579D5D4ADB6172574B98B34C0000000000000000000000000",
+        },
+        {
+            "name": "test_valid_sgtin_tag_encodable_2",
+            "uri": "urn:epc:id:sgtin:50712192365.88..%25:.13%26",
+            "kwargs": {
+                "binary_coding_scheme": BinaryCodingSchemes.SGTIN_198,
+                "filter_value": SGTINFilterValues.RESERVED_5,
+            },
+            "tag_uri": "urn:epc:tag:sgtin-198:5.50712192365.88..%25:.13%26",
+            "hex": "36A579D5D4ADB6172574B98B34C0000000000000000000000000",
+        },
+        {
+            "name": "test_valid_sgtin_tag_encodable_3",
+            "uri": "urn:epc:id:sgtin:50712192365.88.0",
+            "kwargs": {
+                "binary_coding_scheme": BinaryCodingSchemes.SGTIN_96,
+                "filter_value": SGTINFilterValues.UNIT_LOAD,
+            },
+            "tag_uri": "urn:epc:tag:sgtin-96:6.50712192365.88.0",
+            "hex": "30C579D5D4ADB60000000000",
+        },
+        {
+            "name": "test_valid_sgtin_tag_encodable_4",
+            "uri": "urn:epc:id:sgtin:50712192365.88.0",
+            "kwargs": {
+                "binary_coding_scheme": BinaryCodingSchemes.SGTIN_198,
+                "filter_value": SGTINFilterValues.UNIT_LOAD,
+            },
+            "tag_uri": "urn:epc:tag:sgtin-198:6.50712192365.88.0",
+            "hex": "36C579D5D4ADB618000000000000000000000000000000000000",
+        },
+    ],
+    invalid_data=[
+        {
+            "name": "test_invalid_sgtin_tag_encodable_invalid_serial_for_coding_scheme_1",
+            "uri": "urn:epc:id:sgtin:50712192365.88..%25:.13%26",
+            "kwargs": {
+                "binary_coding_scheme": BinaryCodingSchemes.SGTIN_96,
+                "filter_value": SGTINFilterValues.POS_ITEM,
+            },
+        },
+        {
+            "name": "test_invalid_sgtin_tag_encodable_invalid_serial_for_coding_scheme_2",
+            "uri": "urn:epc:id:sgtin:50712192365.88.0123",
+            "kwargs": {
+                "binary_coding_scheme": BinaryCodingSchemes.SGTIN_96,
+                "filter_value": SGTINFilterValues.POS_ITEM,
+            },
+        },
+        {
+            "name": "test_invalid_sgtin_tag_encodable_invalid_serial_for_coding_scheme_3",
+            "uri": "urn:epc:id:sgtin:50712192365.88.1123456789012",
+            "kwargs": {
+                "binary_coding_scheme": BinaryCodingSchemes.SGTIN_96,
+                "filter_value": SGTINFilterValues.POS_ITEM,
+            },
+        },
+        {
+            "name": "test_invalid_sgtin_tag_encodable_missing_filter",
+            "uri": "urn:epc:id:sgtin:50712192365.88.156789012",
+            "kwargs": {
+                "binary_coding_scheme": BinaryCodingSchemes.SGTIN_96,
+                "filter_value": None,
+            },
+        },
+        {
+            "name": "test_invalid_sgtin_tag_encodable_missing_coding_scheme",
+            "uri": "urn:epc:id:sgtin:50712192365.88.112789012",
+            "kwargs": {
+                "binary_coding_scheme": None,
+                "filter_value": SGTINFilterValues.POS_ITEM,
+            },
         },
     ],
 ):
