@@ -1,7 +1,7 @@
 # Generic
 CPREF_COMPONENT = "([0-9A-Z-]|%2F|%23)+"
 NUMERIC_COMPONENT = "(0|[1-9]\d*)"
-GS3A3_CHAR = "(%[0-9a-fA-F])|([a-zA-Z0-9!'()*+,-.:;=_])"
+GS3A3_CHAR = "((%[0-9a-fA-F])|([a-zA-Z0-9!'()*+,-.:;=_]))"
 GS3A3_COMPONENT = f"{GS3A3_CHAR}+"
 PADDED_NUMERIC_COMPONENT = "\d+"
 PADDED_NUMERIC_COMPONENT_OR_EMPTY = "\d*"
