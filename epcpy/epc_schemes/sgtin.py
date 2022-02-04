@@ -1,5 +1,6 @@
 import re
 from enum import Enum, IntEnum
+from __future__ import annotations # for class type hints
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
@@ -16,6 +17,7 @@ from epcpy.utils.common import (
     str_to_binary,
     verify_gs3a3_component,
 )
+from epcpy.utils.parsers import hex_to_epc_tag_uri
 from epcpy.utils.regex import SGTIN_URI
 
 SGTIN_REGEX = re.compile(SGTIN_URI)
@@ -129,6 +131,29 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         self._gtin = f"{self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}{check_digit}".zfill(
             14
         )
+    
+    @classmethod
+    def from_epc_uri(cls, epc_uri: str) -> SGTIN:
+        return cls(epc_uri)
+
+    @classmethod
+    def from_gtin_plus_serial(cls, gtin: str, serial: str) -> SGTIN:
+        # todo: is this always valid? maybe first validate gtin
+        gtin = gtin.zfill(14)
+        return cls("urn:epc:id:sgtin:" + gtin[1:8] + "." + gtin[0] + gtin[8:13] + "." + str(serial))
+
+    @classmethod
+    def from_tag_uri(cls, epc_tag_uri: str) -> SGTIN:
+        return cls(".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:]))
+    
+    @classmethod
+    def from_binary_string(cls, epc_tag_binary_string: str) -> SGTIN:
+        return cls(binary_to_value_sgtin96(epc_tag_binary_string))
+    
+    @classmethod
+    def from_hex(cls, epc_tag_hex: str) -> SGTIN:
+        return cls.from_tag_uri(hex_to_epc_tag_uri(epc_tag_hex))
+
 
     def gs1_key(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
         return self.gtin(gtin_type=gtin_type)
@@ -205,6 +230,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         return _binary
 
 
+# todo: are 96 and 198 similar?
 def binary_to_value_sgtin96(truncated_binary: str) -> str:
     filter_binary = truncated_binary[8:11]
     gtin_binary = truncated_binary[11:58]
@@ -229,6 +255,7 @@ def binary_to_value_sgtin198(truncated_binary: str) -> str:
     return f"{filter_string}.{gtin_string}.{serial_string}"
 
 
+# todo: are these similar for both tags?
 def tag_to_value_sgtin96(epc_tag_uri: str) -> str:
     return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
 
