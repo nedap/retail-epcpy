@@ -15,8 +15,11 @@ class TagEncodable:
         self._hex = None
         self._tag_uri = None
 
+    def tag_uri(self, **kwargs) -> str:
+        raise NotImplementedError
+
     def binary(self, **kwargs) -> str:
-        return self._binary
+        raise NotImplementedError
 
     def hex(self, **kwargs) -> str:
         binary = self.binary(**kwargs)
@@ -42,4 +45,4 @@ class GS1Keyed:
         self._gs1_key = None
 
     def gs1_key(self, *args, **kwargs) -> str:
-        return self._gs1_key
+        raise NotImplementedError

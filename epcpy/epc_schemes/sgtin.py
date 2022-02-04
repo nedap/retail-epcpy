@@ -116,6 +116,11 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])
         verify_gs3a3_component(serial)
 
+        if not (1 <= len(replace_uri_escapes(serial)) <= 20):
+            raise ConvertException(
+                message=f"Invalid number of characters in serial: {len(replace_uri_escapes(serial))}"
+            )
+
         self.epc_uri = epc_uri
 
         value = self.epc_uri.split(":")[4]
@@ -161,16 +166,10 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
 
-        if (
-            scheme == BinaryCodingSchemes.SGTIN_198.value
-            and len(replace_uri_escapes(self._serial)) > 20
-        ) or (
-            scheme == BinaryCodingSchemes.SGTIN_96.value
-            and (
-                not self._serial.isnumeric()
-                or int(self._serial) >= pow(2, 38)
-                or (len(self._serial) > 1 and self._serial[0] == "0")
-            )
+        if scheme == BinaryCodingSchemes.SGTIN_96.value and (
+            not self._serial.isnumeric()
+            or int(self._serial) >= pow(2, 38)
+            or (len(self._serial) > 1 and self._serial[0] == "0")
         ):
             raise ConvertException(message=f"Invalid serial value {self._serial}")
 
