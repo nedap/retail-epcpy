@@ -1,6 +1,6 @@
+from __future__ import annotations
 import re
 from enum import Enum, IntEnum
-from __future__ import annotations # for class type hints
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
@@ -172,16 +172,10 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         return f"(01){gtin}(21){serial}"
 
     def tag_uri(
-        self, binary_coding_scheme: BinaryCodingSchemes, filter_value: SGTINFilterValues
+        self, 
+        binary_coding_scheme: BinaryCodingSchemes = BinaryCodingSchemes.SGTIN_96, 
+        filter_value: SGTINFilterValues = SGTINFilterValues.POS_ITEM
     ) -> str:
-        if (
-            binary_coding_scheme is None or filter_value is None
-        ) and self._tag_uri is None:
-            raise ConvertException(
-                message="Either both a binary coding scheme and a filter value should be provided, or tag_uri should be set."
-            )
-        elif self._tag_uri:
-            return self._tag_uri
 
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
@@ -199,22 +193,18 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         ):
             raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._item_ref}.{self._serial}"
-
-        return self._tag_uri
+        return f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._item_ref}.{self._serial}"
 
     def binary(
         self,
-        binary_coding_scheme: BinaryCodingSchemes = None,
-        filter_value: SGTINFilterValues = None,
+        binary_coding_scheme: BinaryCodingSchemes = BinaryCodingSchemes.SGTIN_96,
+        filter_value: SGTINFilterValues = SGTINFilterValues.POS_ITEM,
     ) -> str:
-        if (binary_coding_scheme is None or filter_value is None) and self._binary:
-            return self._binary
 
-        self.tag_uri(binary_coding_scheme, filter_value)
+        tag_uri = self.tag_uri(binary_coding_scheme, filter_value)
 
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
-        filter_value = self._tag_uri.split(":")[4].split(".")[0]
+        scheme = tag_uri.split(":")[3].replace("-", "_").upper()
+        filter_value = tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._item_ref]
 
         header = BinaryHeaders[scheme].value
@@ -222,7 +212,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         gtin_binary = encode_partition_table(parts, PARTITION_TABLE_L)
         serial_binary = (
             str_to_binary(self._serial, 38)
-            if scheme == "SGTIN_96"
+            if scheme == BinaryCodingSchemes.SGTIN_96.value
             else encode_string(self._serial, 140)
         )
 
