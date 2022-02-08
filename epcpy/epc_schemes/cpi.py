@@ -3,8 +3,6 @@ from enum import Enum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
 from epcpy.utils.common import (
-    BinaryCodingSchemes,
-    BinaryHeaders,
     ConvertException,
     binary_to_int,
     decode_partition_table,
@@ -152,6 +150,10 @@ class CPIFilterValues(Enum):
 
 def replace_cpi_escapes(cpi: str) -> str:
     return cpi.replace("%23", "#").replace("%2F", "/")
+
+
+class BinaryCodingSchemes(Enum):
+    pass
 
 
 class CPI(EPCScheme, TagEncodable):

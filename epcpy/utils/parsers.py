@@ -1,99 +1,73 @@
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
+from epcpy.epc_schemes import *
+from epcpy.epc_schemes.adi import ADI
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
+from typing import List
+from epcpy.epc_schemes.bic import BIC
+from epcpy.epc_schemes.cpi import CPI
+from epcpy.epc_schemes.sgtin import SGTIN
 from epcpy.utils.common import (
-    BinaryHeaders,
     ConvertException,
     base64_to_hex,
     hex_to_binary,
 )
-from epcpy.utils.converters import BINARY_CONVERTERS, TAG_CONVERTERS, URI_TO_SCHEME
 from epcpy.utils.regex import TAG_URI
 
 TAG_URI_REGEX = re.compile(TAG_URI)
 
+EPC_SCHEMES: List[EPCScheme] = [ADI, BIC, CPI, SGTIN]  # todo
+GS1_KEYED_CLASSES: List[GS1Keyed] = [SGTIN]
+TAG_ENCODABLE_CLASSES: List[TagEncodable] = [SGTIN, ADI, CPI]  # todo
+
 
 def epc_pure_identity_to_scheme(epc_pure_identity_uri: str) -> EPCScheme:
-    return URI_TO_SCHEME[epc_pure_identity_uri.split(":")[3]](epc_pure_identity_uri)
+
+    for cls in EPC_SCHEMES:
+        try:
+            return cls.from_epc_uri(epc_pure_identity_uri)
+        except:
+            continue
+
+    raise ConvertException(
+        "Unable to find suitable EPCScheme class for given uri string"
+    )
 
 
-def epc_pure_identity_to_gs1_key(epc_pure_identity_uri: str) -> str:
+def epc_pure_identity_to_gs1_keyed(epc_pure_identity_uri: str) -> GS1Keyed:
+
     scheme = epc_pure_identity_to_scheme(epc_pure_identity_uri)
 
     if not isinstance(scheme, GS1Keyed):
         raise ConvertException(message="EPC URI has no GS1 Key")
 
-    return scheme.gs1_key()
+    return scheme
 
 
-def binary_to_epc_tag_uri(binary: str) -> str:
-    header = binary[:8]
+def binary_to_epc(binary: str) -> TagEncodable:
 
-    try:
-        scheme = BinaryHeaders(header).name.replace("_", "-").lower()
-    except ValueError:
-        raise ConvertException(message=f"{header} is not a valid header")
+    for cls in TAG_ENCODABLE_CLASSES:
+        try:
+            return cls.from_binary(binary)
+        except ConvertException as e:
+            continue
 
-    _, size = scheme.split("-")
-    size = int(size) if size.isnumeric() else None
-
-    if size and not size <= len(binary):
-        raise ConvertException(
-            message=f"Invalid binary size, expected (<=): {size} actual: {len(binary)}"
-        )
-
-    truncated_binary = binary[:size]
-
-    value = BINARY_CONVERTERS[scheme](truncated_binary)
-
-    return f"urn:epc:tag:{scheme}:{value}"
+    raise ConvertException(
+        "Unable to find suitable TagEncodable class for given binary"
+    )
 
 
-def binary_to_epc_pure_identity(binary: str) -> str:
-    epc_tag_uri = binary_to_epc_tag_uri(binary)
-
-    return epc_tag_uri_to_pure_identity_uri(epc_tag_uri)
-
-
-def binary_to_epc_scheme(binary: str) -> EPCScheme:
-    epc_pure_identity_uri = binary_to_epc_pure_identity(binary)
-    return URI_TO_SCHEME(epc_pure_identity_uri.split(":")[3])(epc_pure_identity_uri)
-
-
-def binary_to_gs1_key(binary: str) -> str:
-    scheme = binary_to_epc_scheme(binary)
-    return scheme.gs1_key()
-
-
-def hex_to_epc_tag_uri(hex_string: str) -> str:
+def hex_to_epc(hex_string: str) -> TagEncodable:
     binary = hex_to_binary(hex_string)
 
-    return binary_to_epc_tag_uri(binary)
+    return binary_to_epc(binary)
 
 
-def hex_to_epc_pure_identity(hex_string: str) -> str:
-    binary = hex_to_binary(hex_string)
-
-    return binary_to_epc_pure_identity(binary)
-
-
-def base64_to_epc_tag_uri(base64_string: str) -> str:
+def base64_to_epc(base64_string: str) -> TagEncodable:
     hex_string = base64_to_hex(base64_string)
 
-    return hex_to_epc_tag_uri(hex_string)
-
-
-def base64_to_epc_pure_identity(base64_string: str) -> str:
-    hex_string = base64_to_hex(base64_string)
-
-    return hex_to_epc_pure_identity(hex_string)
+    return hex_to_epc(hex_string)
 
 
 def epc_tag_uri_to_pure_identity_uri(epc_tag_uri: str) -> str:
-    if not TAG_URI_REGEX.match(epc_tag_uri):
-        raise ConvertException(message=f"Invalid EPC tag URI {epc_tag_uri}")
-
-    epc_scheme = epc_tag_uri.split(":")[3]
-    value = TAG_CONVERTERS[epc_scheme](epc_tag_uri)
-
-    return f"urn:epc:id:{epc_scheme.split('-')[0]}:{value}"
+    pass

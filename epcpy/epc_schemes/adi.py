@@ -4,8 +4,6 @@ from enum import Enum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
 from epcpy.utils.common import (
-    BinaryCodingSchemes,
-    BinaryHeaders,
     ConvertException,
     binary_to_int,
     decode_cage_code_six_bits,

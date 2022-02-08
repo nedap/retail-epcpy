@@ -1,4 +1,6 @@
-from epcpy.utils.common import hex_to_base64
+from __future__ import annotations
+from enum import Enum
+from epcpy.utils.common import ConvertException, hex_to_base64, hex_to_binary
 
 
 class EPCScheme:
@@ -27,9 +29,9 @@ class TagEncodable:
         padding = (16 - (len(binary) % 16)) % 16
         padded_binary = f"{binary:<0{len(binary) + padding}}"
 
-        self._hex = f"{int(padded_binary, 2):X}"
+        # self._hex = f"{int(padded_binary, 2):X}"
 
-        return self._hex
+        return f"{int(padded_binary, 2):X}"
 
     def base64(self, **kwargs) -> str:
         hex_string = self.hex(**kwargs)
@@ -38,6 +40,12 @@ class TagEncodable:
 
         return self._base64
 
+    def from_binary(tag_binary_string: str) -> TagEncodable:
+        raise NotImplementedError
+
+    @classmethod
+    def from_hex(cls, tag_hex_string: str) -> TagEncodable:
+        return cls.from_binary(hex_to_binary(tag_hex_string))
 
 class GS1Keyed:
     def __init__(self) -> None:
