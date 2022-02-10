@@ -16,7 +16,7 @@ class UPUI(EPCScheme):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not UPUI_URI_REGEX.match(epc_uri):
+        if not UPUI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid UPUI URI {epc_uri}")
 
         self._company_pref, self._item_ref, *tpx = ":".join(

@@ -15,7 +15,7 @@ class GINC(EPCScheme, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not GINC_URI_REGEX.match(epc_uri):
+        if not GINC_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GINC URI {epc_uri}")
 
         company_prefix, *consignment_reference = ":".join(epc_uri.split(":")[4:]).split(

@@ -95,7 +95,7 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not SSCC_URI_REGEX.match(epc_uri):
+        if not SSCC_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid SSCC URI {epc_uri}")
 
         if len(epc_uri.split(":")[4].replace(".", "")) != 17:

@@ -90,7 +90,7 @@ class ADI(EPCScheme, TagEncodable):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not ADI_URI_REGEX.match(epc_uri):
+        if not ADI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid ADI URI {epc_uri}")
 
         self._cage_dodaac, self._part_number, self._serial = epc_uri.split(":")[

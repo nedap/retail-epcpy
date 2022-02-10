@@ -100,7 +100,7 @@ class ITIP(EPCScheme, TagEncodable):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not ITIP_URI_REGEX.match(epc_uri):
+        if not ITIP_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid ITIP URI {epc_uri}")
 
         company_prefix, item_ref, piece, total, *serial = ":".join(

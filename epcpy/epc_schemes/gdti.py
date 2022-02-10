@@ -98,7 +98,7 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not GDTI_URI_REGEX.match(epc_uri):
+        if not GDTI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GDTI URI {epc_uri}")
 
         if len("".join(epc_uri.split(":")[4].split(".")[:2])) != 12:

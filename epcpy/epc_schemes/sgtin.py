@@ -105,7 +105,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not SGTIN_REGEX.match(epc_uri):
+        if not SGTIN_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid SGTIN URI {epc_uri}")
 
         if len("".join(epc_uri.split(":")[4].split(".")[:2])) != 13:

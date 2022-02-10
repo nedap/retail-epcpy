@@ -17,7 +17,7 @@ class GID(EPCScheme, TagEncodable):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not GID_URI_REGEX.match(epc_uri):
+        if not GID_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GID URI {epc_uri}")
 
         self._manager, self._object, self._serial = epc_uri.split(":")[4].split(".")

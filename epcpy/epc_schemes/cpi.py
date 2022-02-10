@@ -158,7 +158,7 @@ class CPI(EPCScheme, TagEncodable):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not CPI_URI_REGEX.match(epc_uri):
+        if not CPI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid CPI URI {epc_uri}")
 
         self._company_pref, self._cp_ref, self._serial = epc_uri.split(":")[4].split(
