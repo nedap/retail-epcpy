@@ -1,7 +1,6 @@
 import unittest
 
 from epcpy.epc_schemes.adi import ADI, ADIFilterValues
-from epcpy.utils.common import BinaryCodingSchemes
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
     TestTagEncodableMeta,
