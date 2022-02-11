@@ -118,7 +118,7 @@ class ADI(EPCScheme, TagEncodable):
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingSchemes, filter_value: ADIFilterValue
     ) -> str:
-        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._cage_dodaac}.{self._part_number}.{self._serial}"
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_value.value}.{self._cage_dodaac}.{self._part_number}.{self._serial}"
 
     def binary(
         self, binary_coding_scheme: BinaryCodingSchemes, filter_value: ADIFilterValue
@@ -168,5 +168,5 @@ class ADI(EPCScheme, TagEncodable):
         serial_string = decode_string_six_bits(serial_binary, math.inf)
 
         return cls.from_tag_uri(
-            f"urn:epc:tag:{binary_coding_scheme.value}:{filter_string}.{cage_code_string}.{part_number_string}.{serial_string}"
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{cage_code_string}.{part_number_string}.{serial_string}"
         )

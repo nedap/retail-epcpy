@@ -144,10 +144,6 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         )
 
     @classmethod
-    def from_epc_uri(cls, epc_uri: str) -> SGTIN:
-        return cls(epc_uri)
-
-    @classmethod
     def from_gtin_plus_serial(cls, gtin: str, serial: str) -> SGTIN:
         # todo: is this always valid? maybe first validate gtin
         gtin = gtin.zfill(14)
@@ -187,7 +183,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
 
-        return f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._item_ref}.{self._serial}"
+        return f"{self.TAG_URI_PREFIX}{scheme}:{filter_val}.{self._company_pref}.{self._item_ref}.{self._serial}"
 
     def binary(
         self,
@@ -233,9 +229,9 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
 
         if binary_coding_scheme == SGTIN.BinaryCodingSchemes.SGTIN_96.value:
             return cls.from_tag_uri(
-                f"urn:epc:tag:{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{binary_to_int(serial_binary)}"
+                f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{binary_to_int(serial_binary)}"
             )
         else:
             return cls.from_tag_uri(
-                f"urn:epc:tag:{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{decode_string(serial_binary)}"
+                f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{decode_string(serial_binary)}"
             )

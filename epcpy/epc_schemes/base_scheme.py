@@ -9,10 +9,15 @@ class EPCScheme:
         super().__init__()
         self.epc_uri = None
 
+    @classmethod
+    def from_epc_uri(cls, epc_uri: str) -> EPCScheme:
+        return cls(epc_uri)
+
 
 class TagEncodable:
 
     TAG_URI_REGEX = re.compile(TAG_URI)
+    TAG_URI_PREFIX = "urn:epc:tag:"
 
     def __init__(self) -> None:
         super().__init__()
