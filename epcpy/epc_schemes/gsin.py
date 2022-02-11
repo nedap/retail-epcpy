@@ -26,17 +26,19 @@ class GSIN(EPCScheme, GS1Keyed):
         if not GSIN_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GSIN URI {epc_uri}")
 
-        if len(epc_uri.split(":")[4].replace(".", "")) != 16:
+        self._company_prefix, self._shipper_ref = epc_uri.split(":")[4].split(".")
+
+        if len(f"{self._company_prefix}{self._shipper_ref}") != 16 or not (
+            6 <= len(self._company_prefix) <= 12
+        ):
             raise ConvertException(
                 message=f"Invalid component length {len(epc_uri.split(':')[4].replace('.', ''))}"
             )
 
         self.epc_uri = epc_uri
+        check_digit = calculate_checksum(f"{self._company_prefix}{self._shipper_ref}")
 
-        company_prefix, shipper_ref = self.epc_uri.split(":")[4].split(".")
-        check_digit = calculate_checksum(f"{company_prefix}{shipper_ref}")
-
-        self._gsin = f"{company_prefix}{shipper_ref}{check_digit}"
+        self._gsin = f"{self._company_prefix}{self._shipper_ref}{check_digit}"
 
     def gs1_key(self) -> str:
         return self._gsin
