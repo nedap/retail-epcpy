@@ -1,6 +1,5 @@
 import re
 
-from epcpy.epc_schemes import *
 from epcpy.epc_schemes.adi import ADI
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from typing import List
