@@ -2,7 +2,7 @@ import base64
 import re
 from enum import Enum
 from math import inf, log
-from typing import Dict
+from typing import Dict, Tuple
 
 from epcpy.utils.regex import VERIFY_GS3A3_CHARS
 
@@ -284,7 +284,7 @@ def calculate_checksum(digits: str) -> int:
 
 def parse_header_and_truncate_binary(
     binary_string: str, header_to_schemes: Dict[str, str]
-):
+) -> Tuple(str, str):
     header = binary_string[:8]
 
     try:
