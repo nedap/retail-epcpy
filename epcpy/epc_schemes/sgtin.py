@@ -83,7 +83,7 @@ PARTITION_TABLE_L = {
 }
 
 
-class SGTINFilterValues(Enum):
+class SGTINFilterValue(Enum):
     ALL_OTHERS = "0"
     POS_ITEM = "1"
     FULL_CASE = "2"
@@ -102,7 +102,7 @@ class GTIN_TYPE(IntEnum):
 
 
 class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
-    class BinaryCodingSchemes(Enum):
+    class BinaryCodingScheme(Enum):
         SGTIN_96 = "sgtin-96"
         SGTIN_198 = "sgtin-198"
 
@@ -167,11 +167,11 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
 
     def tag_uri(
         self,
-        binary_coding_scheme: BinaryCodingSchemes = BinaryCodingSchemes.SGTIN_96,
-        filter_value: SGTINFilterValues = SGTINFilterValues.POS_ITEM,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SGTIN_96,
+        filter_value: SGTINFilterValue = SGTINFilterValue.POS_ITEM,
     ) -> str:
 
-        if binary_coding_scheme == SGTIN.BinaryCodingSchemes.SGTIN_96 and (
+        if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96 and (
             not self._serial.isnumeric()
             or int(self._serial) >= pow(2, 38)
             or (len(self._serial) > 1 and self._serial[0] == "0")
@@ -187,8 +187,8 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
 
     def binary(
         self,
-        binary_coding_scheme: BinaryCodingSchemes = BinaryCodingSchemes.SGTIN_96,
-        filter_value: SGTINFilterValues = SGTINFilterValues.POS_ITEM,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SGTIN_96,
+        filter_value: SGTINFilterValue = SGTINFilterValue.POS_ITEM,
     ) -> str:
 
         tag_uri = self.tag_uri(binary_coding_scheme, filter_value)
@@ -203,7 +203,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
 
         serial_binary = (
             str_to_binary(self._serial, 38)
-            if scheme == SGTIN.BinaryCodingSchemes.SGTIN_96.value
+            if scheme == SGTIN.BinaryCodingScheme.SGTIN_96.value
             else encode_string(self._serial, 140)
         )
 
@@ -215,8 +215,8 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             {
-                SGTIN.BinaryHeaders.SGTIN_96.value: SGTIN.BinaryCodingSchemes.SGTIN_96,
-                SGTIN.BinaryHeaders.SGTIN_198.value: SGTIN.BinaryCodingSchemes.SGTIN_198,
+                SGTIN.BinaryHeaders.SGTIN_96.value: SGTIN.BinaryCodingScheme.SGTIN_96,
+                SGTIN.BinaryHeaders.SGTIN_198.value: SGTIN.BinaryCodingScheme.SGTIN_198,
             },
         )
 
@@ -227,7 +227,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         filter_string = binary_to_int(filter_binary)
         gtin_string = decode_partition_table(gtin_binary, PARTITION_TABLE_P)
 
-        if binary_coding_scheme == SGTIN.BinaryCodingSchemes.SGTIN_96.value:
+        if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96.value:
             return cls.from_tag_uri(
                 f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{binary_to_int(serial_binary)}"
             )

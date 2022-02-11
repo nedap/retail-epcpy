@@ -152,11 +152,11 @@ def replace_cpi_escapes(cpi: str) -> str:
     return cpi.replace("%23", "#").replace("%2F", "/")
 
 
-class BinaryCodingSchemes(Enum):
-    pass
-
 
 class CPI(EPCScheme, TagEncodable):
+    class BinaryCodingScheme(Enum):
+        pass
+    
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
