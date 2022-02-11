@@ -168,10 +168,9 @@ class CPI(EPCScheme, TagEncodable):
         if (
             len("".join([self._company_pref, self._cp_ref])) > 30
             or len(self._serial) > 12
+            or not (6 <= len(self._company_pref) <= 12)
         ):
-            raise ConvertException(
-                message=f"Invalid CPI URI {epc_uri} | wrong number of characters"
-            )
+            raise ConvertException(message=f"Invalid CPI URI {epc_uri}")
 
         self.epc_uri = epc_uri
 
@@ -195,15 +194,10 @@ class CPI(EPCScheme, TagEncodable):
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
 
-        if (
-            scheme == BinaryCodingSchemes.CPI_VAR.value
-            and len(self._serial) > 12
-            or (len(self._serial) > 1 and self._serial[0] == "0")
-        ) or (
+        if (scheme == BinaryCodingSchemes.CPI_VAR.value and len(self._serial) > 12) or (
             scheme == BinaryCodingSchemes.CPI_96.value
             and (
                 int(self._serial) >= pow(2, 31)
-                or (len(self._serial) > 1 and self._serial[0] == "0")
                 or not self._cp_ref.isnumeric()
                 or (len(self._cp_ref) > 1 and self._cp_ref[0] == "0")
                 or len(self._cp_ref) > 15 - len(self._company_pref)
