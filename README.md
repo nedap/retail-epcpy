@@ -28,7 +28,7 @@ print(sgtin.tag_uri(binary_coding_scheme=BinaryCodingSchemes.SGTIN_198, filter_v
 print(sgtin.hex(binary_coding_scheme=BinaryCodingSchemes.SGTIN_198, filter_value=SGTINFilterValues.POS_ITEM))
 print(sgtin.binary(binary_coding_scheme=BinaryCodingSchemes.SGTIN_198, filter_value=SGTINFilterValues.POS_ITEM))
 ```
-Similary, given a tag `36300001DB011169E5E5A70EC000000000000000000000000000`, an SGTIN can be constructed
+Similary, given a sgtin tag in hex `36300001DB011169E5E5A70EC000000000000000000000000000`, an SGTIN can be constructed
 ```python
 SGTIN.from_hex("36300001DB011169E5E5A70EC000000000000000000000000000")
 ```

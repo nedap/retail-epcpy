@@ -29,16 +29,12 @@ class TagEncodable:
         padding = (16 - (len(binary) % 16)) % 16
         padded_binary = f"{binary:<0{len(binary) + padding}}"
 
-        # self._hex = f"{int(padded_binary, 2):X}"
-
         return f"{int(padded_binary, 2):X}"
 
     def base64(self, **kwargs) -> str:
         hex_string = self.hex(**kwargs)
 
-        self._base64 = hex_to_base64(hex_string)
-
-        return self._base64
+        return hex_to_base64(hex_string)
 
     def from_binary(tag_binary_string: str) -> TagEncodable:
         raise NotImplementedError
@@ -46,6 +42,10 @@ class TagEncodable:
     @classmethod
     def from_hex(cls, tag_hex_string: str) -> TagEncodable:
         return cls.from_binary(hex_to_binary(tag_hex_string))
+
+    @classmethod
+    def from_base64(cls, tag_hex_string: str) -> TagEncodable:
+        return cls.from_binary(hex_to_base64(tag_hex_string))
 
 class GS1Keyed:
     def __init__(self) -> None:

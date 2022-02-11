@@ -102,17 +102,15 @@ class GTIN_TYPE(IntEnum):
     GTIN14 = 14
 
 
-class BinaryCodingSchemes(Enum):
-    SGTIN_96 = "sgtin-96"
-    SGTIN_198 = "sgtin-198"
-
-
-class BinaryHeaders(Enum):
-    SGTIN_96 = "00110000"
-    SGTIN_198 = "00110110"
-
-
 class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
+    class BinaryCodingSchemes(Enum):
+        SGTIN_96 = "sgtin-96"
+        SGTIN_198 = "sgtin-198"
+
+    class BinaryHeaders(Enum):
+        SGTIN_96 = "00110000"
+        SGTIN_198 = "00110110"
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -164,7 +162,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         epc_scheme = epc_tag_uri.split(":")[3]
         value = ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
 
-        return f"urn:epc:id:{epc_scheme.split('-')[0]}:{value}"
+        return cls(f"urn:epc:id:{epc_scheme.split('-')[0]}:{value}")
 
     def gs1_key(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
         return self.gtin(gtin_type=gtin_type)
