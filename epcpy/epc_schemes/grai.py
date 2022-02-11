@@ -101,21 +101,22 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
         if not GRAI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GRAI URI {epc_uri}")
 
-        if len("".join(epc_uri.split(":")[4].split(".")[:2])) != 12:
-            raise ConvertException(
-                message=f"Invalid EPC URI {epc_uri} | Company prefix + asset type must be 12 digits"
-            )
+        self._serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])
+        verify_gs3a3_component(self._serial)
 
-        serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])
-        verify_gs3a3_component(serial)
+        self._company_pref, self._asset_type = epc_uri.split(":")[4].split(".")[:2]
+
+        if (
+            len(f"{self._company_pref}{self._asset_type}") != 12
+            or not (6 <= len(self._company_pref) <= 12)
+            or len(self._serial) > 16
+        ):
+            raise ConvertException(message=f"Invalid EPC URI {epc_uri}")
 
         self.epc_uri = epc_uri
 
-        self._serial = serial
-        self._company_pref, self._asset_type = self.epc_uri.split(":")[4].split(".")[:2]
-
         check_digit = calculate_checksum(f"{self._company_pref}{self._asset_type}")
-        self._grai = f"{self._company_pref}{self._asset_type}{check_digit}{replace_uri_escapes(serial)}"
+        self._grai = f"{self._company_pref}{self._asset_type}{check_digit}{replace_uri_escapes(self._serial)}"
 
     def gs1_key(self) -> str:
         return self._grai
