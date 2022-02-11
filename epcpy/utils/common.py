@@ -284,7 +284,7 @@ def calculate_checksum(digits: str) -> int:
 
 def parse_header_and_truncate_binary(
     binary_string: str, header_to_schemes: Dict[str, str]
-) -> Tuple(str, str):
+) -> Tuple[str, str]:
     header = binary_string[:8]
 
     try:

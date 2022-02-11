@@ -18,7 +18,7 @@ class TestEPCSchemeInitMeta(type):
         def generate_valid_init_tests(scheme: EPCScheme, epc_uri: str):
             def test(self: unittest.TestCase):
                 try:
-                    self.assertEqual(scheme(epc_uri).epc_uri, epc_uri)
+                    self.assertEqual(scheme.from_epc_uri(epc_uri).epc_uri, epc_uri)
                 except ConvertException:
                     self.fail(
                         f"{scheme} init unexpectedly raised ConvertException for URI {epc_uri}"
@@ -29,7 +29,7 @@ class TestEPCSchemeInitMeta(type):
         def generate_invalid_init_tests(scheme: EPCScheme, epc_uri: str):
             def test(self: unittest.TestCase):
                 with self.assertRaises(ConvertException):
-                    scheme(epc_uri)
+                    scheme.from_epc_uri(epc_uri)
 
             return test
 
@@ -56,7 +56,7 @@ class TestGS1KeyedMeta(type):
             scheme: EPCScheme, epc_uri: str, gs1_key: str, **kwargs
         ):
             def test(self: unittest.TestCase):
-                s: GS1Keyed = scheme(epc_uri)
+                s: GS1Keyed = scheme.from_epc_uri(epc_uri)
                 try:
                     self.assertEqual(s.gs1_key(**kwargs), gs1_key)
                 except ConvertException:
@@ -101,7 +101,7 @@ class TestTagEncodableMeta(type):
             scheme: EPCScheme, epc_uri: str, tag_uri: str, **kwargs
         ):
             def test(self: unittest.TestCase):
-                s: TagEncodable = scheme(epc_uri)
+                s: TagEncodable = scheme.from_epc_uri(epc_uri)
                 try:
                     self.assertEqual(s.tag_uri(**kwargs), tag_uri)
                 except ConvertException:
@@ -129,7 +129,7 @@ class TestTagEncodableMeta(type):
             scheme: EPCScheme, epc_uri: str, **kwargs
         ):
             def test(self: unittest.TestCase):
-                s: TagEncodable = scheme(epc_uri)
+                s: TagEncodable = scheme.from_epc_uri(epc_uri)
                 with self.assertRaises(ConvertException):
                     s.tag_uri(**kwargs)
 

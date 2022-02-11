@@ -186,6 +186,15 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         filter_value: SGTINFilterValues = SGTINFilterValues.POS_ITEM,
     ) -> str:
 
+        if binary_coding_scheme == SGTIN.BinaryCodingSchemes.SGTIN_96 and (
+            not self._serial.isnumeric()
+            or int(self._serial) >= pow(2, 38)
+            or (len(self._serial) > 1 and self._serial[0] == "0")
+        ):
+            raise ConvertException(
+                message=f"Invalid serial value {self._serial} for SGTIN_96 coding scheme"
+            )
+
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
 
@@ -203,13 +212,13 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         filter_value = tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._item_ref]
 
-        header = BinaryHeaders[binary_coding_scheme.name].value
+        header = SGTIN.BinaryHeaders[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value, 3)
         gtin_binary = encode_partition_table(parts, PARTITION_TABLE_L)
 
         serial_binary = (
             str_to_binary(self._serial, 38)
-            if scheme == BinaryCodingSchemes.SGTIN_96.value
+            if scheme == SGTIN.BinaryCodingSchemes.SGTIN_96.value
             else encode_string(self._serial, 140)
         )
 
@@ -221,8 +230,8 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             {
-                BinaryHeaders.SGTIN_96.value: BinaryCodingSchemes.SGTIN_96,
-                BinaryHeaders.SGTIN_198.value: BinaryCodingSchemes.SGTIN_198,
+                SGTIN.BinaryHeaders.SGTIN_96.value: SGTIN.BinaryCodingSchemes.SGTIN_96,
+                SGTIN.BinaryHeaders.SGTIN_198.value: SGTIN.BinaryCodingSchemes.SGTIN_198,
             },
         )
 
@@ -233,7 +242,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         filter_string = binary_to_int(filter_binary)
         gtin_string = decode_partition_table(gtin_binary, PARTITION_TABLE_P)
 
-        if binary_coding_scheme == BinaryCodingSchemes.SGTIN_96.value:
+        if binary_coding_scheme == SGTIN.BinaryCodingSchemes.SGTIN_96.value:
             return cls.from_tag_uri(
                 f"urn:epc:tag:{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{binary_to_int(serial_binary)}"
             )
