@@ -103,30 +103,25 @@ class ITIP(EPCScheme, TagEncodable):
         if not ITIP_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid ITIP URI {epc_uri}")
 
-        company_prefix, item_ref, piece, total, *serial = ":".join(
-            epc_uri.split(":")[4:]
-        ).split(".")
+        (
+            self._company_pref,
+            self._item_ref,
+            self._piece,
+            self._total,
+            *serial,
+        ) = ":".join(epc_uri.split(":")[4:]).split(".")
 
-        serial = ".".join(serial)
-        verify_gs3a3_component(serial)
+        self._serial = ".".join(serial)
+        verify_gs3a3_component(self._serial)
 
-        if len(f"{company_prefix}{item_ref}{piece}{total}") != 17:
-            raise ConvertException(
-                message=f"Invalid ITIP URI {epc_uri} | first four components must be 17 digits"
-            )
-
-        if not (1 <= len(serial) <= 20):
-            raise ConvertException(
-                message=f"Invalid serial | serial must be between 1 and 20 digits"
-            )
+        if (
+            len(f"{self._company_pref}{self._item_ref}{self._piece}{self._total}") != 17
+            or not (1 <= len(replace_uri_escapes(self._serial)) <= 20)
+            or not (6 <= len(self._company_pref) <= 12)
+        ):
+            raise ConvertException(message=f"Invalid ITIP URI {epc_uri}")
 
         self.epc_uri = epc_uri
-
-        self._company_pref = company_prefix
-        self._item_ref = item_ref
-        self._piece = piece
-        self._total = total
-        self._serial = serial
 
     def gs1_element_string(self) -> str:
         indicator = self._item_ref[0]
