@@ -19,7 +19,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import SGTIN_URI, TAG_URI
 
 SGTIN_REGEX = re.compile(SGTIN_URI)
-TAG_URI_REGEX = re.compile(TAG_URI)
 
 PARTITION_TABLE_P = {
     0: {
@@ -154,16 +153,6 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         gtin = gtin.zfill(14)
         return cls(f"urn:epc:id:sgtin:{gtin[1:8]}.{gtin[0]}{gtin[8:13]}.{str(serial)}")
 
-    @classmethod
-    def from_tag_uri(cls, epc_tag_uri: str) -> SGTIN:
-        if not TAG_URI_REGEX.match(epc_tag_uri):
-            raise ConvertException(message=f"Invalid EPC tag URI {epc_tag_uri}")
-
-        epc_scheme = epc_tag_uri.split(":")[3]
-        value = ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
-
-        return cls(f"urn:epc:id:{epc_scheme.split('-')[0]}:{value}")
-
     def gs1_key(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
         return self.gtin(gtin_type=gtin_type)
 
@@ -250,6 +239,3 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
             return cls.from_tag_uri(
                 f"urn:epc:tag:{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{decode_string(serial_binary)}"
             )
-
-    def tag_to_value_sgtin(epc_tag_uri: str) -> str:
-        return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])

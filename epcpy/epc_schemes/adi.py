@@ -1,3 +1,4 @@
+from __future__ import annotations
 import math
 import re
 from enum import Enum
@@ -10,6 +11,7 @@ from epcpy.utils.common import (
     decode_string_six_bits,
     encode_cage_code_six_bits,
     encode_string_six_bits,
+    parse_header_and_truncate_binary,
     str_to_binary,
 )
 from epcpy.utils.regex import ADI_URI
@@ -17,7 +19,7 @@ from epcpy.utils.regex import ADI_URI
 ADI_URI_REGEX = re.compile(ADI_URI)
 
 
-class ADIFilterValues(Enum):
+class ADIFilterValue(Enum):
     ALL_OTHERS = "0"
     ITEM_OTHER = "1"
     CARTON = "2"
@@ -85,6 +87,12 @@ class ADIFilterValues(Enum):
 
 
 class ADI(EPCScheme, TagEncodable):
+    class BinaryCodingSchemes(Enum):
+        ADI_VAR = "adi-var"
+
+    class BinaryHeaders(Enum):
+        ADI_VAR = "00111011"
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -107,65 +115,58 @@ class ADI(EPCScheme, TagEncodable):
 
         self.epc_uri = epc_uri
 
-    def tag_uri(self, filter_value: ADIFilterValues) -> str:
-        if filter_value is None and self._tag_uri is None:
-            raise ConvertException(
-                message="Either tag_uri should be set or a filter value should be provided"
-            )
-        elif self._tag_uri:
-            return self._tag_uri
+    def tag_uri(
+        self, binary_coding_scheme: BinaryCodingSchemes, filter_value: ADIFilterValue
+    ) -> str:
+        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._cage_dodaac}.{self._part_number}.{self._serial}"
 
-        scheme = BinaryCodingSchemes.ADI_VAR.value
-        filter_val = filter_value.value
+    def binary(
+        self, binary_coding_scheme: BinaryCodingSchemes, filter_value: ADIFilterValue
+    ) -> str:
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._cage_dodaac}.{self._part_number}.{self._serial}"
-
-        return self._tag_uri
-
-    def binary(self, filter_value: ADIFilterValues = None) -> str:
-        if filter_value is None and self._binary:
-            return self._binary
-
-        self.tag_uri(filter_value)
-
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
-        filter_val = self._tag_uri.split(":")[4].split(".")[0]
-
-        header = BinaryHeaders[scheme].value
-        filter_binary = str_to_binary(filter_val, 6)
+        header = ADI.BinaryHeaders[binary_coding_scheme.name].value
+        filter_binary = str_to_binary(filter_value.value, 6)
         cage_code_binary = encode_cage_code_six_bits(self._cage_dodaac)
         part_number_binary = encode_string_six_bits(self._part_number)
         serial_binary = encode_string_six_bits(self._serial)
 
-        self._binary = (
+        _binary = (
             header
             + filter_binary
             + cage_code_binary
             + part_number_binary
             + serial_binary
         )
-        return self._binary
+        return _binary
 
+    @classmethod
+    def from_binary(cls, binary_string: str) -> ADI:
 
-def binary_to_value_adivar(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:14]
-    cage_code_binary = truncated_binary[14:50]
-
-    if not re.match(".*([0]{6})+.*", truncated_binary[50:]):
-        raise ConvertException(
-            message="Invalid binary for ADI, missing 6-bit terminators"
+        binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
+            binary_string,
+            {
+                ADI.BinaryHeaders.ADI_VAR.value: ADI.BinaryCodingSchemes.ADI_VAR,
+            },
         )
 
-    part_number_binary, _, *serial_binary = re.split("([0]{6})", truncated_binary[50:])
-    serial_binary = "".join(serial_binary)[:-6]
+        filter_binary = truncated_binary[8:14]
+        cage_code_binary = truncated_binary[14:50]
 
-    filter_string = binary_to_int(filter_binary)
-    cage_code_string = decode_cage_code_six_bits(cage_code_binary)
-    part_number_string = decode_string_six_bits(part_number_binary, math.inf)
-    serial_string = decode_string_six_bits(serial_binary, math.inf)
+        if not re.match(".*([0]{6})+.*", truncated_binary[50:]):
+            raise ConvertException(
+                message="Invalid binary for ADI, missing 6-bit terminators"
+            )
 
-    return f"{filter_string}.{cage_code_string}.{part_number_string}.{serial_string}"
+        part_number_binary, _, *serial_binary = re.split(
+            "([0]{6})", truncated_binary[50:]
+        )
+        serial_binary = "".join(serial_binary)[:-6]
 
+        filter_string = binary_to_int(filter_binary)
+        cage_code_string = decode_cage_code_six_bits(cage_code_binary)
+        part_number_string = decode_string_six_bits(part_number_binary, math.inf)
+        serial_string = decode_string_six_bits(serial_binary, math.inf)
 
-def tag_to_value_adivar(epc_tag_uri: str) -> str:
-    return ".".join(epc_tag_uri.split(":")[4].split(".")[1:])
+        return cls.from_tag_uri(
+            f"urn:epc:tag:{binary_coding_scheme.value}:{filter_string}.{cage_code_string}.{part_number_string}.{serial_string}"
+        )

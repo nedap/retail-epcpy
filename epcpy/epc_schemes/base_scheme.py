@@ -1,6 +1,7 @@
 from __future__ import annotations
-from enum import Enum
 from epcpy.utils.common import ConvertException, hex_to_base64, hex_to_binary
+from epcpy.utils.regex import TAG_URI
+import re
 
 
 class EPCScheme:
@@ -10,6 +11,9 @@ class EPCScheme:
 
 
 class TagEncodable:
+
+    TAG_URI_REGEX = re.compile(TAG_URI)
+
     def __init__(self) -> None:
         super().__init__()
         self._base64 = None
@@ -46,6 +50,17 @@ class TagEncodable:
     @classmethod
     def from_base64(cls, tag_hex_string: str) -> TagEncodable:
         return cls.from_binary(hex_to_base64(tag_hex_string))
+
+    @classmethod
+    def from_tag_uri(cls, epc_tag_uri: str) -> TagEncodable:
+        if not TagEncodable.TAG_URI_REGEX.match(epc_tag_uri):
+            raise ConvertException(message=f"Invalid EPC tag URI {epc_tag_uri}")
+
+        epc_scheme = epc_tag_uri.split(":")[3]
+        value = ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+
+        return cls(f"urn:epc:id:{epc_scheme.split('-')[0]}:{value}")
+
 
 class GS1Keyed:
     def __init__(self) -> None:
