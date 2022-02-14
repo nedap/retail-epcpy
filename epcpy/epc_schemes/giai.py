@@ -1,14 +1,14 @@
+from __future__ import annotations
 import re
 from enum import Enum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
-    BinaryCodingSchemes,
-    BinaryHeaders,
     ConvertException,
     binary_to_int,
     decode_partition_table,
     encode_partition_table,
+    parse_header_and_truncate_binary,
     replace_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
@@ -142,7 +142,7 @@ PARTITION_TABLE_L_202 = {
 }
 
 
-class GIAIFilterValues(Enum):
+class GIAIFilterValue(Enum):
     ALL_OTHERS = "0"
     RAIL_VEHICLE = "1"
     RESERVED_2 = "2"
@@ -154,6 +154,14 @@ class GIAIFilterValues(Enum):
 
 
 class GIAI(EPCScheme, TagEncodable, GS1Keyed):
+    class BinaryCodingScheme(Enum):
+        GIAI_96 = "giai-96"
+        GIAI_202 = "giai-202"
+
+    class BinaryHeader(Enum):
+        GIAI_96 = "00110100"
+        GIAI_202 = "00111000"
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -182,7 +190,7 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
         return f"(8004){self._giai}"
 
     def tag_uri(
-        self, binary_coding_scheme: BinaryCodingSchemes, filter_value: GIAIFilterValues
+        self, binary_coding_scheme: BinaryCodingScheme, filter_value: GIAIFilterValue
     ) -> str:
         if (
             binary_coding_scheme is None or filter_value is None
@@ -193,15 +201,14 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
         elif self._tag_uri:
             return self._tag_uri
 
-        scheme = binary_coding_scheme.value
         filter_val = filter_value.value
 
         if (
-            scheme == BinaryCodingSchemes.GIAI_202.value
+            binary_coding_scheme == GIAI.BinaryCodingScheme.GIAI_202
             and len(replace_uri_escapes(self._asset_ref))
             > PARTITION_TABLE_L_202[len(self._company_pref)]["K"]
         ) or (
-            scheme == BinaryCodingSchemes.GIAI_96.value
+            binary_coding_scheme == GIAI.BinaryCodingScheme.GIAI_96
             and (
                 not self._asset_ref.isnumeric()
                 or len(self._asset_ref)
@@ -215,32 +222,27 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
                 message=f"Invalid asset reference value {self._asset_ref}"
             )
 
-        self._tag_uri = (
-            f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._asset_ref}"
-        )
+        self._tag_uri = f"urn:epc:tag:{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._asset_ref}"
 
         return self._tag_uri
 
     def binary(
         self,
-        binary_coding_scheme: BinaryCodingSchemes = None,
-        filter_value: GIAIFilterValues = None,
+        binary_coding_scheme: BinaryCodingScheme,
+        filter_value: GIAIFilterValue,
     ) -> str:
-        if (binary_coding_scheme is None or filter_value is None) and self._binary:
-            return self._binary
 
-        self.tag_uri(binary_coding_scheme, filter_value)
+        tag_uri = self.tag_uri(binary_coding_scheme, filter_value)
 
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
-        filter_value = self._tag_uri.split(":")[4].split(".")[0]
+        filter_value = tag_uri.split(":")[4].split(".")[0]
 
-        header = BinaryHeaders[scheme].value
+        header = GIAI.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value, 3)
         parts = [self._company_pref, self._asset_ref]
 
         giai_binary = (
             encode_partition_table(parts, PARTITION_TABLE_L_96)
-            if scheme == "GIAI_96"
+            if binary_coding_scheme == GIAI.BinaryCodingScheme.GIAI_96
             else encode_partition_table(
                 parts,
                 PARTITION_TABLE_L_202,
@@ -251,34 +253,30 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
         _binary = header + filter_binary + giai_binary
         return _binary
 
+    @classmethod
+    def from_binary(cls, binary_string: str) -> GIAI:
+        binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
+            binary_string,
+            {
+                GIAI.BinaryHeader.GIAI_96.value: GIAI.BinaryCodingScheme.GIAI_96,
+                GIAI.BinaryHeader.GIAI_202.value: GIAI.BinaryCodingScheme.GIAI_202,
+            },
+        )
+        filter_binary = truncated_binary[8:11]
+        giai_binary = truncated_binary[11:96]
 
-def binary_to_value_giai96(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    giai_binary = truncated_binary[11:96]
+        filter_string = binary_to_int(filter_binary)
 
-    filter_string = binary_to_int(filter_binary)
-    giai_string = decode_partition_table(
-        giai_binary, PARTITION_TABLE_P_96, unpadded_partition=True
-    )
+        giai_string = (
+            decode_partition_table(
+                giai_binary, PARTITION_TABLE_P_96, unpadded_partition=True
+            )
+            if binary_coding_scheme == GIAI.BinaryCodingScheme.GIAI_96
+            else decode_partition_table(
+                giai_binary, PARTITION_TABLE_P_202, string_partition=True
+            )
+        )
 
-    return f"{filter_string}.{giai_string}"
-
-
-def binary_to_value_giai202(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    giai_binary = truncated_binary[11:202]
-
-    filter_string = binary_to_int(filter_binary)
-    giai_string = decode_partition_table(
-        giai_binary, PARTITION_TABLE_P_202, string_partition=True
-    )
-
-    return f"{filter_string}.{giai_string}"
-
-
-def tag_to_value_giai96(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
-
-
-def tag_to_value_giai202(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{giai_string}"
+        )

@@ -164,7 +164,6 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
 
         tag_uri = self.tag_uri(binary_coding_scheme, filter_value)
 
-        scheme = tag_uri.split(":")[3].replace("-", "_").upper()
         filter_value = tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._doc_type]
 
@@ -173,7 +172,7 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
         gdti_binary = encode_partition_table(parts, PARTITION_TABLE_L)
         serial_binary = (
             str_to_binary(self._serial, 41)
-            if scheme == "GDTI_96"
+            if binary_coding_scheme == GDTI.BinaryCodingScheme.GDTI_96
             else encode_string(self._serial, 119)
         )
 
