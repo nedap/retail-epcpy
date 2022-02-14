@@ -98,20 +98,24 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
         if not SSCC_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid SSCC URI {epc_uri}")
 
-        if len(epc_uri.split(":")[4].replace(".", "")) != 17:
+        self.epc_uri = epc_uri
+
+        self._company_pref, self._serial = self.epc_uri.split(":")[-1].split(".")
+
+        if len(f"{self._company_pref}{self._serial}") != 17 or not (
+            6 <= len(self._company_pref) <= 12
+        ):
             raise ConvertException(
                 message=f"Invalid SSCC URI {epc_uri} | wrong number of digits"
             )
 
-        self.epc_uri = epc_uri
-
-        self._company_prefix, serial = self.epc_uri.split(":")[-1].split(".")
-        self._serial = serial
         check_digit = calculate_checksum(
-            f"{serial[0]}{self._company_prefix}{serial[1:]}"
+            f"{self._serial[0]}{self._company_pref}{self._serial[1:]}"
         )
 
-        self._sscc = f"{serial[0]}{self._company_prefix}{serial[1:]}{check_digit}"
+        self._sscc = (
+            f"{self._serial[0]}{self._company_pref}{self._serial[1:]}{check_digit}"
+        )
 
     def gs1_key(self) -> str:
         return self._sscc
@@ -131,7 +135,7 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
         filter_val = filter_value.value
 
         self._tag_uri = (
-            f"urn:epc:tag:{scheme}:{filter_val}.{self._company_prefix}.{self._serial}"
+            f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._serial}"
         )
 
         return self._tag_uri
@@ -144,7 +148,7 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
 
         scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
         filter_value = self._tag_uri.split(":")[4].split(".")[0]
-        parts = [self._company_prefix, self._serial]
+        parts = [self._company_pref, self._serial]
 
         header = BinaryHeaders[scheme].value
         filter_binary = str_to_binary(filter_value, 3)
