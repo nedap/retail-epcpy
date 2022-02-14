@@ -107,6 +107,7 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
         if (
             len(f"{self._company_pref}{self._coupon_ref}") != 12
             or len(self._serial) > 12
+            or not (6 <= len(self._company_pref) <= 12)
         ):
             raise ConvertException(
                 message=f"Invalid SGCN URI {epc_uri} | wrong number of digits"
