@@ -1,10 +1,9 @@
+from __future__ import annotations
 import re
 from enum import Enum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
-    BinaryCodingSchemes,
-    BinaryHeaders,
     ConvertException,
     binary_to_int,
     calculate_checksum,
@@ -12,6 +11,7 @@ from epcpy.utils.common import (
     decode_string,
     encode_partition_table,
     encode_string,
+    parse_header_and_truncate_binary,
     replace_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
@@ -83,7 +83,7 @@ PARTITION_TABLE_L = {
 }
 
 
-class GDTIFilterValues(Enum):
+class GDTIFilterValue(Enum):
     ALL_OTHERS = "0"
     TRAVEL_DOCUMENT = "1"
     RESERVED_2 = "2"
@@ -95,6 +95,14 @@ class GDTIFilterValues(Enum):
 
 
 class GDTI(EPCScheme, TagEncodable, GS1Keyed):
+    class BinaryCodingScheme(Enum):
+        GDTI_96 = "gdti-96"
+        GDTI_174 = "gdti-174"
+
+    class BinaryHeader(Enum):
+        GDTI_96 = "00101100"
+        GDTI_174 = "00111110"
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -124,25 +132,18 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
         return f"(253){self._gdti}"
 
     def tag_uri(
-        self, binary_coding_scheme: BinaryCodingSchemes, filter_value: GDTIFilterValues
+        self,
+        binary_coding_scheme: GDTI.BinaryCodingScheme,
+        filter_value: GDTIFilterValue,
     ) -> str:
-        if (
-            binary_coding_scheme is None or filter_value is None
-        ) and self._tag_uri is None:
-            raise ConvertException(
-                message="Either both a binary coding scheme and a filter value should be provided, or tag_uri should be set."
-            )
-        elif self._tag_uri:
-            return self._tag_uri
-
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
 
         if (
-            scheme == BinaryCodingSchemes.GDTI_174.value
+            scheme == GDTI.BinaryCodingScheme.GDTI_174.value
             and len(replace_uri_escapes(self._serial)) > 17
         ) or (
-            scheme == BinaryCodingSchemes.GDTI_96.value
+            scheme == GDTI.BinaryCodingScheme.GDTI_96.value
             and (
                 not self._serial.isnumeric()
                 or int(self._serial) >= pow(2, 41)
@@ -157,19 +158,17 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
 
     def binary(
         self,
-        binary_coding_scheme: BinaryCodingSchemes = None,
-        filter_value: GDTIFilterValues = None,
+        binary_coding_scheme: BinaryCodingScheme,
+        filter_value: GDTIFilterValue,
     ) -> str:
-        if (binary_coding_scheme is None or filter_value is None) and self._binary:
-            return self._binary
 
-        self.tag_uri(binary_coding_scheme, filter_value)
+        tag_uri = self.tag_uri(binary_coding_scheme, filter_value)
 
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
-        filter_value = self._tag_uri.split(":")[4].split(".")[0]
+        scheme = tag_uri.split(":")[3].replace("-", "_").upper()
+        filter_value = tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._doc_type]
 
-        header = BinaryHeaders[scheme].value
+        header = GDTI.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value, 3)
         gdti_binary = encode_partition_table(parts, PARTITION_TABLE_L)
         serial_binary = (
@@ -181,34 +180,28 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
         _binary = header + filter_binary + gdti_binary + serial_binary
         return _binary
 
+    @classmethod
+    def from_binary(cls, binary_string: str) -> GDTI:
+        binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
+            binary_string,
+            {
+                GDTI.BinaryHeader.GDTI_96.value: GDTI.BinaryCodingScheme.GDTI_96,
+                GDTI.BinaryHeader.GDIT_174.value: GDTI.BinaryCodingScheme.GDTI_174,
+            },
+        )
 
-def binary_to_value_gdti96(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    gdti_binary = truncated_binary[11:55]
-    serial_binary = truncated_binary[55:]
+        filter_binary = truncated_binary[8:11]
+        gdti_binary = truncated_binary[11:55]
+        serial_binary = truncated_binary[55:]
 
-    filter_string = binary_to_int(filter_binary)
-    gdti_string = decode_partition_table(gdti_binary, PARTITION_TABLE_P)
-    serial_string = binary_to_int(serial_binary)
+        filter_string = binary_to_int(filter_binary)
+        gdti_string = decode_partition_table(gdti_binary, PARTITION_TABLE_P)
 
-    return f"{filter_string}.{gdti_string}.{serial_string}"
-
-
-def binary_to_value_gdti174(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    gdti_binary = truncated_binary[11:55]
-    serial_binary = truncated_binary[55:]
-
-    filter_string = binary_to_int(filter_binary)
-    gdti_string = decode_partition_table(gdti_binary, PARTITION_TABLE_P)
-    serial_string = decode_string(serial_binary)
-
-    return f"{filter_string}.{gdti_string}.{serial_string}"
-
-
-def tag_to_value_gdti96(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
-
-
-def tag_to_value_gdti174(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+        serial_string = (
+            binary_to_int(serial_binary)
+            if binary_coding_scheme == GDTI.BinaryCodingScheme.GDTI_96.value
+            else decode_string(serial_binary)
+        )
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gdti_string}.{serial_string}"
+        )

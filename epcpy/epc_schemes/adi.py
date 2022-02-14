@@ -90,7 +90,7 @@ class ADI(EPCScheme, TagEncodable):
     class BinaryCodingSchemes(Enum):
         ADI_VAR = "adi-var"
 
-    class BinaryHeaders(Enum):
+    class BinaryHeader(Enum):
         ADI_VAR = "00111011"
 
     def __init__(self, epc_uri) -> None:
@@ -124,7 +124,7 @@ class ADI(EPCScheme, TagEncodable):
         self, binary_coding_scheme: BinaryCodingSchemes, filter_value: ADIFilterValue
     ) -> str:
 
-        header = ADI.BinaryHeaders[binary_coding_scheme.name].value
+        header = ADI.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value.value, 6)
         cage_code_binary = encode_cage_code_six_bits(self._cage_dodaac)
         part_number_binary = encode_string_six_bits(self._part_number)
@@ -145,7 +145,7 @@ class ADI(EPCScheme, TagEncodable):
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             {
-                ADI.BinaryHeaders.ADI_VAR.value: ADI.BinaryCodingSchemes.ADI_VAR,
+                ADI.BinaryHeader.ADI_VAR.value: ADI.BinaryCodingSchemes.ADI_VAR,
             },
         )
 

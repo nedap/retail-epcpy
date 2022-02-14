@@ -1,3 +1,4 @@
+from __future__ import annotations
 import re
 from enum import Enum
 
@@ -7,6 +8,7 @@ from epcpy.utils.common import (
     binary_to_int,
     decode_partition_table,
     encode_partition_table,
+    parse_header_and_truncate_binary,
     str_to_binary,
 )
 from epcpy.utils.regex import CPI_URI
@@ -137,7 +139,7 @@ PARTITION_TABLE_L_VAR = {
 }
 
 
-class CPIFilterValues(Enum):
+class CPIFilterValue(Enum):
     ALL_OTHERS = "0"
     RESERVED_1 = "1"
     RESERVED_2 = "2"
@@ -152,11 +154,15 @@ def replace_cpi_escapes(cpi: str) -> str:
     return cpi.replace("%23", "#").replace("%2F", "/")
 
 
-
 class CPI(EPCScheme, TagEncodable):
     class BinaryCodingScheme(Enum):
-        pass
-    
+        CPI_96 = "cpi-96"
+        CPI_VAR = "cpi-var"
+
+    class BinaryHeader(Enum):
+        CPI_96 = "00111100"
+        CPI_VAR = "00111101"
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -183,26 +189,15 @@ class CPI(EPCScheme, TagEncodable):
         return f"(8010){self._company_pref}{cp_ref}(8011){self._serial}"
 
     def tag_uri(
-        self, binary_coding_scheme: BinaryCodingSchemes, filter_value: CPIFilterValues
+        self, binary_coding_scheme: BinaryCodingScheme, filter_value: CPIFilterValue
     ) -> str:
-        if (
-            binary_coding_scheme is None or filter_value is None
-        ) and self._tag_uri is None:
-            raise ConvertException(
-                message="Either both a binary coding scheme and a filter value should be provided, or tag_uri should be set."
-            )
-        elif self._tag_uri:
-            return self._tag_uri
-
-        scheme = binary_coding_scheme.value
-        filter_val = filter_value.value
 
         if (
-            scheme == BinaryCodingSchemes.CPI_VAR.value
+            binary_coding_scheme == CPI.BinaryCodingScheme.CPI_VAR
             and len(self._serial) > 12
             or (len(self._serial) > 1 and self._serial[0] == "0")
         ) or (
-            scheme == BinaryCodingSchemes.CPI_96.value
+            binary_coding_scheme == CPI.BinaryCodingScheme.CPI_96
             and (
                 int(self._serial) >= pow(2, 31)
                 or (len(self._serial) > 1 and self._serial[0] == "0")
@@ -213,72 +208,57 @@ class CPI(EPCScheme, TagEncodable):
         ):
             raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._cp_ref}.{self._serial}"
+        self._tag_uri = f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._cp_ref}.{self._serial}"
 
         return self._tag_uri
 
     def binary(
         self,
-        binary_coding_scheme: BinaryCodingSchemes = None,
-        filter_value: CPIFilterValues = None,
+        binary_coding_scheme: BinaryCodingScheme,
+        filter_value: CPIFilterValue,
     ) -> str:
-        if (binary_coding_scheme is None or filter_value is None) and self._binary:
-            return self._binary
 
         self.tag_uri(binary_coding_scheme, filter_value)
 
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
+        scheme = self._tag_uri.split(":")[3]
         filter_value = self._tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._cp_ref]
         serial = self._serial
 
-        header = BinaryHeaders[scheme].value
+        header = CPI.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value, 3)
         cpi_binary = (
             encode_partition_table(parts, PARTITION_TABLE_L_96)
-            if scheme == "CPI_96"
+            if scheme == CPI.BinaryCodingScheme.CPI_96.value
             else encode_partition_table(
                 parts, PARTITION_TABLE_L_VAR, six_bit_variable_partition=True
             )
         )
-        serial_binary = str_to_binary(serial, 31 if scheme == "CPI_96" else 40)
+        serial_binary = str_to_binary(
+            serial, 31 if scheme == CPI.BinaryCodingScheme.CPI_96.value else 40
+        )
 
         _binary = header + filter_binary + cpi_binary + serial_binary
 
         return _binary
 
+    @classmethod
+    def from_binary(cls, binary_string: str) -> CPI:
+        binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
+            binary_string,
+            {
+                CPI.BinaryHeader.CPI_96.value: CPI.BinaryCodingScheme.CPI_96,
+                CPI.BinaryHeader.CPI_VAR.value: CPI.BinaryCodingScheme.CPI_VAR,
+            },
+        )
+        filter_binary = truncated_binary[8:11]
+        cpi_binary = truncated_binary[11:65]
+        serial_binary = truncated_binary[65:]
 
-def binary_to_value_cpi96(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    cpi_binary = truncated_binary[11:65]
-    serial_binary = truncated_binary[65:]
+        filter_string = binary_to_int(filter_binary)
+        cpi_string = decode_partition_table(
+            cpi_binary, PARTITION_TABLE_P_96, unpadded_partition=True
+        )
+        serial_string = binary_to_int(serial_binary)
 
-    filter_string = binary_to_int(filter_binary)
-    cpi_string = decode_partition_table(
-        cpi_binary, PARTITION_TABLE_P_96, unpadded_partition=True
-    )
-    serial_string = binary_to_int(serial_binary)
-
-    return f"{filter_string}.{cpi_string}.{serial_string}"
-
-
-def binary_to_value_cpivar(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    cpi_binary = truncated_binary[11:-40]
-    serial_binary = truncated_binary[-40:]
-
-    filter_string = binary_to_int(filter_binary)
-    cpi_string = decode_partition_table(
-        cpi_binary, PARTITION_TABLE_P_VAR, six_bit_variable_partition=True
-    )
-    serial_string = binary_to_int(serial_binary)
-
-    return f"{filter_string}.{cpi_string}.{serial_string}"
-
-
-def tag_to_value_cpi96(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
-
-
-def tag_to_value_cpivar(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+        return cls.from_tag_uri(f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{cpi_string}.{serial_string}")

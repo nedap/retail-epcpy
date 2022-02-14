@@ -106,7 +106,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         SGTIN_96 = "sgtin-96"
         SGTIN_198 = "sgtin-198"
 
-    class BinaryHeaders(Enum):
+    class BinaryHeader(Enum):
         SGTIN_96 = "00110000"
         SGTIN_198 = "00110110"
 
@@ -197,7 +197,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         filter_value = tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._item_ref]
 
-        header = SGTIN.BinaryHeaders[binary_coding_scheme.name].value
+        header = SGTIN.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value, 3)
         gtin_binary = encode_partition_table(parts, PARTITION_TABLE_L)
 
@@ -215,8 +215,8 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             {
-                SGTIN.BinaryHeaders.SGTIN_96.value: SGTIN.BinaryCodingScheme.SGTIN_96,
-                SGTIN.BinaryHeaders.SGTIN_198.value: SGTIN.BinaryCodingScheme.SGTIN_198,
+                SGTIN.BinaryHeader.SGTIN_96.value: SGTIN.BinaryCodingScheme.SGTIN_96,
+                SGTIN.BinaryHeader.SGTIN_198.value: SGTIN.BinaryCodingScheme.SGTIN_198,
             },
         )
 
