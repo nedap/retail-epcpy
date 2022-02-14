@@ -192,15 +192,6 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingScheme, filter_value: GIAIFilterValue
     ) -> str:
-        if (
-            binary_coding_scheme is None or filter_value is None
-        ) and self._tag_uri is None:
-            raise ConvertException(
-                message="Either both a binary coding scheme and a filter value should be provided, or tag_uri should be set."
-            )
-        elif self._tag_uri:
-            return self._tag_uri
-
         filter_val = filter_value.value
 
         if (
@@ -222,9 +213,7 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
                 message=f"Invalid asset reference value {self._asset_ref}"
             )
 
-        self._tag_uri = f"urn:epc:tag:{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._asset_ref}"
-
-        return self._tag_uri
+        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._asset_ref}"
 
     def binary(
         self,
