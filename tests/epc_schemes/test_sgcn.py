@@ -1,7 +1,6 @@
 import unittest
 
 from epcpy.epc_schemes.sgcn import SGCN, SGCNFilterValues
-from epcpy.utils.common import BinaryCodingSchemes
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
     TestGS1KeyedMeta,
@@ -55,6 +54,10 @@ class TestSGCNInit(
         {
             "name": "test_invalid_sgcn_serial_too_short",
             "uri": "urn:epc:id:sgcn:401231.123465.",
+        },
+        {
+            "name": "test_invalid_sgcn_illegal_chars",
+            "uri": "urn:epc:id:sgcn:401231.123465.999ABCD999999",
         },
     ],
 ):
