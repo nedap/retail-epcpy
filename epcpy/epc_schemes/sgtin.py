@@ -193,24 +193,19 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         filter_value: SGTINFilterValue = SGTINFilterValue.POS_ITEM,
     ) -> str:
 
-        tag_uri = self.tag_uri(binary_coding_scheme, filter_value)
-
-        scheme = tag_uri.split(":")[3]
-        filter_value = tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._item_ref]
 
         header = SGTIN.BinaryHeader[binary_coding_scheme.name].value
-        filter_binary = str_to_binary(filter_value, 3)
+        filter_binary = str_to_binary(filter_value.value, 3)
         gtin_binary = encode_partition_table(parts, PARTITION_TABLE_L)
 
         serial_binary = (
             str_to_binary(self._serial, 38)
-            if scheme == SGTIN.BinaryCodingScheme.SGTIN_96.value
+            if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96
             else encode_string(self._serial, 140)
         )
 
-        _binary = header + filter_binary + gtin_binary + serial_binary
-        return _binary
+        return header + filter_binary + gtin_binary + serial_binary
 
     @classmethod
     def from_binary(cls, binary_string: str) -> SGTIN:
@@ -226,11 +221,12 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         filter_string = binary_to_int(filter_binary)
         gtin_string = decode_partition_table(gtin_binary, PARTITION_TABLE_P)
 
-        if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96.value:
-            return cls.from_tag_uri(
-                f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{binary_to_int(serial_binary)}"
-            )
-        else:
-            return cls.from_tag_uri(
-                f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{decode_string(serial_binary)}"
-            )
+        serial_string = (
+            binary_to_int(serial_binary)
+            if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96.value
+            else decode_string(serial_binary)
+        )
+
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{serial_string}"
+        )

@@ -190,9 +190,10 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
         gln_string = decode_partition_table(gln_binary, PARTITION_TABLE_P)
         serial_string = (
             binary_to_int(serial_binary)
-            if binary_coding_scheme == SGLN.BinaryCodingScheme.SGLN_96
+            if binary_coding_scheme == SGLN.BinaryCodingScheme.SGLN_96.value
             else decode_string(serial_binary)
         )
+
         return cls.from_tag_uri(
             f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gln_string}.{serial_string}"
         )

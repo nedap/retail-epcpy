@@ -167,7 +167,3 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
         return cls.from_tag_uri(
             f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{sscc_string}"
         )
-
-
-def tag_to_value_sscc96(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
