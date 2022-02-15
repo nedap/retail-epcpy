@@ -101,23 +101,27 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not SSCC_URI_REGEX.match(epc_uri):
+        if not SSCC_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid SSCC URI {epc_uri}")
 
-        if len(epc_uri.split(":")[4].replace(".", "")) != 17:
+        self.epc_uri = epc_uri
+
+        self._company_pref, self._serial = self.epc_uri.split(":")[-1].split(".")
+
+        if len(f"{self._company_pref}{self._serial}") != 17 or not (
+            6 <= len(self._company_pref) <= 12
+        ):
             raise ConvertException(
                 message=f"Invalid SSCC URI {epc_uri} | wrong number of digits"
             )
 
-        self.epc_uri = epc_uri
-
-        self._company_prefix, serial = self.epc_uri.split(":")[-1].split(".")
-        self._serial = serial
         check_digit = calculate_checksum(
-            f"{serial[0]}{self._company_prefix}{serial[1:]}"
+            f"{self._serial[0]}{self._company_pref}{self._serial[1:]}"
         )
 
-        self._sscc = f"{serial[0]}{self._company_prefix}{serial[1:]}{check_digit}"
+        self._sscc = (
+            f"{self._serial[0]}{self._company_pref}{self._serial[1:]}{check_digit}"
+        )
 
     def gs1_key(self) -> str:
         return self._sscc
@@ -131,7 +135,19 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SSCC_96,
     ) -> str:
 
+<<<<<<< HEAD
         return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._company_prefix}.{self._serial}"
+=======
+        self._tag_uri = (
+            f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._serial}"
+        )
+
+        return self._tag_uri
+
+    def binary(self, filter_value: SSCCFilterValues = None) -> str:
+        if filter_value is None and self._binary:
+            return self._binary
+>>>>>>> origin/main
 
     def binary(
         self,
@@ -139,7 +155,13 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SSCC_96,
     ) -> str:
 
+<<<<<<< HEAD
         parts = [self._company_prefix, self._serial]
+=======
+        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
+        filter_value = self._tag_uri.split(":")[4].split(".")[0]
+        parts = [self._company_pref, self._serial]
+>>>>>>> origin/main
 
         header = SSCC.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value.value, 3)

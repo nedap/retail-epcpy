@@ -11,7 +11,7 @@ class IMOVN(EPCScheme):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not IMOVN_URI_REGEX.match(epc_uri):
+        if not IMOVN_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid IMOVN URI {epc_uri}")
 
         self.epc_uri = epc_uri

@@ -157,7 +157,11 @@ def encode_partition_table(
     elif six_bit_variable_partition:
         D_bin = encode_string_six_bits(D)
     else:
-        D_bin = str_to_binary(D, partition["N"]) if partition["K"] != 0 else "0"
+        D_bin = (
+            str_to_binary(D, partition["N"])
+            if partition["K"] != 0
+            else "0" * partition["N"]
+        )
 
     return P_bin + C_bin + D_bin
 

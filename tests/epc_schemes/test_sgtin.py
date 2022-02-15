@@ -21,6 +21,14 @@ class TestSGTINInit(
             "name": "test_valid_sgtin_2",
             "uri": "urn:epc:id:sgtin:00000000000.00.0",
         },
+        {
+            "name": "test_valid_sgtin_3",
+            "uri": "urn:epc:id:sgtin:507121923656.1..%25:.13%26",
+        },
+        {
+            "name": "test_valid_sgtin_4",
+            "uri": "urn:epc:id:sgtin:507124.1123456..%25:.13%26",
+        },
     ],
     invalid_data=[
         {
@@ -30,6 +38,14 @@ class TestSGTINInit(
         {
             "name": "test_invalid_sgtin_identifier",
             "uri": "urn:epc:id:sg:50712192365.88..%25:.13%26",
+        },
+        {
+            "name": "test_invalid_sgtin_company_prefix_1",
+            "uri": "urn:epc:id:sgtin:50712.11123456..%25:.13%26",
+        },
+        {
+            "name": "test_invalid_sgtin_company_prefix_2",
+            "uri": "urn:epc:id:sgtin:5071241234567.0..%25:.13%26",
         },
         {
             "name": "test_invalid_sgtin_too_many_digits",
@@ -56,19 +72,16 @@ class TestSGTINGS1Key(
         {
             "name": "test_valid_sgtin_gs1_key_1",
             "uri": "urn:epc:id:sgtin:50712192365.88..%25:.13%26",
-            "kwargs": {},
             "gs1_key": "85071219236581",
         },
         {
             "name": "test_valid_sgtin_gs1_key_2",
             "uri": "urn:epc:id:sgtin:00000000000.00.0",
-            "kwargs": {},
             "gs1_key": "00000000000000",
         },
         {
             "name": "test_valid_sgtin_gs1_key_3",
             "uri": "urn:epc:id:sgtin:5019265.123588..%25:.13%26",
-            "kwargs": {},
             "gs1_key": "15019265235883",
         },
         {

@@ -113,32 +113,34 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not SGTIN_REGEX.match(epc_uri):
+        if not SGTIN_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid SGTIN URI {epc_uri}")
-
-        if len("".join(epc_uri.split(":")[4].split(".")[:2])) != 13:
-            raise ConvertException(
-                message=f"Invalid SGTIN URI {epc_uri} | Company prefix + item reference must be 13 digits"
-            )
-
-        serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])
-        verify_gs3a3_component(serial)
-
-        if not (1 <= len(replace_uri_escapes(serial)) <= 20):
-            raise ConvertException(
-                message=f"Invalid number of characters in serial: {len(replace_uri_escapes(serial))}"
-            )
 
         self.epc_uri = epc_uri
 
         value = self.epc_uri.split(":")[4]
         self._company_pref = value.split(".")[0]
         self._item_ref = value.split(".")[1]
+        self._serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])
+
+        if len(f"{self._company_pref}{self._item_ref}") != 13 or not (
+            6 <= len(self._company_pref) <= 12
+        ):
+            raise ConvertException(
+                message=f"Invalid SGTIN URI {epc_uri} | Company prefix + item reference must be 13 digits"
+            )
+
+        verify_gs3a3_component(self._serial)
+
+        if not (1 <= len(replace_uri_escapes(self._serial)) <= 20):
+            raise ConvertException(
+                message=f"Invalid number of characters in serial: {len(replace_uri_escapes(self._serial))}"
+            )
+
         check_digit = calculate_checksum(
             f"{self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}"
         )
 
-        self._serial = serial
         self._gtin = f"{self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}{check_digit}".zfill(
             14
         )

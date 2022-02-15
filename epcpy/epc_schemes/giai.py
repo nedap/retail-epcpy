@@ -165,16 +165,20 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not GIAI_URI_REGEX.match(epc_uri):
+        if not GIAI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GIAI URI {epc_uri}")
 
         company_prefix, *asset_reference = epc_uri.split(":")[4].split(".")
-        if not (6 <= len(company_prefix) <= 12):
+        asset_reference = ".".join(asset_reference)
+
+        if (
+            not (6 <= len(company_prefix) <= 12)
+            or len(f"{company_prefix}{asset_reference}") > 30
+        ):
             raise ConvertException(
                 message=f"Invalid company prefix length {len(company_prefix)}"
             )
 
-        asset_reference = ".".join(asset_reference)
         verify_gs3a3_component(asset_reference)
 
         self.epc_uri = epc_uri

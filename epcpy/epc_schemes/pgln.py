@@ -11,20 +11,21 @@ class PGLN(EPCScheme, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not PGLN_URI_REGEX.match(epc_uri):
+        if not PGLN_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid PGLN URI {epc_uri}")
 
-        if len(epc_uri.split(":")[4].replace(".", "")) != 12:
-            raise ConvertException(
-                message=f"Invalid component length {len(epc_uri.split(':')[4].replace('.', ''))}"
-            )
+        self._company_pref, self._party_ref = epc_uri.split(":")[4].split(".")
+
+        if len(f"{self._company_pref}{self._party_ref}") != 12 or not (
+            6 <= len(self._company_pref) <= 12
+        ):
+            raise ConvertException(message=f"Invalid EPC_URI")
 
         self.epc_uri = epc_uri
 
-        company_prefix, party_ref = self.epc_uri.split(":")[4].split(".")
-        check_digit = calculate_checksum(f"{company_prefix}{party_ref}")
+        check_digit = calculate_checksum(f"{self._company_pref}{self._party_ref}")
 
-        self._pgln = f"{company_prefix}{party_ref}{check_digit}"
+        self._pgln = f"{self._company_pref}{self._party_ref}{check_digit}"
 
     def gs1_key(self) -> str:
         return self._pgln

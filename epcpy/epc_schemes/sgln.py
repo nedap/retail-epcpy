@@ -106,26 +106,27 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not SGLN_URI_REGEX.match(epc_uri):
+        if not SGLN_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid SGLN URI {epc_uri}")
 
-        if len("".join(epc_uri.split(":")[4].split(".")[:2])) != 12:
+        self._company_pref, self._location_ref = epc_uri.split(":")[4].split(".")[:2]
+        self._serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])
+
+        if (
+            len(f"{self._company_pref}{self._location_ref}") != 12
+            or not (6 <= len(self._company_pref) <= 12)
+            or len(replace_uri_escapes(self._serial)) > 20
+        ):
             raise ConvertException(
                 message=f"Invalid SGLN URI {epc_uri} | Company prefix + location reference must be 12 digits"
             )
 
-        serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])
-        verify_gs3a3_component(serial)
+        verify_gs3a3_component(self._serial)
 
         self.epc_uri = epc_uri
 
-        self._company_prefix, self._location_ref = self.epc_uri.split(":")[4].split(
-            "."
-        )[:2]
-        self._serial = serial
-
-        check_digit = calculate_checksum(f"{self._company_prefix}{self._location_ref}")
-        self._gln = f"{self._company_prefix}{self._location_ref}{check_digit}"
+        check_digit = calculate_checksum(f"{self._company_pref}{self._location_ref}")
+        self._gln = f"{self._company_pref}{self._location_ref}{check_digit}"
 
     def gs1_key(self) -> str:
         return self._gln
@@ -153,7 +154,7 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
         ):
             raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._company_prefix}.{self._location_ref}.{self._serial}"
+        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._location_ref}.{self._serial}"
 
     def binary(
         self,
@@ -161,7 +162,7 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme,
     ) -> str:
 
-        parts = [self._company_prefix, self._location_ref]
+        parts = [self._company_pref, self._location_ref]
 
         header = SGLN.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value.value, 3)

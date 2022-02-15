@@ -166,7 +166,7 @@ class CPI(EPCScheme, TagEncodable):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not CPI_URI_REGEX.match(epc_uri):
+        if not CPI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid CPI URI {epc_uri}")
 
         self._company_pref, self._cp_ref, self._serial = epc_uri.split(":")[4].split(
@@ -176,10 +176,9 @@ class CPI(EPCScheme, TagEncodable):
         if (
             len("".join([self._company_pref, self._cp_ref])) > 30
             or len(self._serial) > 12
+            or not (6 <= len(self._company_pref) <= 12)
         ):
-            raise ConvertException(
-                message=f"Invalid CPI URI {epc_uri} | wrong number of characters"
-            )
+            raise ConvertException(message=f"Invalid CPI URI {epc_uri}")
 
         self.epc_uri = epc_uri
 
@@ -195,12 +194,10 @@ class CPI(EPCScheme, TagEncodable):
         if (
             binary_coding_scheme == CPI.BinaryCodingScheme.CPI_VAR
             and len(self._serial) > 12
-            or (len(self._serial) > 1 and self._serial[0] == "0")
         ) or (
             binary_coding_scheme == CPI.BinaryCodingScheme.CPI_96
             and (
                 int(self._serial) >= pow(2, 31)
-                or (len(self._serial) > 1 and self._serial[0] == "0")
                 or not self._cp_ref.isnumeric()
                 or (len(self._cp_ref) > 1 and self._cp_ref[0] == "0")
                 or len(self._cp_ref) > 15 - len(self._company_pref)
