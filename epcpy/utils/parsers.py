@@ -94,7 +94,3 @@ def base64_to_epc(base64_string: str) -> TagEncodable:
     hex_string = base64_to_hex(base64_string)
 
     return hex_to_epc(hex_string)
-
-
-def epc_tag_uri_to_pure_identity_uri(epc_tag_uri: str) -> str:
-    pass
