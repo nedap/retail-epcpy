@@ -96,8 +96,8 @@ class GRAIFilterValue(Enum):
 
 class GRAI(EPCScheme, TagEncodable, GS1Keyed):
     class BinaryCodingScheme(Enum):
-        GRAI_96 = "gria-96"
-        GRAI_170 = "gria-170"
+        GRAI_96 = "grai-96"
+        GRAI_170 = "grai-170"
 
     class BinaryHeader(Enum):
         GRAI_96 = "00110011"
