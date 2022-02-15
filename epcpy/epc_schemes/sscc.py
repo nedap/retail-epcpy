@@ -135,19 +135,7 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SSCC_96,
     ) -> str:
 
-<<<<<<< HEAD
-        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._company_prefix}.{self._serial}"
-=======
-        self._tag_uri = (
-            f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._serial}"
-        )
-
-        return self._tag_uri
-
-    def binary(self, filter_value: SSCCFilterValue = None) -> str:
-        if filter_value is None and self._binary:
-            return self._binary
->>>>>>> origin/main
+        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._serial}"
 
     def binary(
         self,
@@ -155,13 +143,7 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SSCC_96,
     ) -> str:
 
-<<<<<<< HEAD
-        parts = [self._company_prefix, self._serial]
-=======
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
-        filter_value = self._tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._serial]
->>>>>>> origin/main
 
         header = SSCC.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value.value, 3)

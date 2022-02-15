@@ -116,12 +116,16 @@ class ADI(EPCScheme, TagEncodable):
         self.epc_uri = epc_uri
 
     def tag_uri(
-        self, binary_coding_scheme: BinaryCodingScheme, filter_value: ADIFilterValue
+        self,
+        filter_value: ADIFilterValue,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.ADI_VAR,
     ) -> str:
         return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_value.value}.{self._cage_dodaac}.{self._part_number}.{self._serial}"
 
     def binary(
-        self, binary_coding_scheme: BinaryCodingScheme, filter_value: ADIFilterValue
+        self,
+        filter_value: ADIFilterValue,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.ADI_VAR,
     ) -> str:
 
         header = ADI.BinaryHeader[binary_coding_scheme.name].value

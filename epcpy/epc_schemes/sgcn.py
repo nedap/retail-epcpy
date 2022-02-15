@@ -139,7 +139,9 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
         return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._coupon_ref}.{self._serial}"
 
     def binary(
-        self, filter_value: SGCNFilterValue, binary_coding_scheme: BinaryCodingScheme
+        self,
+        filter_value: SGCNFilterValue,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SGCN_96,
     ) -> str:
 
         parts = [self._company_pref, self._coupon_ref]
