@@ -24,9 +24,9 @@ print(sgtin.gs1_key(gtin_type=GTIN_TYPE.GTIN14))
 #### Tag encoded
 With some additional information an SGTIN can be encoded into a tag, subsequently the tag can for example be represented as tag uri, hexadecimal binary or binary string
 ```python
-print(sgtin.tag_uri(binary_coding_scheme=BinaryCodingSchemes.SGTIN_198, filter_value=SGTINFilterValues.POS_ITEM))
-print(sgtin.hex(binary_coding_scheme=BinaryCodingSchemes.SGTIN_198, filter_value=SGTINFilterValues.POS_ITEM))
-print(sgtin.binary(binary_coding_scheme=BinaryCodingSchemes.SGTIN_198, filter_value=SGTINFilterValues.POS_ITEM))
+print(sgtin.tag_uri(binary_coding_scheme=SGTIN.BinaryCodingScheme.SGTIN_198, filter_value=SGTINFilterValue.POS_ITEM))
+print(sgtin.hex(binary_coding_scheme=SGTIN.BinaryCodingScheme.SGTIN_198, filter_value=SGTINFilterValue.POS_ITEM))
+print(sgtin.binary(binary_coding_scheme=SGTIN.BinaryCodingScheme.SGTIN_198, filter_value=SGTINFilterValue.POS_ITEM))
 ```
 Similary, given a sgtin tag in hex `36300001DB011169E5E5A70EC000000000000000000000000000`, an SGTIN can be constructed
 ```python

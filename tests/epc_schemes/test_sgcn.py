@@ -1,6 +1,6 @@
 import unittest
 
-from epcpy.epc_schemes.sgcn import SGCN, SGCNFilterValues
+from epcpy.epc_schemes.sgcn import SGCN, SGCNFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
     TestGS1KeyedMeta,
@@ -109,7 +109,7 @@ class TestSGCNTagEncodable(
             "name": "test_valid_sgcn_tag_encodable_1",
             "uri": "urn:epc:id:sgcn:4012345.67890.04711",
             "kwargs": {
-                "filter_value": SGCNFilterValues.ALL_OTHERS,
+                "filter_value": SGCNFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:sgcn-96:0.4012345.67890.04711",
             "hex": "3F14F4E4E612640000019907",
@@ -118,7 +118,7 @@ class TestSGCNTagEncodable(
             "name": "test_valid_sgcn_tag_encodable_2",
             "uri": "urn:epc:id:sgcn:4012345.67890.0",
             "kwargs": {
-                "filter_value": SGCNFilterValues.ALL_OTHERS,
+                "filter_value": SGCNFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:sgcn-96:0.4012345.67890.0",
             "hex": "3F14F4E4E61264000000000A",
@@ -127,7 +127,7 @@ class TestSGCNTagEncodable(
             "name": "test_valid_sgcn_tag_encodable_3",
             "uri": "urn:epc:id:sgcn:4012345.67890.01",
             "kwargs": {
-                "filter_value": SGCNFilterValues.ALL_OTHERS,
+                "filter_value": SGCNFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:sgcn-96:0.4012345.67890.01",
             "hex": "3F14F4E4E612640000000065",
@@ -136,7 +136,7 @@ class TestSGCNTagEncodable(
             "name": "test_valid_sgcn_tag_encodable_4",
             "uri": "urn:epc:id:sgcn:401234512345..1",
             "kwargs": {
-                "filter_value": SGCNFilterValues.RESERVED_7,
+                "filter_value": SGCNFilterValue.RESERVED_7,
             },
             "tag_uri": "urn:epc:tag:sgcn-96:7.401234512345..1",
             "hex": "3FE175ADC32764000000000B",
@@ -145,7 +145,7 @@ class TestSGCNTagEncodable(
             "name": "test_valid_sgcn_tag_encodable_5",
             "uri": "urn:epc:id:sgcn:401231.123465.999999999999",
             "kwargs": {
-                "filter_value": SGCNFilterValues.RESERVED_7,
+                "filter_value": SGCNFilterValue.RESERVED_7,
             },
             "tag_uri": "urn:epc:tag:sgcn-96:7.401231.123465.999999999999",
             "hex": "3FF987D3C3C493D1A94A1FFF",

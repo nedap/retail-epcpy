@@ -1,7 +1,6 @@
 import unittest
 
-from epcpy.epc_schemes.gdti import GDTI, GDTIFilterValues
-from epcpy.utils.common import BinaryCodingSchemes
+from epcpy.epc_schemes.gdti import GDTI, GDTIFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
     TestGS1KeyedMeta,
@@ -105,8 +104,8 @@ class TestGDTITagEncodable(
             "name": "test_valid_gdti_tag_encodable_1",
             "uri": "urn:epc:id:gdti:0614141.12345.ABCD1234%2F",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GDTI_174,
-                "filter_value": GDTIFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": GDTI.BinaryCodingScheme.GDTI_174,
+                "filter_value": GDTIFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:gdti-174:0.0614141.12345.ABCD1234%2F",
             "hex": "3E14257BF460730614388C593368BC00000000000000",
@@ -115,8 +114,8 @@ class TestGDTITagEncodable(
             "name": "test_valid_gdti_tag_encodable_2",
             "uri": "urn:epc:id:gdti:0614141.12345.2199023255551",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GDTI_96,
-                "filter_value": GDTIFilterValues.RESERVED_2,
+                "binary_coding_scheme": GDTI.BinaryCodingScheme.GDTI_96,
+                "filter_value": GDTIFilterValue.RESERVED_2,
             },
             "tag_uri": "urn:epc:tag:gdti-96:2.0614141.12345.2199023255551",
             "hex": "2C54257BF46073FFFFFFFFFF",
@@ -125,8 +124,8 @@ class TestGDTITagEncodable(
             "name": "test_valid_gdti_tag_encodable_3",
             "uri": "urn:epc:id:gdti:0614141.12345.2199023255552",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GDTI_174,
-                "filter_value": GDTIFilterValues.RESERVED_2,
+                "binary_coding_scheme": GDTI.BinaryCodingScheme.GDTI_174,
+                "filter_value": GDTIFilterValue.RESERVED_2,
             },
             "tag_uri": "urn:epc:tag:gdti-174:2.0614141.12345.2199023255552",
             "hex": "3E54257BF46072C98B972C193364D5AB56AC80000000",
@@ -135,8 +134,8 @@ class TestGDTITagEncodable(
             "name": "test_valid_gdti_tag_encodable_4",
             "uri": "urn:epc:id:gdti:0614141.12345.0",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GDTI_96,
-                "filter_value": GDTIFilterValues.RESERVED_6,
+                "binary_coding_scheme": GDTI.BinaryCodingScheme.GDTI_96,
+                "filter_value": GDTIFilterValue.RESERVED_6,
             },
             "tag_uri": "urn:epc:tag:gdti-96:6.0614141.12345.0",
             "hex": "2CD4257BF460720000000000",
@@ -147,24 +146,24 @@ class TestGDTITagEncodable(
             "name": "test_invalid_gdti_tag_encodable_invalid_serial_1",
             "uri": "urn:epc:id:gdti:0614141.12345.ABCD1234%2F",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GDTI_96,
-                "filter_value": GDTIFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": GDTI.BinaryCodingScheme.GDTI_96,
+                "filter_value": GDTIFilterValue.ALL_OTHERS,
             },
         },
         {
             "name": "test_invalid_gdti_tag_encodable_invalid_serial_2",
             "uri": "urn:epc:id:gdti:0614141.12345.2199023255552",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GDTI_96,
-                "filter_value": GDTIFilterValues.RESERVED_2,
+                "binary_coding_scheme": GDTI.BinaryCodingScheme.GDTI_96,
+                "filter_value": GDTIFilterValue.RESERVED_2,
             },
         },
         {
             "name": "test_invalid_gdti_tag_encodable_invalid_serial_3",
             "uri": "urn:epc:id:gdti:0614141.12345.01",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GDTI_96,
-                "filter_value": GDTIFilterValues.RESERVED_2,
+                "binary_coding_scheme": GDTI.BinaryCodingScheme.GDTI_96,
+                "filter_value": GDTIFilterValue.RESERVED_2,
             },
         },
     ],

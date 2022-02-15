@@ -1,7 +1,6 @@
 import unittest
 
-from epcpy.epc_schemes.itip import ITIP, ITIPFilterValues
-from epcpy.utils.common import BinaryCodingSchemes
+from epcpy.epc_schemes.itip import ITIP, ITIPFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
     TestTagEncodableMeta,
@@ -81,8 +80,8 @@ class TestITIPTagEncodable(
             "name": "test_valid_itip_tag_encodable_1",
             "uri": "urn:epc:id:itip:4012345.012345.01.02.987",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.ITIP_110,
-                "filter_value": ITIPFilterValues.RESERVED_7,
+                "binary_coding_scheme": ITIP.BinaryCodingScheme.ITIP_110,
+                "filter_value": ITIPFilterValue.RESERVED_7,
             },
             "tag_uri": "urn:epc:tag:itip-110:7.4012345.012345.01.02.987",
             "hex": "40F4F4E4E40C0E40820000000F6C",
@@ -91,8 +90,8 @@ class TestITIPTagEncodable(
             "name": "test_valid_itip_tag_encodable_2",
             "uri": "urn:epc:id:itip:0123456.012345.00.00.01234567890123456789",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.ITIP_212,
-                "filter_value": ITIPFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": ITIP.BinaryCodingScheme.ITIP_212,
+                "filter_value": ITIPFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:itip-212:0.0123456.012345.00.00.01234567890123456789",
             "hex": "41140789000C0E400060C593368D5B3770E583164CDA356CDDC39000",
@@ -101,8 +100,8 @@ class TestITIPTagEncodable(
             "name": "test_valid_itip_tag_encodable_3",
             "uri": "urn:epc:id:itip:012345678901.0.00.00.01234567890123456789",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.ITIP_212,
-                "filter_value": ITIPFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": ITIP.BinaryCodingScheme.ITIP_212,
+                "filter_value": ITIPFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:itip-212:0.012345678901.0.00.00.01234567890123456789",
             "hex": "41000B7F7070D4000060C593368D5B3770E583164CDA356CDDC39000",
@@ -111,8 +110,8 @@ class TestITIPTagEncodable(
             "name": "test_valid_itip_tag_encodable_4",
             "uri": "urn:epc:id:itip:012345678901.0.00.00.ABCDEFGHIJKLMNOP%2FRST",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.ITIP_212,
-                "filter_value": ITIPFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": ITIP.BinaryCodingScheme.ITIP_212,
+                "filter_value": ITIPFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:itip-212:0.012345678901.0.00.00.ABCDEFGHIJKLMNOP%2FRST",
             "hex": "41000B7F7070D40000830A1C48B1A3C8932A5CC9B3A7D05F4A9D4000",
@@ -121,8 +120,8 @@ class TestITIPTagEncodable(
             "name": "test_valid_itip_tag_encodable_5",
             "uri": "urn:epc:id:itip:012345678901.0.00.00.274877906943",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.ITIP_110,
-                "filter_value": ITIPFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": ITIP.BinaryCodingScheme.ITIP_110,
+                "filter_value": ITIPFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:itip-110:0.012345678901.0.00.00.274877906943",
             "hex": "40000B7F7070D40000FFFFFFFFFC",
@@ -133,24 +132,24 @@ class TestITIPTagEncodable(
             "name": "test_invalid_itip_tag_encodable_invalid_serial_1",
             "uri": "urn:epc:id:itip:0123456.012345.00.00.01234567890123456789",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.ITIP_110,
-                "filter_value": ITIPFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": ITIP.BinaryCodingScheme.ITIP_110,
+                "filter_value": ITIPFilterValue.ALL_OTHERS,
             },
         },
         {
             "name": "test_invalid_itip_tag_encodable_invalid_serial_2",
             "uri": "urn:epc:id:itip:012345678901.0.00.00.ABCDEFGHIJKLMNOP%2FRST",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.ITIP_110,
-                "filter_value": ITIPFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": ITIP.BinaryCodingScheme.ITIP_110,
+                "filter_value": ITIPFilterValue.ALL_OTHERS,
             },
         },
         {
             "name": "test_invalid_itip_tag_encodable_invalid_serial_3",
             "uri": "urn:epc:id:itip:012345678901.0.00.00.274877906944",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.ITIP_110,
-                "filter_value": ITIPFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": ITIP.BinaryCodingScheme.ITIP_110,
+                "filter_value": ITIPFilterValue.ALL_OTHERS,
             },
         },
     ],

@@ -1,6 +1,6 @@
 import unittest
 
-from epcpy.epc_schemes.sscc import SSCC, SSCCFilterValues
+from epcpy.epc_schemes.sscc import SSCC, SSCCFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
     TestGS1KeyedMeta,
@@ -88,7 +88,7 @@ class TestSSCCTagEncodable(
             "name": "test_valid_sscc_tag_encodable_1",
             "uri": "urn:epc:id:sscc:0614141.1234567890",
             "kwargs": {
-                "filter_value": SSCCFilterValues.FULL_CASE,
+                "filter_value": SSCCFilterValue.FULL_CASE,
             },
             "tag_uri": "urn:epc:tag:sscc-96:2.0614141.1234567890",
             "hex": "3154257BF4499602D2000000",
@@ -97,7 +97,7 @@ class TestSSCCTagEncodable(
             "name": "test_valid_sscc_tag_encodable_2",
             "uri": "urn:epc:id:sscc:061414.12345678901",
             "kwargs": {
-                "filter_value": SSCCFilterValues.FULL_CASE,
+                "filter_value": SSCCFilterValue.FULL_CASE,
             },
             "tag_uri": "urn:epc:tag:sscc-96:2.061414.12345678901",
             "hex": "31583BF982DFDC1C35000000",
@@ -106,7 +106,7 @@ class TestSSCCTagEncodable(
             "name": "test_valid_sscc_tag_encodable_3",
             "uri": "urn:epc:id:sscc:061414123456.12345",
             "kwargs": {
-                "filter_value": SSCCFilterValues.ALL_OTHERS,
+                "filter_value": SSCCFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:sscc-96:0.061414123456.12345",
             "hex": "31003932449F003039000000",
@@ -115,7 +115,7 @@ class TestSSCCTagEncodable(
             "name": "test_valid_sscc_tag_encodable_4",
             "uri": "urn:epc:id:sscc:061414123456.00000",
             "kwargs": {
-                "filter_value": SSCCFilterValues.RESERVED_5,
+                "filter_value": SSCCFilterValue.RESERVED_5,
             },
             "tag_uri": "urn:epc:tag:sscc-96:5.061414123456.00000",
             "hex": "31A03932449F000000000000",

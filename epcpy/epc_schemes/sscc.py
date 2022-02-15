@@ -144,7 +144,7 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
 
         return self._tag_uri
 
-    def binary(self, filter_value: SSCCFilterValues = None) -> str:
+    def binary(self, filter_value: SSCCFilterValue = None) -> str:
         if filter_value is None and self._binary:
             return self._binary
 >>>>>>> origin/main
