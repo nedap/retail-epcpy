@@ -149,7 +149,7 @@ class ITIP(EPCScheme, TagEncodable):
             binary_coding_scheme == ITIP.BinaryCodingScheme.ITIP_212
             and len(replace_uri_escapes(self._serial)) > 20
         ) or (
-            binary_coding_scheme == ITIP.BinaryCodingScheme.ITIP_110.value
+            binary_coding_scheme == ITIP.BinaryCodingScheme.ITIP_110
             and (
                 not self._serial.isnumeric()
                 or int(self._serial) >= pow(2, 38)

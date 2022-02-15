@@ -145,7 +145,7 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
             binary_coding_scheme == SGLN.BinaryCodingScheme.SGLN_195
             and len(replace_uri_escapes(self._serial)) > 20
         ) or (
-            binary_coding_scheme == SGLN.BinaryCodingScheme.SGLN_96.value
+            binary_coding_scheme == SGLN.BinaryCodingScheme.SGLN_96
             and (
                 not self._serial.isnumeric()
                 or int(self._serial) >= pow(2, 41)
