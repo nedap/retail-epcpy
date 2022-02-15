@@ -164,7 +164,7 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
         parts = [self._company_prefix, self._location_ref]
 
         header = SGLN.BinaryHeader[binary_coding_scheme.name].value
-        filter_binary = str_to_binary(filter_value, 3)
+        filter_binary = str_to_binary(filter_value.value, 3)
         gln_binary = encode_partition_table(parts, PARTITION_TABLE_L)
         serial_binary = (
             str_to_binary(self._serial, 41)
