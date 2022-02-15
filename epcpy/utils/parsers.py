@@ -5,7 +5,20 @@ from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from typing import List
 from epcpy.epc_schemes.bic import BIC
 from epcpy.epc_schemes.cpi import CPI
+
+from epcpy.epc_schemes.gdti import GDTI
+from epcpy.epc_schemes.giai import GIAI
+from epcpy.epc_schemes.gid import GID
+from epcpy.epc_schemes.grai import GRAI
+from epcpy.epc_schemes.gsrn import GSRN
+from epcpy.epc_schemes.gsrnp import GSRNP
+from epcpy.epc_schemes.itip import ITIP
+from epcpy.epc_schemes.sgcn import SGCN
+from epcpy.epc_schemes.sgln import SGLN
 from epcpy.epc_schemes.sgtin import SGTIN
+from epcpy.epc_schemes.sscc import SSCC
+from epcpy.epc_schemes.usdod import USDOD
+
 from epcpy.utils.common import (
     ConvertException,
     base64_to_hex,
@@ -17,7 +30,26 @@ TAG_URI_REGEX = re.compile(TAG_URI)
 
 EPC_SCHEMES: List[EPCScheme] = [ADI, BIC, CPI, SGTIN]  # todo
 GS1_KEYED_CLASSES: List[GS1Keyed] = [SGTIN]
-TAG_ENCODABLE_CLASSES: List[TagEncodable] = [SGTIN, ADI, CPI]  # todo
+TAG_ENCODABLE_CLASSES: List[TagEncodable] = [
+    ADI,
+    CPI,
+    GDTI,
+    GIAI,
+    GID,
+    GRAI,
+    GSRN,
+    GSRNP,
+    ITIP,
+    SGCN,
+    SGLN,
+    SGTIN,
+    SSCC,
+    USDOD,
+]
+
+TAG_ENCODABLE_HEADERS = {
+    h.value: cls for cls in TAG_ENCODABLE_CLASSES for h in cls.BinaryHeader
+}
 
 
 def epc_pure_identity_to_scheme(epc_pure_identity_uri: str) -> EPCScheme:
@@ -43,17 +75,13 @@ def epc_pure_identity_to_gs1_keyed(epc_pure_identity_uri: str) -> GS1Keyed:
     return scheme
 
 
-def binary_to_epc(binary: str) -> TagEncodable:
+def binary_to_epc(binary_string: str) -> TagEncodable:
+    header = binary_string[:8]
 
-    for cls in TAG_ENCODABLE_CLASSES:
-        try:
-            return cls.from_binary(binary)
-        except ConvertException as e:
-            continue
+    if header not in TAG_ENCODABLE_HEADERS:
+        raise ConvertException("Unknown header")
 
-    raise ConvertException(
-        "Unable to find suitable TagEncodable class for given binary"
-    )
+    return TAG_ENCODABLE_HEADERS[header].from_binary(binary_string)
 
 
 def hex_to_epc(hex_string: str) -> TagEncodable:
