@@ -181,34 +181,17 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
             cls.header_to_schemes(),
         )
 
+        filter_binary = truncated_binary[8:11]
+        gln_binary = truncated_binary[11:55]
+        serial_binary = truncated_binary[55:]
 
-def binary_to_value_sgln96(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    gln_binary = truncated_binary[11:55]
-    serial_binary = truncated_binary[55:]
-
-    filter_string = binary_to_int(filter_binary)
-    gln_string = decode_partition_table(gln_binary, PARTITION_TABLE_P)
-    serial_string = binary_to_int(serial_binary)
-
-    return f"{filter_string}.{gln_string}.{serial_string}"
-
-
-def binary_to_value_sgln195(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    gln_binary = truncated_binary[11:55]
-    serial_binary = truncated_binary[55:]
-
-    filter_string = binary_to_int(filter_binary)
-    gln_string = decode_partition_table(gln_binary, PARTITION_TABLE_P)
-    serial_string = decode_string(serial_binary)
-
-    return f"{filter_string}.{gln_string}.{serial_string}"
-
-
-def tag_to_value_sgln96(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
-
-
-def tag_to_value_sgln195(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+        filter_string = binary_to_int(filter_binary)
+        gln_string = decode_partition_table(gln_binary, PARTITION_TABLE_P)
+        serial_string = (
+            binary_to_int(serial_binary)
+            if binary_coding_scheme == SGLN.BinaryCodingScheme.SGLN_96
+            else decode_string(serial_binary)
+        )
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gln_string}.{serial_string}"
+        )

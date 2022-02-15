@@ -154,15 +154,15 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
             cls.header_to_schemes(),
         )
 
+        filter_binary = truncated_binary[8:11]
+        sscc_binary = truncated_binary[11:72]
 
-def binary_to_value_sscc96(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    sscc_binary = truncated_binary[11:72]
+        filter_string = binary_to_int(filter_binary)
+        sscc_string = decode_partition_table(sscc_binary, PARTITION_TABLE_P)
 
-    filter_string = binary_to_int(filter_binary)
-    sscc_string = decode_partition_table(sscc_binary, PARTITION_TABLE_P)
-
-    return f"{filter_string}.{sscc_string}"
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{sscc_string}"
+        )
 
 
 def tag_to_value_sscc96(epc_tag_uri: str) -> str:

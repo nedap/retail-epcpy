@@ -85,18 +85,14 @@ class USDOD(EPCScheme, TagEncodable):
             cls.header_to_schemes(),
         )
 
+        filter_binary = truncated_binary[8:12]
+        cage_code_binary = truncated_binary[12:60]
+        serial_binary = truncated_binary[60:]
 
-def binary_to_value_usdod96(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:12]
-    cage_code_binary = truncated_binary[12:60]
-    serial_binary = truncated_binary[60:]
+        filter_string = binary_to_int(filter_binary)
+        cage_code_string = decode_cage_code(cage_code_binary)
+        serial_string = binary_to_int(serial_binary)
 
-    filter_string = binary_to_int(filter_binary)
-    cage_code_string = decode_cage_code(cage_code_binary)
-    serial_string = binary_to_int(serial_binary)
-
-    return f"{filter_string}.{cage_code_string}.{serial_string}"
-
-
-def tag_to_value_usdod96(epc_tag_uri: str) -> str:
-    return ".".join(epc_tag_uri.split(":")[4].split(".")[1:])
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{cage_code_string}.{serial_string}"
+        )

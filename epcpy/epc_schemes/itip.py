@@ -200,46 +200,22 @@ class ITIP(EPCScheme, TagEncodable):
             cls.header_to_schemes(),
         )
 
+        filter_binary = truncated_binary[8:11]
+        gtin_binary = truncated_binary[11:58]
+        piece_binary = truncated_binary[58:65]
+        total_binary = truncated_binary[65:72]
+        serial_binary = truncated_binary[72:]
 
-def binary_to_value_itip110(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    gtin_binary = truncated_binary[11:58]
-    piece_binary = truncated_binary[58:65]
-    total_binary = truncated_binary[65:72]
-    serial_binary = truncated_binary[72:]
+        filter_string = binary_to_int(filter_binary)
+        gtin_string = decode_partition_table(gtin_binary, PARTITION_TABLE_P)
+        piece_string = decode_fixed_width_integer(piece_binary)
+        total_string = decode_fixed_width_integer(total_binary)
+        serial_string = (
+            binary_to_int(serial_binary)
+            if binary_coding_scheme == ITIP.BinaryCodingScheme.ITIP_110
+            else decode_string(serial_binary)
+        )
 
-    filter_string = binary_to_int(filter_binary)
-    gtin_string = decode_partition_table(gtin_binary, PARTITION_TABLE_P)
-    piece_string = decode_fixed_width_integer(piece_binary)
-    total_string = decode_fixed_width_integer(total_binary)
-    serial_string = binary_to_int(serial_binary)
-
-    return (
-        f"{filter_string}.{gtin_string}.{piece_string}.{total_string}.{serial_string}"
-    )
-
-
-def binary_to_value_itip212(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    gtin_binary = truncated_binary[11:58]
-    piece_binary = truncated_binary[58:65]
-    total_binary = truncated_binary[65:72]
-    serial_binary = truncated_binary[72:]
-
-    filter_string = binary_to_int(filter_binary)
-    gtin_string = decode_partition_table(gtin_binary, PARTITION_TABLE_P)
-    piece_string = decode_fixed_width_integer(piece_binary)
-    total_string = decode_fixed_width_integer(total_binary)
-    serial_string = decode_string(serial_binary)
-
-    return (
-        f"{filter_string}.{gtin_string}.{piece_string}.{total_string}.{serial_string}"
-    )
-
-
-def tag_to_value_itip110(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
-
-
-def tag_to_value_itip212(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{piece_string}.{total_string}.{serial_string}"
+        )
