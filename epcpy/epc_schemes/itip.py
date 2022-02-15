@@ -1,10 +1,9 @@
+from __future__ import annotations
 import re
 from enum import Enum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
 from epcpy.utils.common import (
-    BinaryCodingSchemes,
-    BinaryHeaders,
     ConvertException,
     binary_to_int,
     calculate_checksum,
@@ -14,6 +13,7 @@ from epcpy.utils.common import (
     encode_fixed_width_integer,
     encode_partition_table,
     encode_string,
+    parse_header_and_truncate_binary,
     replace_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
@@ -85,7 +85,7 @@ PARTITION_TABLE_L = {
 }
 
 
-class ITIPFilterValues(Enum):
+class ITIPFilterValue(Enum):
     ALL_OTHERS = "0"
     RESERVED_1 = "1"
     RESERVED_2 = "2"
@@ -97,6 +97,14 @@ class ITIPFilterValues(Enum):
 
 
 class ITIP(EPCScheme, TagEncodable):
+    class BinaryCodingScheme(Enum):
+        ITIP_110 = "itip-110"
+        ITIP_212 = "itip-212"
+
+    class BinaryHeader(Enum):
+        ITIP_110 = "01000000"
+        ITIP_212 = "01000001"
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -137,25 +145,16 @@ class ITIP(EPCScheme, TagEncodable):
         return f"(8006){indicator}{self._company_pref}{self._item_ref[1:]}{check_digit}{self._piece}{self._total}(21){replace_uri_escapes(self._serial)}"
 
     def tag_uri(
-        self, binary_coding_scheme: BinaryCodingSchemes, filter_value: ITIPFilterValues
+        self, filter_value: ITIPFilterValue, binary_coding_scheme: BinaryCodingScheme
     ) -> str:
-        if (
-            binary_coding_scheme is None or filter_value is None
-        ) and self._tag_uri is None:
-            raise ConvertException(
-                message="Either both a binary coding scheme and a filter value should be provided, or tag_uri should be set."
-            )
-        elif self._tag_uri:
-            return self._tag_uri
 
-        scheme = binary_coding_scheme.value
         filter_val = filter_value.value
 
         if (
-            scheme == BinaryCodingSchemes.ITIP_212.value
+            binary_coding_scheme == ITIP.BinaryCodingScheme.ITIP_212
             and len(replace_uri_escapes(self._serial)) > 20
         ) or (
-            scheme == BinaryCodingSchemes.ITIP_110.value
+            binary_coding_scheme == ITIP.BinaryCodingScheme.ITIP_110.value
             and (
                 not self._serial.isnumeric()
                 or int(self._serial) >= pow(2, 38)
@@ -164,36 +163,28 @@ class ITIP(EPCScheme, TagEncodable):
         ):
             raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._item_ref}.{self._piece}.{self._total}.{self._serial}"
-
-        return self._tag_uri
+        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._item_ref}.{self._piece}.{self._total}.{self._serial}"
 
     def binary(
         self,
-        binary_coding_scheme: BinaryCodingSchemes = None,
-        filter_value: ITIPFilterValues = None,
+        filter_value: ITIPFilterValue,
+        binary_coding_scheme: BinaryCodingScheme,
     ) -> str:
-        if (binary_coding_scheme is None or filter_value is None) and self._binary:
-            return self._binary
 
-        self.tag_uri(binary_coding_scheme, filter_value)
-
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
-        filter_value = self._tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._item_ref]
 
-        header = BinaryHeaders[scheme].value
-        filter_binary = str_to_binary(filter_value, 3)
+        header = ITIP.BinaryHeader[binary_coding_scheme.name].value
+        filter_binary = str_to_binary(filter_value.value, 3)
         gtin_binary = encode_partition_table(parts, PARTITION_TABLE_L)
         piece_binary = encode_fixed_width_integer(self._piece, 7)
         total_binary = encode_fixed_width_integer(self._total, 7)
         serial_binary = (
             str_to_binary(self._serial, 38)
-            if scheme == "ITIP_110"
+            if binary_coding_scheme == ITIP.BinaryCodingScheme.ITIP_110
             else encode_string(self._serial, 140)
         )
 
-        _binary = (
+        return (
             header
             + filter_binary
             + gtin_binary
@@ -201,7 +192,13 @@ class ITIP(EPCScheme, TagEncodable):
             + total_binary
             + serial_binary
         )
-        return _binary
+
+    @classmethod
+    def from_binary(cls, binary_string: str) -> ITIP:
+        binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
+            binary_string,
+            cls.header_to_schemes(),
+        )
 
 
 def binary_to_value_itip110(truncated_binary: str) -> str:

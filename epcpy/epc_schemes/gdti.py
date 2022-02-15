@@ -162,13 +162,10 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
         filter_value: GDTIFilterValue,
     ) -> str:
 
-        tag_uri = self.tag_uri(binary_coding_scheme, filter_value)
-
-        filter_value = tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._doc_type]
 
         header = GDTI.BinaryHeader[binary_coding_scheme.name].value
-        filter_binary = str_to_binary(filter_value, 3)
+        filter_binary = str_to_binary(filter_value.value, 3)
         gdti_binary = encode_partition_table(parts, PARTITION_TABLE_L)
         serial_binary = (
             str_to_binary(self._serial, 41)

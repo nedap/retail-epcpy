@@ -52,7 +52,6 @@ class GID(EPCScheme, TagEncodable):
         self,
         binary_coding_scheme: GID.BinaryCodingScheme.GID_96 = BinaryCodingScheme.GID_96,
     ) -> str:
-        tag_uri = self.tag_uri()
 
         header = GID.BinaryHeader[binary_coding_scheme.name].value
         manager_binary = str_to_binary(self._manager, 28)

@@ -221,12 +221,8 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
         filter_value: GIAIFilterValue,
     ) -> str:
 
-        tag_uri = self.tag_uri(binary_coding_scheme, filter_value)
-
-        filter_value = tag_uri.split(":")[4].split(".")[0]
-
         header = GIAI.BinaryHeader[binary_coding_scheme.name].value
-        filter_binary = str_to_binary(filter_value, 3)
+        filter_binary = str_to_binary(filter_value.value, 3)
         parts = [self._company_pref, self._asset_ref]
 
         giai_binary = (

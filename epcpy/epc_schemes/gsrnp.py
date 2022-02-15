@@ -138,13 +138,10 @@ class GSRNP(EPCScheme, TagEncodable, GS1Keyed):
         filter_value: GSRNPFilterValue = GSRNPFilterValue.ALL_OTHERS,
     ) -> str:
 
-        tag_uri = self.tag_uri(filter_value)
-
-        filter_value = tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._service_ref]
 
         header = GSRNP.BinaryHeader[binary_coding_scheme.name].value
-        filter_binary = str_to_binary(filter_value, 3)
+        filter_binary = str_to_binary(filter_value.value, 3)
         gsrnp_binary = encode_partition_table(parts, PARTITION_TABLE_L)
 
         return header + filter_binary + gsrnp_binary + "0" * 24

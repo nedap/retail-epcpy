@@ -1,14 +1,14 @@
+from __future__ import annotations
 import re
 from enum import Enum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
 from epcpy.utils.common import (
-    BinaryCodingSchemes,
-    BinaryHeaders,
     ConvertException,
     binary_to_int,
     decode_cage_code,
     encode_cage_code,
+    parse_header_and_truncate_binary,
     str_to_binary,
 )
 from epcpy.utils.regex import USDOD_URI
@@ -16,7 +16,7 @@ from epcpy.utils.regex import USDOD_URI
 USDOD_URI_REGEX = re.compile(USDOD_URI)
 
 
-class USDODFilterValues(Enum):
+class USDODFilterValue(Enum):
     PALLET = "0"
     CASE = "1"
     UNIT_PACK = "2"
@@ -36,6 +36,12 @@ class USDODFilterValues(Enum):
 
 
 class USDOD(EPCScheme, TagEncodable):
+    class BinaryCodingScheme(Enum):
+        USDOD_96 = "usdod-96"
+
+    class BinaryHeader(Enum):
+        USDOD_96 = "00101111"
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -51,39 +57,33 @@ class USDOD(EPCScheme, TagEncodable):
 
         self.epc_uri = epc_uri
 
-    def tag_uri(self, filter_value: USDODFilterValues) -> str:
-        if filter_value is None and self._tag_uri is None:
-            raise ConvertException(
-                message="Either tag_uri should be set or a filter value should be provided"
-            )
-        elif self._tag_uri:
-            return self._tag_uri
+    def tag_uri(
+        self,
+        filter_value: USDODFilterValue,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.USDOD_96,
+    ) -> str:
 
-        scheme = BinaryCodingSchemes.USDOD_96.value
-        filter_val = filter_value.value
+        return f"urn:epc:tag:{binary_coding_scheme.USDOD_96.value}:{filter_value.value}.{self._cage_dodaac}.{self._serial}"
 
-        self._tag_uri = (
-            f"urn:epc:tag:{scheme}:{filter_val}.{self._cage_dodaac}.{self._serial}"
-        )
+    def binary(
+        self,
+        filter_value: USDODFilterValue,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.USDOD_96,
+    ) -> str:
 
-        return self._tag_uri
-
-    def binary(self, filter_value: USDODFilterValues = None) -> str:
-        if filter_value is None and self._binary:
-            return self._binary
-
-        self.tag_uri(filter_value)
-
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
-        filter_val = self._tag_uri.split(":")[4].split(".")[0]
-
-        header = BinaryHeaders[scheme].value
-        filter_binary = str_to_binary(filter_val, 4)
+        header = USDOD.BinaryHeader[binary_coding_scheme.USDOD_96.name].value
+        filter_binary = str_to_binary(filter_value.value, 4)
         cage_code_binary = encode_cage_code(f"{self._cage_dodaac:>6}")
         serial_binary = str_to_binary(self._serial, 36)
 
-        self._binary = header + filter_binary + cage_code_binary + serial_binary
-        return self._binary
+        return header + filter_binary + cage_code_binary + serial_binary
+
+    @classmethod
+    def from_binary(cls, binary_string: str) -> USDOD:
+        binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
+            binary_string,
+            cls.header_to_schemes(),
+        )
 
 
 def binary_to_value_usdod96(truncated_binary: str) -> str:

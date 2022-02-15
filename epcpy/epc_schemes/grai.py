@@ -158,13 +158,10 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
         filter_value: GRAIFilterValue,
     ) -> str:
 
-        tag_uri = self.tag_uri(binary_coding_scheme, filter_value)
-
-        filter_value = tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._asset_type]
 
         header = GRAI.BinaryHeader[binary_coding_scheme.name].value
-        filter_binary = str_to_binary(filter_value, 3)
+        filter_binary = str_to_binary(filter_value.value, 3)
         grai_binary = encode_partition_table(parts, PARTITION_TABLE_L)
         serial_binary = (
             str_to_binary(self._serial, 38)

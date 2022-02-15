@@ -218,24 +218,20 @@ class CPI(EPCScheme, TagEncodable):
         filter_value: CPIFilterValue,
     ) -> str:
 
-        self.tag_uri(binary_coding_scheme, filter_value)
-
-        scheme = self._tag_uri.split(":")[3]
-        filter_value = self._tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._cp_ref]
         serial = self._serial
 
         header = CPI.BinaryHeader[binary_coding_scheme.name].value
-        filter_binary = str_to_binary(filter_value, 3)
+        filter_binary = str_to_binary(filter_value.value, 3)
         cpi_binary = (
             encode_partition_table(parts, PARTITION_TABLE_L_96)
-            if scheme == CPI.BinaryCodingScheme.CPI_96.value
+            if binary_coding_scheme == CPI.BinaryCodingScheme.CPI_96
             else encode_partition_table(
                 parts, PARTITION_TABLE_L_VAR, six_bit_variable_partition=True
             )
         )
         serial_binary = str_to_binary(
-            serial, 31 if scheme == CPI.BinaryCodingScheme.CPI_96.value else 40
+            serial, 31 if binary_coding_scheme == CPI.BinaryCodingScheme.CPI_96 else 40
         )
 
         _binary = header + filter_binary + cpi_binary + serial_binary
