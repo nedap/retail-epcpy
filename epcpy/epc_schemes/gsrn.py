@@ -1,15 +1,15 @@
+from __future__ import annotations
 import re
 from enum import Enum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
-    BinaryCodingSchemes,
-    BinaryHeaders,
     ConvertException,
     binary_to_int,
     calculate_checksum,
     decode_partition_table,
     encode_partition_table,
+    parse_header_and_truncate_binary,
     str_to_binary,
 )
 from epcpy.utils.regex import GSRN_URI
@@ -80,7 +80,7 @@ PARTITION_TABLE_L = {
 }
 
 
-class GSRNFilterValues(Enum):
+class GSRNFilterValue(Enum):
     ALL_OTHERS = "0"
     RESERVED_1 = "1"
     RESERVED_2 = "2"
@@ -92,6 +92,12 @@ class GSRNFilterValues(Enum):
 
 
 class GSRN(EPCScheme, TagEncodable, GS1Keyed):
+    class BinaryCodingScheme(Enum):
+        GSRN_96 = "gsrn-96"
+
+    class BinaryHeader(Enum):
+        GSRN_96 = "00101101"
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -116,48 +122,45 @@ class GSRN(EPCScheme, TagEncodable, GS1Keyed):
     def gs1_element_string(self) -> str:
         return f"(8018){self._gsrn}"
 
-    def tag_uri(self, filter_value: GSRNFilterValues) -> str:
-        if filter_value is None and self._tag_uri is None:
-            raise ConvertException(
-                message="Either tag_uri should be set or a filter value should be provided"
-            )
-        elif self._tag_uri:
-            return self._tag_uri
+    def tag_uri(
+        self,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GSRN_96,
+        filter_value: GSRNFilterValue = GSRNFilterValue.ALL_OTHERS,
+    ) -> str:
 
-        scheme = BinaryCodingSchemes.GSRN_96.value
-        filter_val = filter_value.value
+        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._service_ref}"
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._service_ref}"
+    def binary(
+        self,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GSRN_96,
+        filter_value: GSRNFilterValue = GSRNFilterValue.ALL_OTHERS,
+    ) -> str:
 
-        return self._tag_uri
+        tag_uri = self.tag_uri(filter_value)
 
-    def binary(self, filter_value: GSRNFilterValues = None) -> str:
-        if filter_value is None and self._binary:
-            return self._binary
-
-        self.tag_uri(filter_value)
-
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
-        filter_value = self._tag_uri.split(":")[4].split(".")[0]
+        filter_value = tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._service_ref]
 
-        header = BinaryHeaders[scheme].value
+        header = GSRN.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value, 3)
         gsrn_binary = encode_partition_table(parts, PARTITION_TABLE_L)
 
-        self._binary = header + filter_binary + gsrn_binary + "0" * 24
-        return self._binary
+        return header + filter_binary + gsrn_binary + "0" * 24
 
+    @classmethod
+    def from_binary(cls, binary_string: str) -> GSRN:
 
-def binary_to_value_gsrn96(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    gsrn_binary = truncated_binary[11:72]
+        binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
+            binary_string,
+            cls.header_to_schemes(),
+        )
 
-    filter_string = binary_to_int(filter_binary)
-    gsrn_string = decode_partition_table(gsrn_binary, PARTITION_TABLE_P)
+        filter_binary = truncated_binary[8:11]
+        gsrn_binary = truncated_binary[11:72]
 
-    return f"{filter_string}.{gsrn_string}"
+        filter_string = binary_to_int(filter_binary)
+        gsrn_string = decode_partition_table(gsrn_binary, PARTITION_TABLE_P)
 
-
-def tag_to_value_gsrn96(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gsrn_string}"
+        )
