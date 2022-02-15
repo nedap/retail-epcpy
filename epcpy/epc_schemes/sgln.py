@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import re
 from enum import Enum
 
@@ -190,7 +191,7 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
         gln_string = decode_partition_table(gln_binary, PARTITION_TABLE_P)
         serial_string = (
             binary_to_int(serial_binary)
-            if binary_coding_scheme == SGLN.BinaryCodingScheme.SGLN_96.value
+            if binary_coding_scheme == SGLN.BinaryCodingScheme.SGLN_96
             else decode_string(serial_binary)
         )
 

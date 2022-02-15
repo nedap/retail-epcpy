@@ -1,8 +1,10 @@
 from __future__ import annotations
+
+import re
 from typing import Any, Dict
+
 from epcpy.utils.common import ConvertException, hex_to_base64, hex_to_binary
 from epcpy.utils.regex import TAG_URI
-import re
 
 
 class EPCScheme:
@@ -58,12 +60,18 @@ class TagEncodable:
         return cls.from_binary(hex_to_base64(tag_hex_string))
 
     @classmethod
-    def from_tag_uri(cls, epc_tag_uri: str) -> TagEncodable:
+    def from_tag_uri(
+        cls, epc_tag_uri: str, includes_filter: bool = True
+    ) -> TagEncodable:
         if not TagEncodable.TAG_URI_REGEX.match(epc_tag_uri):
             raise ConvertException(message=f"Invalid EPC tag URI {epc_tag_uri}")
 
         epc_scheme = epc_tag_uri.split(":")[3]
-        value = ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+
+        if includes_filter:
+            value = ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+        else:
+            value = epc_tag_uri.split(":")[4]
 
         return cls(f"urn:epc:id:{epc_scheme.split('-')[0]}:{value}")
 

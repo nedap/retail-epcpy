@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import re
+from enum import Enum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
 from epcpy.utils.common import (
@@ -8,7 +10,6 @@ from epcpy.utils.common import (
     parse_header_and_truncate_binary,
     str_to_binary,
 )
-from enum import Enum
 from epcpy.utils.regex import GID_URI
 
 GID_URI_REGEX = re.compile(GID_URI)
@@ -62,6 +63,12 @@ class GID(EPCScheme, TagEncodable):
         return _binary
 
     @classmethod
+    def from_tag_uri(cls, epc_tag_uri: str, includes_filter=False):
+        return super(GID, cls).from_tag_uri(
+            epc_tag_uri, includes_filter=includes_filter
+        )
+
+    @classmethod
     def from_binary(cls, binary_string: str) -> GID:
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
@@ -75,9 +82,8 @@ class GID(EPCScheme, TagEncodable):
         manager_string = binary_to_int(manager_binary)
         object_string = binary_to_int(object_binary)
         serial_string = binary_to_int(serial_binary)
-        print(manager_string)
-        print(object_string)
 
         return cls.from_tag_uri(
-            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{manager_string}.{object_string}.{serial_string}"
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{manager_string}.{object_string}.{serial_string}",
+            includes_filter=False,
         )

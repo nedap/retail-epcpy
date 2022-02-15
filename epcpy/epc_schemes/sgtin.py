@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import re
 from enum import Enum, IntEnum
 
@@ -223,7 +224,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
 
         serial_string = (
             binary_to_int(serial_binary)
-            if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96.value
+            if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96
             else decode_string(serial_binary)
         )
 

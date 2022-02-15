@@ -170,7 +170,7 @@ class TestSGLNTagEncodable(
             "hex": "390039318D8400C1880000000000000000000000000000000000",
         },
         {
-            "name": "test_valid_sgln_tag_encodable_5",
+            "name": "test_valid_sgln_tag_encodable_6",
             "uri": "urn:epc:id:sgln:061411123456..A%2F-BCDEFGHIJKLMNOPQR",
             "kwargs": {
                 "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_195,
@@ -180,7 +180,7 @@ class TestSGLNTagEncodable(
             "hex": "390039318D8401057AD850E2458D1E449952E64D9D3E851A4000",
         },
         {
-            "name": "test_valid_sgln_tag_encodable_6",
+            "name": "test_valid_sgln_tag_encodable_7",
             "uri": "urn:epc:id:sgln:061411123456..2199023255551",
             "kwargs": {
                 "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_96,
@@ -190,7 +190,7 @@ class TestSGLNTagEncodable(
             "hex": "320039318D8401FFFFFFFFFF",
         },
         {
-            "name": "test_valid_sgln_tag_encodable_7",
+            "name": "test_valid_sgln_tag_encodable_8",
             "uri": "urn:epc:id:sgln:061411123456..2199023255552",
             "kwargs": {
                 "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_195,

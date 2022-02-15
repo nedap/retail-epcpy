@@ -68,7 +68,7 @@ class TestGS1KeyedMeta(type):
 
         def generate_invalid_gs1_key_tests(scheme: EPCScheme, epc_uri: str, **kwargs):
             def test(self: unittest.TestCase):
-                s: GS1Keyed = scheme(epc_uri)
+                s: GS1Keyed = scheme.from_epc_uri(epc_uri)
                 with self.assertRaises(ConvertException):
                     s.gs1_key(**kwargs)
 
@@ -100,7 +100,7 @@ class TestTagEncodableMeta(type):
         valid_data: List[Dict[str, Any]] = None,
         invalid_data: List[Dict[str, Any]] = None,
     ):
-        def generate_valid_tag_uri_test(
+        def generate_valid_to_tag_uri_test(
             scheme: EPCScheme, epc_uri: str, tag_uri: str, **kwargs
         ):
             def test(self: unittest.TestCase):
@@ -114,16 +114,44 @@ class TestTagEncodableMeta(type):
 
             return test
 
-        def generate_valid_hex_test(
+        def generate_valid_to_hex_test(
             scheme: EPCScheme, epc_uri: str, hex_string: str, **kwargs
         ):
             def test(self: unittest.TestCase):
-                s: TagEncodable = scheme(epc_uri)
+                s: TagEncodable = scheme.from_epc_uri(epc_uri)
                 try:
                     self.assertEqual(s.hex(**kwargs), hex_string)
                 except ConvertException:
                     self.fail(
                         f"{scheme} hex unexpectedly raised ConvertException for URI {epc_uri} and kwargs {kwargs}"
+                    )
+
+            return test
+
+        def generate_valid_from_tag_uri_test(
+            scheme: TagEncodable, epc_uri: str, tag_uri: str
+        ):
+            def test(self: unittest.TestCase):
+                try:
+                    s: EPCScheme = scheme.from_tag_uri(tag_uri)
+                    self.assertEqual(s.epc_uri, epc_uri)
+                except ConvertException:
+                    self.fail(
+                        f"{scheme} from tag uri unexpectedly raised ConvertException for URI {epc_uri}"
+                    )
+
+            return test
+
+        def generate_valid_from_hex_test(
+            scheme: TagEncodable, epc_uri: str, hex_string: str
+        ):
+            def test(self: unittest.TestCase):
+                try:
+                    s: EPCScheme = scheme.from_hex(hex_string)
+                    self.assertEqual(s.epc_uri, epc_uri)
+                except ConvertException:
+                    self.fail(
+                        f"{scheme} from hex unexpectedly raised ConvertException for URI {epc_uri}"
                     )
 
             return test
@@ -140,17 +168,27 @@ class TestTagEncodableMeta(type):
 
         for entry in valid_data:
             name = entry["name"]
-            attrs[f"{name}_tag_uri"] = generate_valid_tag_uri_test(
+            attrs[f"{name}_to_tag_uri"] = generate_valid_to_tag_uri_test(
                 scheme,
                 entry["uri"],
                 entry["tag_uri"],
                 **entry["kwargs"] if "kwargs" in entry else {},
             )
-            attrs[f"{name}_hex"] = generate_valid_hex_test(
+            attrs[f"{name}_from_tag_uri"] = generate_valid_from_tag_uri_test(
+                scheme,
+                entry["uri"],
+                entry["tag_uri"],
+            )
+            attrs[f"{name}_to_hex"] = generate_valid_to_hex_test(
                 scheme,
                 entry["uri"],
                 entry["hex"],
                 **entry["kwargs"] if "kwargs" in entry else {},
+            )
+            attrs[f"{name}_from_hex"] = generate_valid_from_hex_test(
+                scheme,
+                entry["uri"],
+                entry["hex"],
             )
 
         for entry in invalid_data:

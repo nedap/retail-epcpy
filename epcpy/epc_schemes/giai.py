@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import re
 from enum import Enum
 
@@ -249,7 +250,7 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
             cls.header_to_schemes(),
         )
         filter_binary = truncated_binary[8:11]
-        giai_binary = truncated_binary[11:96]
+        giai_binary = truncated_binary[11:]
 
         filter_string = binary_to_int(filter_binary)
 
