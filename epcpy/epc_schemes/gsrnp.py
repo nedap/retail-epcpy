@@ -95,17 +95,20 @@ class GSRNP(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not GSRNP_URI_REGEX.match(epc_uri):
+        if not GSRNP_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GSRNP URI {epc_uri}")
 
-        if len(epc_uri.split(":")[4].replace(".", "")) != 17:
+        self._company_pref, self._service_ref = epc_uri.split(":")[4].split(".")
+
+        if len(f"{self._company_pref}{self._service_ref}") != 17 or not (
+            6 <= len(self._company_pref) <= 12
+        ):
             raise ConvertException(
-                message=f"Invalid GSRNP URI {epc_uri} | wrong number of digits"
+                message=f"Invalid EPC URI {epc_uri} | wrong number of digits"
             )
 
         self.epc_uri = epc_uri
 
-        self._company_pref, self._service_ref = self.epc_uri.split(":")[4].split(".")
         check_digit = calculate_checksum(f"{self._company_pref}{self._service_ref}")
 
         self._gsrnp = f"{self._company_pref}{self._service_ref}{check_digit}"

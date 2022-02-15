@@ -76,12 +76,15 @@ class TestGS1KeyedMeta(type):
 
         for entry in valid_data:
             attrs[entry["name"]] = generate_valid_gs1_key_tests(
-                scheme, entry["uri"], entry["gs1_key"], **entry["kwargs"]
+                scheme,
+                entry["uri"],
+                entry["gs1_key"],
+                **entry["kwargs"] if "kwargs" in entry else {},
             )
 
         for entry in invalid_data:
             attrs[entry["name"]] = generate_invalid_gs1_key_tests(
-                scheme, entry["uri"], **entry["kwargs"]
+                scheme, entry["uri"], **entry["kwargs"] if "kwargs" in entry else {}
             )
 
         return type.__new__(cls, name, bases, attrs)
@@ -138,15 +141,21 @@ class TestTagEncodableMeta(type):
         for entry in valid_data:
             name = entry["name"]
             attrs[f"{name}_tag_uri"] = generate_valid_tag_uri_test(
-                scheme, entry["uri"], entry["tag_uri"], **entry["kwargs"]
+                scheme,
+                entry["uri"],
+                entry["tag_uri"],
+                **entry["kwargs"] if "kwargs" in entry else {},
             )
             attrs[f"{name}_hex"] = generate_valid_hex_test(
-                scheme, entry["uri"], entry["hex"], **entry["kwargs"]
+                scheme,
+                entry["uri"],
+                entry["hex"],
+                **entry["kwargs"] if "kwargs" in entry else {},
             )
 
         for entry in invalid_data:
             attrs[entry["name"]] = generate_invalid_tag_encodable_tests(
-                scheme, entry["uri"], **entry["kwargs"]
+                scheme, entry["uri"], **entry["kwargs"] if "kwargs" in entry else {}
             )
 
         return type.__new__(cls, name, bases, attrs)

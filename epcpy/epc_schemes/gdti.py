@@ -98,24 +98,27 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not GDTI_URI_REGEX.match(epc_uri):
+        if not GDTI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GDTI URI {epc_uri}")
 
-        if len("".join(epc_uri.split(":")[4].split(".")[:2])) != 12:
+        self._serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])
+        verify_gs3a3_component(self._serial)
+
+        self._company_pref, self._doc_type = epc_uri.split(":")[4].split(".")[:2]
+
+        if (
+            len(f"{self._company_pref}{self._doc_type}") != 12
+            or len(self._serial) > 17
+            or not (6 <= len(self._company_pref) <= 12)
+        ):
             raise ConvertException(
                 message=f"Invalid GDTI URI {epc_uri} | Company prefix + document type must be 12 digits"
             )
 
-        serial = ".".join(":".join(epc_uri.split(":")[4:]).split(".")[2:])
-        verify_gs3a3_component(serial)
-
         self.epc_uri = epc_uri
-
-        self._company_pref, self._doc_type = epc_uri.split(":")[4].split(".")[:2]
         check_digit = calculate_checksum(f"{self._company_pref}{self._doc_type}")
 
-        self._serial = serial
-        self._gdti = f"{self._company_pref}{self._doc_type}{check_digit}{replace_uri_escapes(serial)}"
+        self._gdti = f"{self._company_pref}{self._doc_type}{check_digit}{replace_uri_escapes(self._serial)}"
 
     def gs1_key(self) -> str:
         return self._gdti

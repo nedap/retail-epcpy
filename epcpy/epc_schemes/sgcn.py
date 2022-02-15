@@ -97,7 +97,7 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not SGCN_URI_REGEX.match(epc_uri):
+        if not SGCN_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid SGCN URI {epc_uri}")
 
         self._company_pref, self._coupon_ref, self._serial = epc_uri.split(":")[
@@ -107,6 +107,7 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
         if (
             len(f"{self._company_pref}{self._coupon_ref}") != 12
             or len(self._serial) > 12
+            or not (6 <= len(self._company_pref) <= 12)
         ):
             raise ConvertException(
                 message=f"Invalid SGCN URI {epc_uri} | wrong number of digits"

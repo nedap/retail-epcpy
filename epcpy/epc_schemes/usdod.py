@@ -39,7 +39,7 @@ class USDOD(EPCScheme, TagEncodable):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
-        if not USDOD_URI_REGEX.match(epc_uri):
+        if not USDOD_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid USDOD URI {epc_uri}")
 
         self._cage_dodaac, self._serial = epc_uri.split(":")[4].split(".")
