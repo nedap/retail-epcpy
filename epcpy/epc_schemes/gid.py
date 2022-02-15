@@ -66,9 +66,7 @@ class GID(EPCScheme, TagEncodable):
     def from_binary(cls, binary_string: str) -> GID:
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
-            {
-                GID.BinaryHeader.GID_96.value: GID.BinaryCodingScheme.GID_96,
-            },
+            cls.header_to_schemes(),
         )
 
         manager_binary = truncated_binary[8:36]

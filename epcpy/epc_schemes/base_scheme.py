@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any, Dict
 from epcpy.utils.common import ConvertException, hex_to_base64, hex_to_binary
 from epcpy.utils.regex import TAG_URI
 import re
@@ -65,6 +66,13 @@ class TagEncodable:
         value = ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
 
         return cls(f"urn:epc:id:{epc_scheme.split('-')[0]}:{value}")
+
+    @classmethod
+    def header_to_schemes(cls) -> Dict[str, Any]:
+        return {
+            binary_header.value: cls.BinaryCodingScheme[binary_header.name]
+            for binary_header in cls.BinaryHeader
+        }
 
 
 class GS1Keyed:

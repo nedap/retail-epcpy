@@ -183,10 +183,7 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
     def from_binary(cls, binary_string: str) -> GDTI:
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
-            {
-                GDTI.BinaryHeader.GDTI_96.value: GDTI.BinaryCodingScheme.GDTI_96,
-                GDTI.BinaryHeader.GDIT_174.value: GDTI.BinaryCodingScheme.GDTI_174,
-            },
+            cls.header_to_schemes(),
         )
 
         filter_binary = truncated_binary[8:11]

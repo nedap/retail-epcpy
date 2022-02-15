@@ -144,9 +144,7 @@ class ADI(EPCScheme, TagEncodable):
 
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
-            {
-                ADI.BinaryHeader.ADI_VAR.value: ADI.BinaryCodingSchemes.ADI_VAR,
-            },
+            cls.header_to_schemes(),
         )
 
         filter_binary = truncated_binary[8:14]

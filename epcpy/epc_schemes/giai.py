@@ -246,10 +246,7 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
     def from_binary(cls, binary_string: str) -> GIAI:
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
-            {
-                GIAI.BinaryHeader.GIAI_96.value: GIAI.BinaryCodingScheme.GIAI_96,
-                GIAI.BinaryHeader.GIAI_202.value: GIAI.BinaryCodingScheme.GIAI_202,
-            },
+            cls.header_to_schemes(),
         )
         filter_binary = truncated_binary[8:11]
         giai_binary = truncated_binary[11:96]

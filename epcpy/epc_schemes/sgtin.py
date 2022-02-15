@@ -214,10 +214,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
     def from_binary(cls, binary_string: str) -> SGTIN:
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
-            {
-                SGTIN.BinaryHeader.SGTIN_96.value: SGTIN.BinaryCodingScheme.SGTIN_96,
-                SGTIN.BinaryHeader.SGTIN_198.value: SGTIN.BinaryCodingScheme.SGTIN_198,
-            },
+            cls.header_to_schemes(),
         )
 
         filter_binary = truncated_binary[8:11]

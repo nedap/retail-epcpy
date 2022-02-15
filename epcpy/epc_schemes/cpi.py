@@ -246,10 +246,7 @@ class CPI(EPCScheme, TagEncodable):
     def from_binary(cls, binary_string: str) -> CPI:
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
-            {
-                CPI.BinaryHeader.CPI_96.value: CPI.BinaryCodingScheme.CPI_96,
-                CPI.BinaryHeader.CPI_VAR.value: CPI.BinaryCodingScheme.CPI_VAR,
-            },
+            cls.header_to_schemes(),
         )
         filter_binary = truncated_binary[8:11]
         cpi_binary = truncated_binary[11:65]
@@ -261,4 +258,6 @@ class CPI(EPCScheme, TagEncodable):
         )
         serial_string = binary_to_int(serial_binary)
 
-        return cls.from_tag_uri(f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{cpi_string}.{serial_string}")
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{cpi_string}.{serial_string}"
+        )
