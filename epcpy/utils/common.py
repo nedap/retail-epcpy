@@ -85,7 +85,7 @@ def encode_string(string: str, num_bits: int) -> str:
 def decode_string_six_bits(binary: str, max_chars: int) -> str:
     res = ""
     for g in re.split("([0-1]{6})", binary):
-        if g == "000000" or g == "":
+        if g == "000000" or len(g) < 6:
             continue
         elif g.startswith("10") or g.startswith("11"):
             res += chr(int(g, 2))

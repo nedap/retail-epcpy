@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import math
 import re
 from enum import Enum
@@ -167,6 +168,7 @@ class ADI(EPCScheme, TagEncodable):
         filter_string = binary_to_int(filter_binary)
         cage_code_string = decode_cage_code_six_bits(cage_code_binary)
         part_number_string = decode_string_six_bits(part_number_binary, math.inf)
+
         serial_string = decode_string_six_bits(serial_binary, math.inf)
 
         return cls.from_tag_uri(
