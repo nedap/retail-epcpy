@@ -156,9 +156,7 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
         ):
             raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._doc_type}.{self._serial}"
-
-        return self._tag_uri
+        return f"{self.TAG_URI_PREFIX}{scheme}:{filter_val}.{self._company_pref}.{self._doc_type}.{self._serial}"
 
     def binary(
         self,

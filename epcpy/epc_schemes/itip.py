@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import re
 from enum import Enum
 
@@ -158,7 +159,7 @@ class ITIP(EPCScheme, TagEncodable):
         ):
             raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._item_ref}.{self._piece}.{self._total}.{self._serial}"
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._item_ref}.{self._piece}.{self._total}.{self._serial}"
 
     def binary(
         self,

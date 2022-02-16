@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import re
 from enum import Enum
 
@@ -136,7 +137,7 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SGCN_96,
     ) -> str:
 
-        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._coupon_ref}.{self._serial}"
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._coupon_ref}.{self._serial}"
 
     def binary(
         self,

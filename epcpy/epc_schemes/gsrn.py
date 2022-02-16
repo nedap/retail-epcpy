@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import re
 from enum import Enum
 
@@ -131,7 +132,7 @@ class GSRN(EPCScheme, TagEncodable, GS1Keyed):
         filter_value: GSRNFilterValue = GSRNFilterValue.ALL_OTHERS,
     ) -> str:
 
-        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._service_ref}"
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._service_ref}"
 
     def binary(
         self,

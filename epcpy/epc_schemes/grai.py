@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import re
 from enum import Enum
 
@@ -151,7 +152,7 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
         ):
             raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._asset_type}.{self._serial}"
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._asset_type}.{self._serial}"
 
     def binary(
         self,

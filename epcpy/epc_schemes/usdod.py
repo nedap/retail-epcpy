@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import re
 from enum import Enum
 
@@ -63,7 +64,7 @@ class USDOD(EPCScheme, TagEncodable):
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.USDOD_96,
     ) -> str:
 
-        return f"urn:epc:tag:{binary_coding_scheme.USDOD_96.value}:{filter_value.value}.{self._cage_dodaac}.{self._serial}"
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.USDOD_96.value}:{filter_value.value}.{self._cage_dodaac}.{self._serial}"
 
     def binary(
         self,

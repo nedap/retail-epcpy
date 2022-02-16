@@ -218,7 +218,7 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
                 message=f"Invalid asset reference value {self._asset_ref}"
             )
 
-        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._asset_ref}"
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._asset_ref}"
 
     def binary(
         self,

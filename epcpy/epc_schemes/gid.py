@@ -47,7 +47,7 @@ class GID(EPCScheme, TagEncodable):
         self,
         binary_coding_scheme: GID.BinaryCodingScheme.GID_96 = BinaryCodingScheme.GID_96,
     ) -> str:
-        return f"urn:epc:tag:{binary_coding_scheme.value}:{self._manager}.{self._object}.{self._serial}"
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{self._manager}.{self._object}.{self._serial}"
 
     def binary(
         self,

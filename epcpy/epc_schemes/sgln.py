@@ -155,7 +155,7 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
         ):
             raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        return f"urn:epc:tag:{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._location_ref}.{self._serial}"
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._location_ref}.{self._serial}"
 
     def binary(
         self,
