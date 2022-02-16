@@ -148,7 +148,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
 
     @classmethod
     def from_gtin_plus_serial(cls, gtin: str, serial: str) -> SGTIN:
-        # todo: is this always valid? maybe first validate gtin
+        # TODO: is this always valid? maybe first validate gtin
         gtin = gtin.zfill(14)
         return cls(f"urn:epc:id:sgtin:{gtin[1:8]}.{gtin[0]}{gtin[8:13]}.{str(serial)}")
 

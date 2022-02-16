@@ -1,11 +1,10 @@
 import re
+from typing import List
 
 from epcpy.epc_schemes.adi import ADI
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
-from typing import List
 from epcpy.epc_schemes.bic import BIC
 from epcpy.epc_schemes.cpi import CPI
-
 from epcpy.epc_schemes.gdti import GDTI
 from epcpy.epc_schemes.giai import GIAI
 from epcpy.epc_schemes.gid import GID
@@ -18,18 +17,13 @@ from epcpy.epc_schemes.sgln import SGLN
 from epcpy.epc_schemes.sgtin import SGTIN
 from epcpy.epc_schemes.sscc import SSCC
 from epcpy.epc_schemes.usdod import USDOD
-
-from epcpy.utils.common import (
-    ConvertException,
-    base64_to_hex,
-    hex_to_binary,
-)
+from epcpy.utils.common import ConvertException, base64_to_hex, hex_to_binary
 from epcpy.utils.regex import TAG_URI
 
 TAG_URI_REGEX = re.compile(TAG_URI)
 
-EPC_SCHEMES: List[EPCScheme] = [ADI, BIC, CPI, SGTIN]  # todo
-GS1_KEYED_CLASSES: List[GS1Keyed] = [SGTIN]
+EPC_SCHEMES: List[EPCScheme] = [ADI, BIC, CPI, SGTIN]  # TODO
+GS1_KEYED_CLASSES: List[GS1Keyed] = [SGTIN]  # TODO
 TAG_ENCODABLE_CLASSES: List[TagEncodable] = [
     ADI,
     CPI,
