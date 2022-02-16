@@ -1,15 +1,16 @@
+from __future__ import annotations
+
 import re
 from enum import Enum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
-    BinaryCodingSchemes,
-    BinaryHeaders,
     ConvertException,
     binary_to_int,
     calculate_checksum,
     decode_partition_table,
     encode_partition_table,
+    parse_header_and_truncate_binary,
     str_to_binary,
 )
 from epcpy.utils.regex import GSRNP_URI
@@ -80,7 +81,7 @@ PARTITION_TABLE_L = {
 }
 
 
-class GSRNPFilterValues(Enum):
+class GSRNPFilterValue(Enum):
     ALL_OTHERS = "0"
     RESERVED_1 = "1"
     RESERVED_2 = "2"
@@ -92,6 +93,12 @@ class GSRNPFilterValues(Enum):
 
 
 class GSRNP(EPCScheme, TagEncodable, GS1Keyed):
+    class BinaryCodingScheme(Enum):
+        GSRNP_96 = "gsrnp-96"
+
+    class BinaryHeader(Enum):
+        GSRNP_96 = "00101110"
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -119,48 +126,43 @@ class GSRNP(EPCScheme, TagEncodable, GS1Keyed):
     def gs1_element_string(self) -> str:
         return f"(8017){self._gsrnp}"
 
-    def tag_uri(self, filter_value: GSRNPFilterValues) -> str:
-        if filter_value is None and self._tag_uri is None:
-            raise ConvertException(
-                message="Either tag_uri should be set or a filter value should be provided"
-            )
-        elif self._tag_uri:
-            return self._tag_uri
+    def tag_uri(
+        self,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GSRNP_96,
+        filter_value: GSRNPFilterValue = GSRNPFilterValue.ALL_OTHERS,
+    ) -> str:
 
-        scheme = BinaryCodingSchemes.GSRNP_96.value
         filter_val = filter_value.value
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._service_ref}"
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._service_ref}"
 
-        return self._tag_uri
+    def binary(
+        self,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GSRNP_96,
+        filter_value: GSRNPFilterValue = GSRNPFilterValue.ALL_OTHERS,
+    ) -> str:
 
-    def binary(self, filter_value: GSRNPFilterValues = None) -> str:
-        if filter_value is None and self._binary:
-            return self._binary
-
-        self.tag_uri(filter_value)
-
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
-        filter_value = self._tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._service_ref]
 
-        header = BinaryHeaders[scheme].value
-        filter_binary = str_to_binary(filter_value, 3)
+        header = GSRNP.BinaryHeader[binary_coding_scheme.name].value
+        filter_binary = str_to_binary(filter_value.value, 3)
         gsrnp_binary = encode_partition_table(parts, PARTITION_TABLE_L)
 
-        self._binary = header + filter_binary + gsrnp_binary + "0" * 24
-        return self._binary
+        return header + filter_binary + gsrnp_binary + "0" * 24
 
+    @classmethod
+    def from_binary(cls, binary_string: str) -> GSRNP:
+        binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
+            binary_string,
+            cls.header_to_schemes(),
+        )
 
-def binary_to_value_gsrnp96(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    gsrnp_binary = truncated_binary[11:72]
+        filter_binary = truncated_binary[8:11]
+        gsrnp_binary = truncated_binary[11:72]
 
-    filter_string = binary_to_int(filter_binary)
-    gsrnp_string = decode_partition_table(gsrnp_binary, PARTITION_TABLE_P)
+        filter_string = binary_to_int(filter_binary)
+        gsrnp_string = decode_partition_table(gsrnp_binary, PARTITION_TABLE_P)
 
-    return f"{filter_string}.{gsrnp_string}"
-
-
-def tag_to_value_gsrnp96(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gsrnp_string}"
+        )

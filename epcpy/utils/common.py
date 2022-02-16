@@ -2,57 +2,9 @@ import base64
 import re
 from enum import Enum
 from math import inf, log
+from typing import Dict, Tuple
 
 from epcpy.utils.regex import VERIFY_GS3A3_CHARS
-
-
-class BinaryHeaders(Enum):
-    SGTIN_96 = "00110000"
-    SGTIN_198 = "00110110"
-    SSCC_96 = "00110001"
-    SGLN_96 = "00110010"
-    SGLN_195 = "00111001"
-    GRAI_96 = "00110011"
-    GRAI_170 = "00110111"
-    GIAI_96 = "00110100"
-    GIAI_202 = "00111000"
-    GSRN_96 = "00101101"
-    GSRNP_96 = "00101110"
-    GDTI_96 = "00101100"
-    GDTI_174 = "00111110"
-    CPI_96 = "00111100"
-    CPI_VAR = "00111101"
-    SGCN_96 = "00111111"
-    ITIP_110 = "01000000"
-    ITIP_212 = "01000001"
-    GID_96 = "00110101"
-    USDOD_96 = "00101111"
-    ADI_VAR = "00111011"
-
-
-class BinaryCodingSchemes(Enum):
-    SGTIN_96 = "sgtin-96"
-    SGTIN_198 = "sgtin-198"
-    SSCC_96 = "sscc-96"
-    SGLN_96 = "sgln-96"
-    SGLN_195 = "sgln-195"
-    GRAI_96 = "grai-96"
-    GRAI_170 = "grai-170"
-    GIAI_96 = "giai-96"
-    GIAI_202 = "giai-202"
-    GSRN_96 = "gsrn-96"
-    GSRNP_96 = "gsrnp-96"
-    GDTI_96 = "gdti-96"
-    GDTI_174 = "gdti-174"
-    CPI_96 = "cpi-96"
-    CPI_VAR = "cpi-var"
-    SGCN_96 = "sgcn-96"
-    ITIP_110 = "itip-110"
-    ITIP_212 = "itip-212"
-    GID_96 = "gid-96"
-    USDOD_96 = "usdod-96"
-    ADI_VAR = "adi-var"
-
 
 ESCAPE_CHARACTERS = {
     "0100010": "%22",
@@ -133,7 +85,9 @@ def encode_string(string: str, num_bits: int) -> str:
 def decode_string_six_bits(binary: str, max_chars: int) -> str:
     res = ""
     for g in re.split("([0-1]{6})", binary):
-        if g == "000000" or g == "":
+        if g == "000000":
+            break
+        if len(g) < 6:
             continue
         elif g.startswith("10") or g.startswith("11"):
             res += chr(int(g, 2))
@@ -331,3 +285,26 @@ def calculate_checksum(digits: str) -> int:
     checksum = (10 - ((3 * (val1) + (val2)) % 10)) % 10
 
     return checksum
+
+
+def parse_header_and_truncate_binary(
+    binary_string: str, header_to_schemes: Dict[str, str]
+) -> Tuple[Enum, str]:
+    header = binary_string[:8]
+
+    try:
+        scheme = header_to_schemes[header]
+    except ValueError:
+        raise ConvertException(message=f"{header} is not a valid header")
+
+    _, size = scheme.value.split("-")
+    size = int(size) if size.isnumeric() else None
+
+    if size and not size <= len(binary_string):
+        raise ConvertException(
+            message=f"Invalid binary size, expected (<=): {size} actual: {len(binary_string)}"
+        )
+
+    truncated_binary = binary_string[:size]
+
+    return scheme, truncated_binary

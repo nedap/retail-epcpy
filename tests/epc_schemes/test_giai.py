@@ -1,7 +1,6 @@
 import unittest
 
-from epcpy.epc_schemes.giai import GIAI, GIAIFilterValues
-from epcpy.utils.common import BinaryCodingSchemes
+from epcpy.epc_schemes.giai import GIAI, GIAIFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
     TestGS1KeyedMeta,
@@ -119,8 +118,8 @@ class TestGIAITagEncodable(
             "name": "test_valid_giai_tag_encodable_1",
             "uri": "urn:epc:id:giai:0614141.12345400",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GIAI_202,
-                "filter_value": GIAIFilterValues.RAIL_VEHICLE,
+                "binary_coding_scheme": GIAI.BinaryCodingScheme.GIAI_202,
+                "filter_value": GIAIFilterValue.RAIL_VEHICLE,
             },
             "tag_uri": "urn:epc:tag:giai-202:1.0614141.12345400",
             "hex": "3834257BF58B266D1AB460C00000000000000000000000000000",
@@ -129,8 +128,8 @@ class TestGIAITagEncodable(
             "name": "test_valid_giai_tag_encodable_2",
             "uri": "urn:epc:id:giai:0614141.0",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GIAI_96,
-                "filter_value": GIAIFilterValues.RAIL_VEHICLE,
+                "binary_coding_scheme": GIAI.BinaryCodingScheme.GIAI_96,
+                "filter_value": GIAIFilterValue.RAIL_VEHICLE,
             },
             "tag_uri": "urn:epc:tag:giai-96:1.0614141.0",
             "hex": "3434257BF400000000000000",
@@ -139,8 +138,8 @@ class TestGIAITagEncodable(
             "name": "test_valid_giai_tag_encodable_3",
             "uri": "urn:epc:id:giai:0614141.1ABc%2FD",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GIAI_202,
-                "filter_value": GIAIFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": GIAI.BinaryCodingScheme.GIAI_202,
+                "filter_value": GIAIFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:giai-202:0.0614141.1ABc%2FD",
             "hex": "3814257BF58C1858D7C400000000000000000000000000000000",
@@ -149,8 +148,8 @@ class TestGIAITagEncodable(
             "name": "test_valid_giai_tag_encodable_4",
             "uri": "urn:epc:id:giai:061411.01ABc%2FD",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GIAI_202,
-                "filter_value": GIAIFilterValues.RESERVED_4,
+                "binary_coding_scheme": GIAI.BinaryCodingScheme.GIAI_202,
+                "filter_value": GIAIFilterValue.RESERVED_4,
             },
             "tag_uri": "urn:epc:tag:giai-202:4.061411.01ABc%2FD",
             "hex": "38983BF8D831830B1AF880000000000000000000000000000000",
@@ -159,8 +158,8 @@ class TestGIAITagEncodable(
             "name": "test_valid_giai_tag_encodable_5",
             "uri": "urn:epc:id:giai:012345.012345678901234567890123",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GIAI_202,
-                "filter_value": GIAIFilterValues.RAIL_VEHICLE,
+                "binary_coding_scheme": GIAI.BinaryCodingScheme.GIAI_202,
+                "filter_value": GIAIFilterValue.RAIL_VEHICLE,
             },
             "tag_uri": "urn:epc:tag:giai-202:1.012345.012345678901234567890123",
             "hex": "38380C0E583164CDA356CDDC3960C593368D5B3770E583164CC0",
@@ -169,8 +168,8 @@ class TestGIAITagEncodable(
             "name": "test_valid_giai_tag_encodable_6",
             "uri": "urn:epc:id:giai:0614141.12345400",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GIAI_96,
-                "filter_value": GIAIFilterValues.RAIL_VEHICLE,
+                "binary_coding_scheme": GIAI.BinaryCodingScheme.GIAI_96,
+                "filter_value": GIAIFilterValue.RAIL_VEHICLE,
             },
             "tag_uri": "urn:epc:tag:giai-96:1.0614141.12345400",
             "hex": "3434257BF400000000BC6038",
@@ -179,8 +178,8 @@ class TestGIAITagEncodable(
             "name": "test_valid_giai_tag_encodable_7",
             "uri": "urn:epc:id:giai:0614141.02",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GIAI_202,
-                "filter_value": GIAIFilterValues.RAIL_VEHICLE,
+                "binary_coding_scheme": GIAI.BinaryCodingScheme.GIAI_202,
+                "filter_value": GIAIFilterValue.RAIL_VEHICLE,
             },
             "tag_uri": "urn:epc:tag:giai-202:1.0614141.02",
             "hex": "3834257BF5832000000000000000000000000000000000000000",
@@ -191,16 +190,16 @@ class TestGIAITagEncodable(
             "name": "test_invalid_giai_tag_encodable_invalid_serial_1",
             "uri": "urn:epc:id:giai:0614141.02",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GIAI_96,
-                "filter_value": GIAIFilterValues.RAIL_VEHICLE,
+                "binary_coding_scheme": GIAI.BinaryCodingScheme.GIAI_96,
+                "filter_value": GIAIFilterValue.RAIL_VEHICLE,
             },
         },
         {
             "name": "test_invalid_giai_tag_encodable_invalid_serial_2",
             "uri": "urn:epc:id:giai:061411.11ABc%2FD",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.GIAI_96,
-                "filter_value": GIAIFilterValues.RESERVED_4,
+                "binary_coding_scheme": GIAI.BinaryCodingScheme.GIAI_96,
+                "filter_value": GIAIFilterValue.RESERVED_4,
             },
         },
     ],

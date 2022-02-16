@@ -1,10 +1,10 @@
+from __future__ import annotations
+
 import re
 from enum import Enum, IntEnum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
-    BinaryCodingSchemes,
-    BinaryHeaders,
     ConvertException,
     binary_to_int,
     calculate_checksum,
@@ -12,11 +12,12 @@ from epcpy.utils.common import (
     decode_string,
     encode_partition_table,
     encode_string,
+    parse_header_and_truncate_binary,
     replace_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import SGTIN_URI
+from epcpy.utils.regex import SGTIN_URI, TAG_URI
 
 SGTIN_REGEX = re.compile(SGTIN_URI)
 
@@ -83,7 +84,7 @@ PARTITION_TABLE_L = {
 }
 
 
-class SGTINFilterValues(Enum):
+class SGTINFilterValue(Enum):
     ALL_OTHERS = "0"
     POS_ITEM = "1"
     FULL_CASE = "2"
@@ -102,6 +103,14 @@ class GTIN_TYPE(IntEnum):
 
 
 class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
+    class BinaryCodingScheme(Enum):
+        SGTIN_96 = "sgtin-96"
+        SGTIN_198 = "sgtin-198"
+
+    class BinaryHeader(Enum):
+        SGTIN_96 = "00110000"
+        SGTIN_198 = "00110110"
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -137,6 +146,12 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
             14
         )
 
+    @classmethod
+    def from_gtin_plus_serial(cls, gtin: str, serial: str) -> SGTIN:
+        # TODO: is this always valid? maybe first validate gtin
+        gtin = gtin.zfill(14)
+        return cls(f"urn:epc:id:sgtin:{gtin[1:8]}.{gtin[0]}{gtin[8:13]}.{str(serial)}")
+
     def gs1_key(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
         return self.gtin(gtin_type=gtin_type)
 
@@ -154,85 +169,65 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         return f"(01){gtin}(21){serial}"
 
     def tag_uri(
-        self, binary_coding_scheme: BinaryCodingSchemes, filter_value: SGTINFilterValues
+        self,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SGTIN_96,
+        filter_value: SGTINFilterValue = SGTINFilterValue.POS_ITEM,
     ) -> str:
-        if (
-            binary_coding_scheme is None or filter_value is None
-        ) and self._tag_uri is None:
-            raise ConvertException(
-                message="Either both a binary coding scheme and a filter value should be provided, or tag_uri should be set."
-            )
-        elif self._tag_uri:
-            return self._tag_uri
 
-        scheme = binary_coding_scheme.value
-        filter_val = filter_value.value
-
-        if scheme == BinaryCodingSchemes.SGTIN_96.value and (
+        if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96 and (
             not self._serial.isnumeric()
             or int(self._serial) >= pow(2, 38)
             or (len(self._serial) > 1 and self._serial[0] == "0")
         ):
-            raise ConvertException(message=f"Invalid serial value {self._serial}")
+            raise ConvertException(
+                message=f"Invalid serial value {self._serial} for SGTIN_96 coding scheme"
+            )
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._item_ref}.{self._serial}"
+        scheme = binary_coding_scheme.value
+        filter_val = filter_value.value
 
-        return self._tag_uri
+        return f"{self.TAG_URI_PREFIX}{scheme}:{filter_val}.{self._company_pref}.{self._item_ref}.{self._serial}"
 
     def binary(
         self,
-        binary_coding_scheme: BinaryCodingSchemes = None,
-        filter_value: SGTINFilterValues = None,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SGTIN_96,
+        filter_value: SGTINFilterValue = SGTINFilterValue.POS_ITEM,
     ) -> str:
-        if (binary_coding_scheme is None or filter_value is None) and self._binary:
-            return self._binary
 
-        self.tag_uri(binary_coding_scheme, filter_value)
-
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
-        filter_value = self._tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._item_ref]
 
-        header = BinaryHeaders[scheme].value
-        filter_binary = str_to_binary(filter_value, 3)
+        header = SGTIN.BinaryHeader[binary_coding_scheme.name].value
+        filter_binary = str_to_binary(filter_value.value, 3)
         gtin_binary = encode_partition_table(parts, PARTITION_TABLE_L)
+
         serial_binary = (
             str_to_binary(self._serial, 38)
-            if scheme == "SGTIN_96"
+            if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96
             else encode_string(self._serial, 140)
         )
 
-        _binary = header + filter_binary + gtin_binary + serial_binary
-        return _binary
+        return header + filter_binary + gtin_binary + serial_binary
 
+    @classmethod
+    def from_binary(cls, binary_string: str) -> SGTIN:
+        binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
+            binary_string,
+            cls.header_to_schemes(),
+        )
 
-def binary_to_value_sgtin96(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    gtin_binary = truncated_binary[11:58]
-    serial_binary = truncated_binary[58:]
+        filter_binary = truncated_binary[8:11]
+        gtin_binary = truncated_binary[11:58]
+        serial_binary = truncated_binary[58:]
 
-    filter_string = binary_to_int(filter_binary)
-    gtin_string = decode_partition_table(gtin_binary, PARTITION_TABLE_P)
-    serial_string = binary_to_int(serial_binary)
+        filter_string = binary_to_int(filter_binary)
+        gtin_string = decode_partition_table(gtin_binary, PARTITION_TABLE_P)
 
-    return f"{filter_string}.{gtin_string}.{serial_string}"
+        serial_string = (
+            binary_to_int(serial_binary)
+            if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96
+            else decode_string(serial_binary)
+        )
 
-
-def binary_to_value_sgtin198(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    gtin_binary = truncated_binary[11:58]
-    serial_binary = truncated_binary[58:]
-
-    filter_string = binary_to_int(filter_binary)
-    gtin_string = decode_partition_table(gtin_binary, PARTITION_TABLE_P)
-    serial_string = decode_string(serial_binary)
-
-    return f"{filter_string}.{gtin_string}.{serial_string}"
-
-
-def tag_to_value_sgtin96(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
-
-
-def tag_to_value_sgtin198(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{gtin_string}.{serial_string}"
+        )

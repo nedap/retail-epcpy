@@ -1,6 +1,6 @@
 import unittest
 
-from epcpy.epc_schemes.adi import ADI, ADIFilterValues
+from epcpy.epc_schemes.adi import ADI, ADIFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
     TestTagEncodableMeta,
@@ -76,7 +76,7 @@ class TestADITagEncodable(
             "name": "test_valid_adi_tag_encodable_1",
             "uri": "urn:epc:id:adi:W81X9C.3KL984PX1.2WMA-52",
             "kwargs": {
-                "filter_value": ADIFilterValues.RESERVED_5,
+                "filter_value": ADIFilterValue.RESERVED_5,
             },
             "tag_uri": "urn:epc:tag:adi-var:5.W81X9C.3KL984PX1.2WMA-52",
             "hex": "3B157E316390F32CCE78D106310325CD06DD7200",
@@ -85,7 +85,7 @@ class TestADITagEncodable(
             "name": "test_valid_adi_tag_encodable_2",
             "uri": "urn:epc:id:adi:2S194..12345678901",
             "kwargs": {
-                "filter_value": ADIFilterValues.OTHER_REPAIR,
+                "filter_value": ADIFilterValue.OTHER_REPAIR,
             },
             "tag_uri": "urn:epc:tag:adi-var:23.2S194..12345678901",
             "hex": "3B5E0C93C79D00C72CF4D76DF8E70C40",
@@ -94,7 +94,7 @@ class TestADITagEncodable(
             "name": "test_valid_adi_tag_encodable_3",
             "uri": "urn:epc:id:adi:W81X9C.3KL984PX1.%232WMA52",
             "kwargs": {
-                "filter_value": ADIFilterValues.UNIT_LOAD_DEVICES,
+                "filter_value": ADIFilterValue.UNIT_LOAD_DEVICES,
             },
             "tag_uri": "urn:epc:tag:adi-var:12.W81X9C.3KL984PX1.%232WMA52",
             "hex": "3B317E316390F32CCE78D10631023C97341D7200",
@@ -103,7 +103,7 @@ class TestADITagEncodable(
             "name": "test_valid_adi_tag_encodable_4",
             "uri": "urn:epc:id:adi:W81X9C.3KL984PX1.%232WM%2FA52",
             "kwargs": {
-                "filter_value": ADIFilterValues.ITEM_OTHER,
+                "filter_value": ADIFilterValue.ITEM_OTHER,
             },
             "tag_uri": "urn:epc:tag:adi-var:1.W81X9C.3KL984PX1.%232WM%2FA52",
             "hex": "3B057E316390F32CCE78D10631023C9736F075C80000",

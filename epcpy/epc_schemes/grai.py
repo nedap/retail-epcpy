@@ -1,10 +1,10 @@
+from __future__ import annotations
+
 import re
 from enum import Enum
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
-    BinaryCodingSchemes,
-    BinaryHeaders,
     ConvertException,
     binary_to_int,
     calculate_checksum,
@@ -12,6 +12,7 @@ from epcpy.utils.common import (
     decode_string,
     encode_partition_table,
     encode_string,
+    parse_header_and_truncate_binary,
     replace_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
@@ -83,7 +84,7 @@ PARTITION_TABLE_L = {
 }
 
 
-class GRAIFilterValues(Enum):
+class GRAIFilterValue(Enum):
     ALL_OTHERS = "0"
     RESERVED_1 = "1"
     RESERVED_2 = "2"
@@ -95,6 +96,14 @@ class GRAIFilterValues(Enum):
 
 
 class GRAI(EPCScheme, TagEncodable, GS1Keyed):
+    class BinaryCodingScheme(Enum):
+        GRAI_96 = "grai-96"
+        GRAI_170 = "grai-170"
+
+    class BinaryHeader(Enum):
+        GRAI_96 = "00110011"
+        GRAI_170 = "00110111"
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -125,25 +134,16 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
         return f"(8003)0{self._grai}"
 
     def tag_uri(
-        self, binary_coding_scheme: BinaryCodingSchemes, filter_value: GRAIFilterValues
+        self, binary_coding_scheme: BinaryCodingScheme, filter_value: GRAIFilterValue
     ) -> str:
-        if (
-            binary_coding_scheme is None or filter_value is None
-        ) and self._tag_uri is None:
-            raise ConvertException(
-                message="Either both a binary coding scheme and a filter value should be provided, or tag_uri should be set."
-            )
-        elif self._tag_uri:
-            return self._tag_uri
 
-        scheme = binary_coding_scheme.value
         filter_val = filter_value.value
 
         if (
-            scheme == BinaryCodingSchemes.GRAI_170.value
+            binary_coding_scheme == GRAI.BinaryCodingScheme.GRAI_170
             and len(replace_uri_escapes(self._serial)) > 20
         ) or (
-            scheme == BinaryCodingSchemes.GRAI_96.value
+            binary_coding_scheme == GRAI.BinaryCodingScheme.GRAI_96
             and (
                 not self._serial.isnumeric()
                 or int(self._serial) >= pow(2, 38)
@@ -152,64 +152,48 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
         ):
             raise ConvertException(message=f"Invalid serial value {self._serial}")
 
-        self._tag_uri = f"urn:epc:tag:{scheme}:{filter_val}.{self._company_pref}.{self._asset_type}.{self._serial}"
-
-        return self._tag_uri
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._asset_type}.{self._serial}"
 
     def binary(
         self,
-        binary_coding_scheme: BinaryCodingSchemes = None,
-        filter_value: GRAIFilterValues = None,
+        binary_coding_scheme: BinaryCodingScheme,
+        filter_value: GRAIFilterValue,
     ) -> str:
-        if (binary_coding_scheme is None or filter_value is None) and self._binary:
-            return self._binary
 
-        self.tag_uri(binary_coding_scheme, filter_value)
-
-        scheme = self._tag_uri.split(":")[3].replace("-", "_").upper()
-        filter_value = self._tag_uri.split(":")[4].split(".")[0]
         parts = [self._company_pref, self._asset_type]
 
-        header = BinaryHeaders[scheme].value
-        filter_binary = str_to_binary(filter_value, 3)
+        header = GRAI.BinaryHeader[binary_coding_scheme.name].value
+        filter_binary = str_to_binary(filter_value.value, 3)
         grai_binary = encode_partition_table(parts, PARTITION_TABLE_L)
         serial_binary = (
             str_to_binary(self._serial, 38)
-            if scheme == "GRAI_96"
+            if binary_coding_scheme == GRAI.BinaryCodingScheme.GRAI_96
             else encode_string(self._serial, 112)
         )
 
         _binary = header + filter_binary + grai_binary + serial_binary
         return _binary
 
+    @classmethod
+    def from_binary(cls, binary_string: str) -> GRAI:
+        binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
+            binary_string,
+            cls.header_to_schemes(),
+        )
 
-def binary_to_value_grai96(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    grai_binary = truncated_binary[11:58]
-    serial_binary = truncated_binary[58:]
+        filter_binary = truncated_binary[8:11]
+        grai_binary = truncated_binary[11:58]
+        serial_binary = truncated_binary[58:]
 
-    filter_string = binary_to_int(filter_binary)
-    grai_string = decode_partition_table(grai_binary, PARTITION_TABLE_P)
-    serial_string = binary_to_int(serial_binary)
+        filter_string = binary_to_int(filter_binary)
+        grai_string = decode_partition_table(grai_binary, PARTITION_TABLE_P)
 
-    return f"{filter_string}.{grai_string}.{serial_string}"
+        serial_string = (
+            binary_to_int(serial_binary)
+            if binary_coding_scheme == GRAI.BinaryCodingScheme.GRAI_96
+            else decode_string(serial_binary)
+        )
 
-
-def binary_to_value_grai170(truncated_binary: str) -> str:
-    filter_binary = truncated_binary[8:11]
-    grai_binary = truncated_binary[11:58]
-    serial_binary = truncated_binary[58:]
-
-    filter_string = binary_to_int(filter_binary)
-    grai_string = decode_partition_table(grai_binary, PARTITION_TABLE_P)
-    serial_string = decode_string(serial_binary)
-
-    return f"{filter_string}.{grai_string}.{serial_string}"
-
-
-def tag_to_value_grai96(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
-
-
-def tag_to_value_grai170(epc_tag_uri: str) -> str:
-    return ".".join(":".join(epc_tag_uri.split(":")[3:]).split(".")[1:])
+        return cls.from_tag_uri(
+            f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{grai_string}.{serial_string}"
+        )

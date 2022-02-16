@@ -1,7 +1,6 @@
 import unittest
 
-from epcpy.epc_schemes.sgln import SGLN, SGLNFilterValues
-from epcpy.utils.common import BinaryCodingSchemes
+from epcpy.epc_schemes.sgln import SGLN, SGLNFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
     TestGS1KeyedMeta,
@@ -124,8 +123,8 @@ class TestSGLNTagEncodable(
             "name": "test_valid_sgln_tag_encodable_1",
             "uri": "urn:epc:id:sgln:0614141.12345.400",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.SGLN_96,
-                "filter_value": SGLNFilterValues.RESERVED_1,
+                "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_96,
+                "filter_value": SGLNFilterValue.RESERVED_1,
             },
             "tag_uri": "urn:epc:tag:sgln-96:1.0614141.12345.400",
             "hex": "3234257BF460720000000190",
@@ -134,8 +133,8 @@ class TestSGLNTagEncodable(
             "name": "test_valid_sgln_tag_encodable_2",
             "uri": "urn:epc:id:sgln:0614141.12345.0",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.SGLN_195,
-                "filter_value": SGLNFilterValues.RESERVED_1,
+                "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_195,
+                "filter_value": SGLNFilterValue.RESERVED_1,
             },
             "tag_uri": "urn:epc:tag:sgln-195:1.0614141.12345.0",
             "hex": "3934257BF46072C0000000000000000000000000000000000000",
@@ -144,8 +143,8 @@ class TestSGLNTagEncodable(
             "name": "test_valid_sgln_tag_encodable_3",
             "uri": "urn:epc:id:sgln:0614141.12345.01",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.SGLN_195,
-                "filter_value": SGLNFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_195,
+                "filter_value": SGLNFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:sgln-195:0.0614141.12345.01",
             "hex": "3914257BF46072C1880000000000000000000000000000000000",
@@ -154,8 +153,8 @@ class TestSGLNTagEncodable(
             "name": "test_valid_sgln_tag_encodable_4",
             "uri": "urn:epc:id:sgln:061411.012345.01",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.SGLN_195,
-                "filter_value": SGLNFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_195,
+                "filter_value": SGLNFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:sgln-195:0.061411.012345.01",
             "hex": "39183BF8C06072C1880000000000000000000000000000000000",
@@ -164,38 +163,38 @@ class TestSGLNTagEncodable(
             "name": "test_valid_sgln_tag_encodable_5",
             "uri": "urn:epc:id:sgln:061411123456..01",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.SGLN_195,
-                "filter_value": SGLNFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_195,
+                "filter_value": SGLNFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:sgln-195:0.061411123456..01",
             "hex": "390039318D8400C1880000000000000000000000000000000000",
         },
         {
-            "name": "test_valid_sgln_tag_encodable_5",
+            "name": "test_valid_sgln_tag_encodable_6",
             "uri": "urn:epc:id:sgln:061411123456..A%2F-BCDEFGHIJKLMNOPQR",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.SGLN_195,
-                "filter_value": SGLNFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_195,
+                "filter_value": SGLNFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:sgln-195:0.061411123456..A%2F-BCDEFGHIJKLMNOPQR",
             "hex": "390039318D8401057AD850E2458D1E449952E64D9D3E851A4000",
         },
         {
-            "name": "test_valid_sgln_tag_encodable_6",
+            "name": "test_valid_sgln_tag_encodable_7",
             "uri": "urn:epc:id:sgln:061411123456..2199023255551",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.SGLN_96,
-                "filter_value": SGLNFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_96,
+                "filter_value": SGLNFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:sgln-96:0.061411123456..2199023255551",
             "hex": "320039318D8401FFFFFFFFFF",
         },
         {
-            "name": "test_valid_sgln_tag_encodable_7",
+            "name": "test_valid_sgln_tag_encodable_8",
             "uri": "urn:epc:id:sgln:061411123456..2199023255552",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.SGLN_195,
-                "filter_value": SGLNFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_195,
+                "filter_value": SGLNFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:sgln-195:0.061411123456..2199023255552",
             "hex": "390039318D8400C98B972C193364D5AB56AC8000000000000000",
@@ -206,24 +205,24 @@ class TestSGLNTagEncodable(
             "name": "test_invalid_sgln_tag_encodable_invalid_serial_1",
             "uri": "urn:epc:id:sgln:0614141.12345.01",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.SGLN_96,
-                "filter_value": SGLNFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_96,
+                "filter_value": SGLNFilterValue.ALL_OTHERS,
             },
         },
         {
             "name": "test_invalid_sgln_tag_encodable_invalid_serial_2",
             "uri": "urn:epc:id:sgln:061411123456..A%2F-BCDEFGHIJKLMNOPQR",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.SGLN_96,
-                "filter_value": SGLNFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_96,
+                "filter_value": SGLNFilterValue.ALL_OTHERS,
             },
         },
         {
             "name": "test_invalid_sgln_tag_encodable_invalid_serial_3",
             "uri": "urn:epc:id:sgln:061411123456..2199023255552",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.SGLN_96,
-                "filter_value": SGLNFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": SGLN.BinaryCodingScheme.SGLN_96,
+                "filter_value": SGLNFilterValue.ALL_OTHERS,
             },
         },
     ],

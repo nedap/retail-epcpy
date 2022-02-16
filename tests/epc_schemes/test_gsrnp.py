@@ -1,6 +1,6 @@
 import unittest
 
-from epcpy.epc_schemes.gsrnp import GSRNP, GSRNPFilterValues
+from epcpy.epc_schemes.gsrnp import GSRNP, GSRNPFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
     TestGS1KeyedMeta,
@@ -121,42 +121,42 @@ class TestGSRNPTagEncodable(
         {
             "name": "test_valid_gsrnp_tag_encodable_1",
             "uri": "urn:epc:id:gsrnp:0614141.1234567890",
-            "kwargs": {"filter_value": GSRNPFilterValues.ALL_OTHERS},
+            "kwargs": {"filter_value": GSRNPFilterValue.ALL_OTHERS},
             "tag_uri": "urn:epc:tag:gsrnp-96:0.0614141.1234567890",
             "hex": "2E14257BF4499602D2000000",
         },
         {
             "name": "test_valid_gsrnp_tag_encodable_2",
             "uri": "urn:epc:id:gsrnp:012345678901.01234",
-            "kwargs": {"filter_value": GSRNPFilterValues.ALL_OTHERS},
+            "kwargs": {"filter_value": GSRNPFilterValue.ALL_OTHERS},
             "tag_uri": "urn:epc:tag:gsrnp-96:0.012345678901.01234",
             "hex": "2E000B7F7070D404D2000000",
         },
         {
             "name": "test_valid_gsrnp_tag_encodable_3",
             "uri": "urn:epc:id:gsrnp:000000.00000000000",
-            "kwargs": {"filter_value": GSRNPFilterValues.ALL_OTHERS},
+            "kwargs": {"filter_value": GSRNPFilterValue.ALL_OTHERS},
             "tag_uri": "urn:epc:tag:gsrnp-96:0.000000.00000000000",
             "hex": "2E1800000000000000000000",
         },
         {
             "name": "test_valid_gsrnp_tag_encodable_4",
             "uri": "urn:epc:id:gsrnp:000000000000.00000",
-            "kwargs": {"filter_value": GSRNPFilterValues.RESERVED_5},
+            "kwargs": {"filter_value": GSRNPFilterValue.RESERVED_5},
             "tag_uri": "urn:epc:tag:gsrnp-96:5.000000000000.00000",
             "hex": "2EA000000000000000000000",
         },
         {
             "name": "test_valid_gsrnp_tag_encodable_5",
             "uri": "urn:epc:id:gsrnp:999999999999.99999",
-            "kwargs": {"filter_value": GSRNPFilterValues.RESERVED_5},
+            "kwargs": {"filter_value": GSRNPFilterValue.RESERVED_5},
             "tag_uri": "urn:epc:tag:gsrnp-96:5.999999999999.99999",
             "hex": "2EA3A352943FFD869F000000",
         },
         {
             "name": "test_valid_gsrnp_tag_encodable_6",
             "uri": "urn:epc:id:gsrnp:999999.99999999999",
-            "kwargs": {"filter_value": GSRNPFilterValues.ALL_OTHERS},
+            "kwargs": {"filter_value": GSRNPFilterValue.ALL_OTHERS},
             "tag_uri": "urn:epc:tag:gsrnp-96:0.999999.99999999999",
             "hex": "2E1BD08FD74876E7FF000000",
         },

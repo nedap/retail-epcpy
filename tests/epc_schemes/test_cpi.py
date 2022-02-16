@@ -1,7 +1,6 @@
 import unittest
 
-from epcpy.epc_schemes.cpi import CPI, CPIFilterValues
-from epcpy.utils.common import BinaryCodingSchemes
+from epcpy.epc_schemes.cpi import CPI, CPIFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
     TestTagEncodableMeta,
@@ -73,8 +72,8 @@ class TestCPITagEncodable(
             "name": "test_valid_cpi_tag_encodable_1",
             "uri": "urn:epc:id:cpi:0614141.12-456.123456789",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.CPI_VAR,
-                "filter_value": CPIFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": CPI.BinaryCodingScheme.CPI_VAR,
+                "filter_value": CPIFilterValue.ALL_OTHERS,
             },
             "tag_uri": "urn:epc:tag:cpi-var:0.0614141.12-456.123456789",
             "hex": "3D14257BF71CADD35D8000075BCD1500",
@@ -83,8 +82,8 @@ class TestCPITagEncodable(
             "name": "test_valid_cpi_tag_encodable_2",
             "uri": "urn:epc:id:cpi:0614141.123456.0",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.CPI_96,
-                "filter_value": CPIFilterValues.RESERVED_1,
+                "binary_coding_scheme": CPI.BinaryCodingScheme.CPI_96,
+                "filter_value": CPIFilterValue.RESERVED_1,
             },
             "tag_uri": "urn:epc:tag:cpi-96:1.0614141.123456.0",
             "hex": "3C34257BF400F12000000000",
@@ -93,8 +92,8 @@ class TestCPITagEncodable(
             "name": "test_valid_cpi_tag_encodable_3",
             "uri": "urn:epc:id:cpi:0614141.1234567890.0",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.CPI_VAR,
-                "filter_value": CPIFilterValues.RESERVED_1,
+                "binary_coding_scheme": CPI.BinaryCodingScheme.CPI_VAR,
+                "filter_value": CPIFilterValue.RESERVED_1,
             },
             "tag_uri": "urn:epc:tag:cpi-var:1.0614141.1234567890.0",
             "hex": "3D34257BF71CB3D35DB7E39C000000000000",
@@ -103,8 +102,8 @@ class TestCPITagEncodable(
             "name": "test_valid_cpi_tag_encodable_4",
             "uri": "urn:epc:id:cpi:0614141.123467890.100000000000",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.CPI_VAR,
-                "filter_value": CPIFilterValues.RESERVED_5,
+                "binary_coding_scheme": CPI.BinaryCodingScheme.CPI_VAR,
+                "filter_value": CPIFilterValue.RESERVED_5,
             },
             "tag_uri": "urn:epc:tag:cpi-var:5.0614141.123467890.100000000000",
             "hex": "3DB4257BF71CB3D36DF8E70005D21DBA0000",
@@ -115,24 +114,24 @@ class TestCPITagEncodable(
             "name": "test_invalid_cpi_tag_encodable_invalid_syntax",
             "uri": "urn:epc:id:cpi:0614141.12-456.123456789",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.CPI_96,
-                "filter_value": CPIFilterValues.ALL_OTHERS,
+                "binary_coding_scheme": CPI.BinaryCodingScheme.CPI_96,
+                "filter_value": CPIFilterValue.ALL_OTHERS,
             },
         },
         {
             "name": "test_invalid_cpi_tag_encodable_invalid_part_length",
             "uri": "urn:epc:id:cpi:0614141.1234567890.0",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.CPI_96,
-                "filter_value": CPIFilterValues.RESERVED_1,
+                "binary_coding_scheme": CPI.BinaryCodingScheme.CPI_96,
+                "filter_value": CPIFilterValue.RESERVED_1,
             },
         },
         {
             "name": "test_invalid_cpi_tag_encodable_serial_out_of_range",
             "uri": "urn:epc:id:cpi:0614141.123467890.100000000000",
             "kwargs": {
-                "binary_coding_scheme": BinaryCodingSchemes.CPI_96,
-                "filter_value": CPIFilterValues.RESERVED_5,
+                "binary_coding_scheme": CPI.BinaryCodingScheme.CPI_96,
+                "filter_value": CPIFilterValue.RESERVED_5,
             },
         },
     ],
