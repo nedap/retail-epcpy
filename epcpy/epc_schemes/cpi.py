@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import re
 from enum import Enum
 
@@ -242,13 +243,34 @@ class CPI(EPCScheme, TagEncodable):
             cls.header_to_schemes(),
         )
         filter_binary = truncated_binary[8:11]
-        cpi_binary = truncated_binary[11:65]
-        serial_binary = truncated_binary[65:]
+
+        if binary_coding_scheme == CPI.BinaryCodingScheme.CPI_96:
+            cpi_binary = truncated_binary[11:65]
+            serial_binary = truncated_binary[65:]
+            cpi_string = decode_partition_table(
+                cpi_binary, PARTITION_TABLE_P_96, unpadded_partition=True
+            )
+        else:
+            cpi_binary = truncated_binary[11:]
+
+            cpi_string = decode_partition_table(
+                cpi_binary, PARTITION_TABLE_P_VAR, six_bit_variable_partition=True
+            )
+
+            partition = PARTITION_TABLE_P_VAR[binary_to_int(cpi_binary[:3])]
+            possible_serial_binary = truncated_binary[(11 + 3 + partition["M"]) :]
+
+            serial_binary = ""
+            is_serial = False
+            for g in re.split("([0-1]{6})", possible_serial_binary):
+                if is_serial:
+                    serial_binary += g
+                if g == "000000":
+                    is_serial = True
+
+            serial_binary = serial_binary[:40] if len(serial_binary) > 0 else "0"
 
         filter_string = binary_to_int(filter_binary)
-        cpi_string = decode_partition_table(
-            cpi_binary, PARTITION_TABLE_P_96, unpadded_partition=True
-        )
         serial_string = binary_to_int(serial_binary)
 
         return cls.from_tag_uri(
