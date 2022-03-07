@@ -10,7 +10,7 @@ A Python module for creation, validation, and transformation of EPC representati
 #### Pure identity
 Given an SGTIN in epc uri representation `urn:epc:id:sgtin:00000950.01093.Serial` an epcpy SGTIN object can be created as follows
 ```python
-from epcpy.epc_schemes.sgtin import SGTIN
+from epcpy.epc_pure_identities.sgtin import SGTIN
 
 sgtin = SGTIN.from_epc_uri("urn:epc:id:sgtin:00000950.01093.Serial")
 ```
