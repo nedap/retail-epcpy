@@ -169,24 +169,6 @@ class TestSGTINTagEncodable(
             "tag_uri": "urn:epc:tag:sgtin-198:6.50712192365.88.0",
             "hex": "36C579D5D4ADB618000000000000000000000000000000000000",
         },
-        {
-            "name": "test_valid_sgtin_tag_encodable_default_filter",
-            "uri": "urn:epc:id:sgtin:50712192365.88.156789012",
-            "kwargs": {
-                "binary_coding_scheme": SGTIN.BinaryCodingScheme.SGTIN_96,
-            },
-            "tag_uri": "urn:epc:tag:sgtin-96:1.50712192365.88.156789012",
-            "hex": "302579D5D4ADB60009586914",
-        },
-        {
-            "name": "test_valid_sgtin_tag_encodable_default_coding_scheme",
-            "uri": "urn:epc:id:sgtin:50712192365.88.112789012",
-            "kwargs": {
-                "filter_value": SGTINFilterValue.POS_ITEM,
-            },
-            "tag_uri": "urn:epc:tag:sgtin-96:1.50712192365.88.112789012",
-            "hex": "302579D5D4ADB60006B90614",
-        },
     ],
     invalid_data=[
         {
