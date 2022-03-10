@@ -49,6 +49,16 @@ def replace_uri_escapes(uri: str) -> str:
         .replace("%25", "%")
     )
 
+def revert_uri_escapes(uri: str) -> str:
+    return (
+        uri.replace("%", "%25")
+        .replace('"', "%22")
+        .replace("&", "%26")
+        .replace("/", "%2F")
+        .replace("<", "%3C")
+        .replace(">", "%3E")
+        .replace("?", "%3F")
+    )
 
 def int_to_binary(integer: int, num_bits: int) -> str:
     return f"{integer:0{num_bits}b}"

@@ -94,5 +94,4 @@ class GS1Keyed:
 
     @classmethod
     def from_gs1_element_string(cls, gs1_element_string: str) -> GS1Keyed:
-        # TODO: some regex validation for GS1 element strings
-        pass
+        raise NotImplementedError
