@@ -1,8 +1,9 @@
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCScheme
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
 from epcpy.utils.common import (
     ConvertException,
+    NoGS1KeyException,
     calculate_checksum,
     replace_uri_escapes,
     verify_gs3a3_component,
@@ -12,7 +13,7 @@ from epcpy.utils.regex import UPUI_URI
 UPUI_URI_REGEX = re.compile(UPUI_URI)
 
 
-class UPUI(EPCScheme):
+class UPUI(EPCScheme, GS1Keyed):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -36,6 +37,11 @@ class UPUI(EPCScheme):
             )
 
         self.epc_uri = epc_uri
+
+    def gs1_key(self) -> None:
+        raise NoGS1KeyException(
+            message="UPUI has no GS1 key, only a GS1 element string"
+        )
 
     def gs1_element_string(self) -> str:
         check_digit = calculate_checksum(

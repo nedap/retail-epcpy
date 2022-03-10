@@ -3,9 +3,10 @@ from __future__ import annotations
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
 from epcpy.utils.common import (
     ConvertException,
+    NoGS1KeyException,
     binary_to_int,
     decode_partition_table,
     encode_partition_table,
@@ -155,7 +156,7 @@ def replace_cpi_escapes(cpi: str) -> str:
     return cpi.replace("%23", "#").replace("%2F", "/")
 
 
-class CPI(EPCScheme, TagEncodable):
+class CPI(EPCScheme, GS1Keyed, TagEncodable):
     class BinaryCodingScheme(Enum):
         CPI_96 = "cpi-96"
         CPI_VAR = "cpi-var"
@@ -182,6 +183,9 @@ class CPI(EPCScheme, TagEncodable):
             raise ConvertException(message=f"Invalid CPI URI {epc_uri}")
 
         self.epc_uri = epc_uri
+
+    def gs1_key(self) -> None:
+        raise NoGS1KeyException(message="CPI has no GS1 key, only a GS1 element string")
 
     def gs1_element_string(self) -> str:
         cp_ref = replace_cpi_escapes(self._cp_ref)
