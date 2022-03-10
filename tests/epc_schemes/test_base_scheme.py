@@ -89,11 +89,13 @@ class TestGS1KeyedMeta(type):
         ):
             def test(self: unittest.TestCase):
                 try:
-                    s: EPCScheme = scheme.from_gs1_element_string(gs1_element_string, *args)
+                    s: EPCScheme = scheme.from_gs1_element_string(
+                        gs1_element_string, *args
+                    )
                     self.assertEqual(s.epc_uri, epc_uri)
                 except ConvertException:
                     self.fail(
-                        f"{scheme} from gs1 element string unexpectedly raised ConvertException for URI {epc_uri}"
+                        f"{scheme} from gs1 element string unexpectedly raised ConvertException for GS1 element string {gs1_element_string}"
                     )
 
             return test

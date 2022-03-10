@@ -93,5 +93,5 @@ class GS1Keyed:
         raise NotImplementedError
 
     @classmethod
-    def from_gs1_element_string(cls, gs1_element_string: str) -> GS1Keyed:
+    def from_gs1_element_string(cls, gs1_element_string: str, *args) -> GS1Keyed:
         raise NotImplementedError

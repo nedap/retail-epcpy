@@ -14,12 +14,14 @@ from epcpy.utils.common import (
     encode_string,
     parse_header_and_truncate_binary,
     replace_uri_escapes,
+    revert_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import SGLN_URI
+from epcpy.utils.regex import SGLN_GS1_ELEMENT_STRING, SGLN_URI
 
 SGLN_URI_REGEX = re.compile(SGLN_URI)
+SGLN_GS1_ELEMENT_STRING_REGEX = re.compile(SGLN_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -135,6 +137,22 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
     def gs1_element_string(self) -> str:
         extension = replace_uri_escapes(self._serial)
         return f"(414){self._gln}(254){extension}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not SGLN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid SGLN GS1 element string {gs1_element_string}"
+            )
+
+        _, digits, chars = re.split(f"\(.{{3}}\)", gs1_element_string)
+        chars = revert_uri_escapes(chars)
+
+        return cls(
+            f"urn:epc:id:sgln:{digits[:company_prefix_length]}.{digits[company_prefix_length:-1]}.{chars}"
+        )
 
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingScheme, filter_value: SGLNFilterValue
