@@ -73,37 +73,43 @@ class TestGINCGS1Key(
             "name": "test_valid_ginc_gs1_key_1",
             "uri": "urn:epc:id:ginc:0614141.xyz3311cba",
             "gs1_key": "0614141xyz3311cba",
-            "gs1_element_string": "(401)0614141xyz3311cba"
+            "gs1_element_string": "(401)0614141xyz3311cba",
+            "args": [7],
         },
         {
             "name": "test_valid_ginc_gs1_key_2",
             "uri": "urn:epc:id:ginc:0614141.0",
             "gs1_key": "06141410",
-            "gs1_element_string": "(401)06141410"
+            "gs1_element_string": "(401)06141410",
+            "args": [7],
         },
         {
             "name": "test_valid_ginc_gs1_key_3",
             "uri": "urn:epc:id:ginc:0614141.01",
             "gs1_key": "061414101",
-            "gs1_element_string": "(401)061414101"
+            "gs1_element_string": "(401)061414101",
+            "args": [7],
         },
         {
             "name": "test_valid_ginc_gs1_key_4",
             "uri": "urn:epc:id:ginc:061411.01ABc%2FD",
             "gs1_key": "06141101ABc/D",
-            "gs1_element_string": "(401)06141101ABc/D"
+            "gs1_element_string": "(401)06141101ABc/D",
+            "args": [6],
         },
         {
             "name": "test_valid_ginc_gs1_key_5",
             "uri": "urn:epc:id:ginc:012345.012345678901234567890123",
             "gs1_key": "012345012345678901234567890123",
-            "gs1_element_string": "(401)012345012345678901234567890123"
+            "gs1_element_string": "(401)012345012345678901234567890123",
+            "args": [6],
         },
         {
             "name": "test_valid_ginc_gs1_key_6",
             "uri": "urn:epc:id:ginc:012345678901.012345678901234567",
             "gs1_key": "012345678901012345678901234567",
-            "gs1_element_string": "(401)012345678901012345678901234567"
+            "gs1_element_string": "(401)012345678901012345678901234567",
+            "args": [12],
         },
     ],
     invalid_data=[],
