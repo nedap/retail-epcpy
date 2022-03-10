@@ -6,11 +6,13 @@ from epcpy.utils.common import (
     NoGS1KeyException,
     calculate_checksum,
     replace_uri_escapes,
+    revert_uri_escapes,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import UPUI_URI
+from epcpy.utils.regex import UPUI_GS1_ELEMENT_STRING, UPUI_URI
 
 UPUI_URI_REGEX = re.compile(UPUI_URI)
+UPUI_GS1_ELEMENT_STRING_REGEX = re.compile(UPUI_GS1_ELEMENT_STRING)
 
 
 class UPUI(EPCScheme, GS1Keyed):
@@ -48,3 +50,20 @@ class UPUI(EPCScheme, GS1Keyed):
             f"{self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}"
         )
         return f"(01){self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}{check_digit}(235){self._tpx}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not UPUI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid UPUI GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[4:18]
+        chars = gs1_element_string[23:]
+        chars = revert_uri_escapes(chars)
+
+        return cls(
+            f"urn:epc:id:upui:{digits[1:1+company_prefix_length]}.{digits[0]}{digits[1+company_prefix_length:-1]}.{chars}"
+        )
