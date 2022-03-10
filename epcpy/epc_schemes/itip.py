@@ -17,12 +17,14 @@ from epcpy.utils.common import (
     encode_string,
     parse_header_and_truncate_binary,
     replace_uri_escapes,
+    revert_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import ITIP_URI
+from epcpy.utils.regex import ITIP_GS1_ELEMENT_STRING, ITIP_URI
 
 ITIP_URI_REGEX = re.compile(ITIP_URI)
+ITIP_GS1_ELEMENT_STRING_REGEX = re.compile(ITIP_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -145,6 +147,23 @@ class ITIP(EPCScheme, GS1Keyed, TagEncodable):
             f"{indicator}{self._company_pref}{self._item_ref[1:]}"
         )
         return f"(8006){indicator}{self._company_pref}{self._item_ref[1:]}{check_digit}{self._piece}{self._total}(21){replace_uri_escapes(self._serial)}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not ITIP_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid ITIP GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[6:24]
+        chars = gs1_element_string[28:]
+        chars = revert_uri_escapes(chars)
+
+        return cls(
+            f"urn:epc:id:itip:{digits[1:1+company_prefix_length]}.{digits[0]}{digits[1+company_prefix_length:-5]}.{digits[-4:-2]}.{digits[-2:]}.{chars}"
+        )
 
     def tag_uri(
         self, filter_value: ITIPFilterValue, binary_coding_scheme: BinaryCodingScheme
