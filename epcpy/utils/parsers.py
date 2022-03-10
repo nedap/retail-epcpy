@@ -1,27 +1,27 @@
 import re
 from typing import List
 
-from epcpy.epc_pure_identities.adi import ADI
-from epcpy.epc_pure_identities.base_scheme import EPCScheme, GS1Keyed, TagEncodable
-from epcpy.epc_pure_identities.bic import BIC
-from epcpy.epc_pure_identities.cpi import CPI
-from epcpy.epc_pure_identities.gdti import GDTI
-from epcpy.epc_pure_identities.giai import GIAI
-from epcpy.epc_pure_identities.gid import GID
-from epcpy.epc_pure_identities.ginc import GINC
-from epcpy.epc_pure_identities.grai import GRAI
-from epcpy.epc_pure_identities.gsin import GSIN
-from epcpy.epc_pure_identities.gsrn import GSRN
-from epcpy.epc_pure_identities.gsrnp import GSRNP
-from epcpy.epc_pure_identities.imovn import IMOVN
-from epcpy.epc_pure_identities.itip import ITIP
-from epcpy.epc_pure_identities.pgln import PGLN
-from epcpy.epc_pure_identities.sgcn import SGCN
-from epcpy.epc_pure_identities.sgln import SGLN
-from epcpy.epc_pure_identities.sgtin import SGTIN
-from epcpy.epc_pure_identities.sscc import SSCC
-from epcpy.epc_pure_identities.upui import UPUI
-from epcpy.epc_pure_identities.usdod import USDOD
+from epcpy.epc_schemes.adi import ADI
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
+from epcpy.epc_schemes.bic import BIC
+from epcpy.epc_schemes.cpi import CPI
+from epcpy.epc_schemes.gdti import GDTI
+from epcpy.epc_schemes.giai import GIAI
+from epcpy.epc_schemes.gid import GID
+from epcpy.epc_schemes.ginc import GINC
+from epcpy.epc_schemes.grai import GRAI
+from epcpy.epc_schemes.gsin import GSIN
+from epcpy.epc_schemes.gsrn import GSRN
+from epcpy.epc_schemes.gsrnp import GSRNP
+from epcpy.epc_schemes.imovn import IMOVN
+from epcpy.epc_schemes.itip import ITIP
+from epcpy.epc_schemes.pgln import PGLN
+from epcpy.epc_schemes.sgcn import SGCN
+from epcpy.epc_schemes.sgln import SGLN
+from epcpy.epc_schemes.sgtin import SGTIN
+from epcpy.epc_schemes.sscc import SSCC
+from epcpy.epc_schemes.upui import UPUI
+from epcpy.epc_schemes.usdod import USDOD
 from epcpy.utils.common import ConvertException, base64_to_hex, hex_to_binary
 from epcpy.utils.regex import TAG_URI
 
