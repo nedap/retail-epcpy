@@ -57,21 +57,25 @@ class TestSSCCGS1Key(
             "name": "test_valid_sscc_gs1_key_1",
             "uri": "urn:epc:id:sscc:0614141.1234567890",
             "gs1_key": "106141412345678908",
+            "gs1_element_string": "(00)106141412345678908"
         },
         {
             "name": "test_valid_sscc_gs1_key_2",
             "uri": "urn:epc:id:sscc:061414.12345678901",
             "gs1_key": "106141423456789018",
+            "gs1_element_string": "(00)106141423456789018"
         },
         {
             "name": "test_valid_sscc_gs1_key_3",
             "uri": "urn:epc:id:sscc:061414123456.12345",
             "gs1_key": "106141412345623458",
+            "gs1_element_string": "(00)106141412345623458"
         },
         {
             "name": "test_valid_sscc_gs1_key_4",
             "uri": "urn:epc:id:sscc:061414123456.00000",
             "gs1_key": "006141412345600001",
+            "gs1_element_string": "(00)006141412345600001"
         },
     ],
     invalid_data=[],

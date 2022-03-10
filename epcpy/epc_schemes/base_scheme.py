@@ -18,7 +18,6 @@ class EPCScheme:
 
 
 class TagEncodable:
-
     TAG_URI_REGEX = re.compile(TAG_URI)
     TAG_URI_PREFIX = "urn:epc:tag:"
 
@@ -86,7 +85,14 @@ class TagEncodable:
 class GS1Keyed:
     def __init__(self) -> None:
         super().__init__()
-        self._gs1_key = None
 
     def gs1_key(self, *args, **kwargs) -> str:
         raise NotImplementedError
+
+    def gs1_element_string(self, *args, **kwargs) -> str:
+        raise NotImplementedError
+
+    @classmethod
+    def from_gs1_element_string(cls, gs1_element_string: str) -> GS1Keyed:
+        # TODO: some regex validation for GS1 element strings
+        pass

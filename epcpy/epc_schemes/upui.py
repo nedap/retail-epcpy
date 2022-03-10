@@ -35,12 +35,10 @@ class UPUI(EPCScheme):
                 message=f"Wrong company prefix + item ref size (!=13)"
             )
 
+        self.epc_uri = epc_uri
+
+    def gs1_element_string(self) -> str:
         check_digit = calculate_checksum(
             f"{self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}"
         )
-
-        self.epc_uri = epc_uri
-        self._gs1_element_string = f"(01){self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}{check_digit}(235){self._tpx}"
-
-    def gs1_element_string(self) -> str:
-        return self._gs1_element_string
+        return f"(01){self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}{check_digit}(235){self._tpx}"

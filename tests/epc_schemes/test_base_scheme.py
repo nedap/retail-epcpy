@@ -66,6 +66,34 @@ class TestGS1KeyedMeta(type):
 
             return test
 
+        def generate_valid_gs1_element_string_tests(
+            scheme: EPCScheme, epc_uri: str, gs1_element_string: str, **kwargs
+        ):
+            def test(self: unittest.TestCase):
+                s: GS1Keyed = scheme.from_epc_uri(epc_uri)
+                try:
+                    self.assertEqual(s.gs1_element_string(**kwargs), gs1_element_string)
+                except ConvertException:
+                    self.fail(
+                        f"{scheme} GS1 element string unexpectedly raised ConvertException for URI {epc_uri} and kwargs {kwargs}"
+                    )
+
+            return test
+
+        def generate_valid_from_gs1_element_string_test(
+            scheme: GS1Keyed, epc_uri: str, gs1_element_string: str
+        ):
+            def test(self: unittest.TestCase):
+                try:
+                    s: EPCScheme = scheme.from_gs1_element_string(gs1_element_string)
+                    self.assertEqual(s.epc_uri, epc_uri)
+                except ConvertException:
+                    self.fail(
+                        f"{scheme} from gs1 element string unexpectedly raised ConvertException for URI {epc_uri}"
+                    )
+
+            return test
+
         def generate_invalid_gs1_key_tests(scheme: EPCScheme, epc_uri: str, **kwargs):
             def test(self: unittest.TestCase):
                 s: GS1Keyed = scheme.from_epc_uri(epc_uri)
@@ -81,6 +109,20 @@ class TestGS1KeyedMeta(type):
                 entry["gs1_key"],
                 **entry["kwargs"] if "kwargs" in entry else {},
             )
+
+            attrs[entry["name"]] = generate_valid_gs1_element_string_tests(
+                scheme,
+                entry["uri"],
+                entry["gs1_element_string"],
+                **entry["kwargs"] if "kwargs" in entry else {},
+            )
+
+            # attrs[entry["name"]] = generate_valid_from_gs1_element_string_test(
+            #     scheme,
+            #     entry["uri"],
+            #     entry["gs1_element_string"],
+            #     **entry["kwargs"] if "kwargs" in entry else {},
+            # )
 
         for entry in invalid_data:
             attrs[entry["name"]] = generate_invalid_gs1_key_tests(

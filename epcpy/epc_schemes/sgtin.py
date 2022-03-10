@@ -17,7 +17,7 @@ from epcpy.utils.common import (
     str_to_binary,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import SGTIN_URI, TAG_URI
+from epcpy.utils.regex import SGTIN_URI
 
 SGTIN_REGEX = re.compile(SGTIN_URI)
 
