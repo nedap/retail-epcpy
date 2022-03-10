@@ -2,7 +2,7 @@ import unittest
 from typing import Any, Dict, List
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
-from epcpy.utils.common import ConvertException
+from epcpy.utils.common import ConvertException, NoGS1KeyException
 
 
 class TestEPCSchemeInitMeta(type):
@@ -57,12 +57,16 @@ class TestGS1KeyedMeta(type):
         ):
             def test(self: unittest.TestCase):
                 s: GS1Keyed = scheme.from_epc_uri(epc_uri)
-                try:
-                    self.assertEqual(s.gs1_key(**kwargs), gs1_key)
-                except ConvertException:
-                    self.fail(
-                        f"{scheme} GS1Key unexpectedly raised ConvertException for URI {epc_uri} and kwargs {kwargs}"
-                    )
+                if gs1_key is None:
+                    with self.assertRaises(NoGS1KeyException):
+                        s.gs1_key(**kwargs)
+                else:
+                    try:
+                        self.assertEqual(s.gs1_key(**kwargs), gs1_key)
+                    except ConvertException:
+                        self.fail(
+                            f"{scheme} GS1Key unexpectedly raised ConvertException for URI {epc_uri} and kwargs {kwargs}"
+                        )
 
             return test
 
@@ -103,21 +107,23 @@ class TestGS1KeyedMeta(type):
             return test
 
         for entry in valid_data:
-            attrs[entry["name"]] = generate_valid_gs1_key_tests(
+            attrs[f"{entry['name']}_gs1_key"] = generate_valid_gs1_key_tests(
                 scheme,
                 entry["uri"],
-                entry["gs1_key"],
+                entry["gs1_key"] if "gs1_key" in entry else None,
                 **entry["kwargs"] if "kwargs" in entry else {},
             )
 
-            attrs[entry["name"]] = generate_valid_gs1_element_string_tests(
+            attrs[
+                f"{entry['name']}_gs1_element_string"
+            ] = generate_valid_gs1_element_string_tests(
                 scheme,
                 entry["uri"],
                 entry["gs1_element_string"],
                 **entry["kwargs"] if "kwargs" in entry else {},
             )
 
-            # attrs[entry["name"]] = generate_valid_from_gs1_element_string_test(
+            # attrs[f"{entry['name']}_from_gs1_element_string"] = generate_valid_from_gs1_element_string_test(
             #     scheme,
             #     entry["uri"],
             #     entry["gs1_element_string"],

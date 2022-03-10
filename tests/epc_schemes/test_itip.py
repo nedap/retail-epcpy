@@ -3,6 +3,7 @@ import unittest
 from epcpy.epc_schemes.itip import ITIP, ITIPFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
+    TestGS1KeyedMeta,
     TestTagEncodableMeta,
 )
 
@@ -67,6 +68,37 @@ class TestITIPInit(
             "uri": "urn:epc:id:itip:012345678901.0.00.000.ABCDEFGHIJKLMNOP%2FRST",
         },
     ],
+):
+    pass
+
+
+class TestITIPGS1Key(
+    unittest.TestCase,
+    metaclass=TestGS1KeyedMeta,
+    scheme=ITIP,
+    valid_data=[
+        {
+            "name": "test_valid_itip_gs1_element_string_1",
+            "uri": "urn:epc:id:itip:4012345.012345.01.02.987",
+            "gs1_element_string": "(8006)040123451234560102(21)987",
+        },
+        {
+            "name": "test_valid_itip_gs1_element_string_2",
+            "uri": "urn:epc:id:itip:0123456.012345.00.00.01234567890123456789",
+            "gs1_element_string": "(8006)001234561234580000(21)01234567890123456789",
+        },
+        {
+            "name": "test_valid_itip_gs1_element_string_3",
+            "uri": "urn:epc:id:itip:012345678901.0.00.00.01234567890123456789",
+            "gs1_element_string": "(8006)001234567890120000(21)01234567890123456789",
+        },
+        {
+            "name": "test_valid_itip_gs1_element_string_4",
+            "uri": "urn:epc:id:itip:012345678901.0.00.00.ABCDEFGHIJKLMNOP%2FRST",
+            "gs1_element_string": "(8006)001234567890120000(21)ABCDEFGHIJKLMNOP/RST",
+        },
+    ],
+    invalid_data=[],
 ):
     pass
 

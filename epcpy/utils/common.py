@@ -25,6 +25,11 @@ class ConvertException(Exception):
         self.message = message
         super().__init__(self.message, *args)
 
+class NoGS1KeyException(Exception):
+    def __init__(self, *args: object, message="") -> None:
+        self.message = message
+        super().__init__(self.message, *args)
+
 
 def ignore_errors_during_conversion(func, *args, **kwargs):
     try:
