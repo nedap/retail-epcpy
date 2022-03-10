@@ -147,10 +147,13 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         )
 
     @classmethod
-    def from_gtin_plus_serial(cls, gtin: str, serial: str) -> SGTIN:
-        # TODO: is this always valid? maybe first validate gtin
+    def from_gtin_plus_serial(
+        cls, gtin: str, serial: str, company_prefix_length: int
+    ) -> SGTIN:
         gtin = gtin.zfill(14)
-        return cls(f"urn:epc:id:sgtin:{gtin[1:8]}.{gtin[0]}{gtin[8:13]}.{str(serial)}")
+        return cls(
+            f"urn:epc:id:sgtin:{gtin[1:1 + company_prefix_length]}.{gtin[0]}{gtin[1 + company_prefix_length:-1]}.{str(serial)}"
+        )
 
     def gs1_key(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
         return self.gtin(gtin_type=gtin_type)
@@ -170,8 +173,8 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
 
     def tag_uri(
         self,
-        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SGTIN_96,
-        filter_value: SGTINFilterValue = SGTINFilterValue.POS_ITEM,
+        binary_coding_scheme: BinaryCodingScheme,
+        filter_value: SGTINFilterValue,
     ) -> str:
 
         if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96 and (
@@ -190,8 +193,8 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
 
     def binary(
         self,
-        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SGTIN_96,
-        filter_value: SGTINFilterValue = SGTINFilterValue.POS_ITEM,
+        binary_coding_scheme: BinaryCodingScheme,
+        filter_value: SGTINFilterValue,
     ) -> str:
 
         parts = [self._company_pref, self._item_ref]
