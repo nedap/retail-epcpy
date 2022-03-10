@@ -134,9 +134,7 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
 
     def gs1_element_string(self) -> str:
         extension = replace_uri_escapes(self._serial)
-        ext = "" if extension == "0" else f"(254){extension}"
-
-        return f"(414){self._gln}{ext}"
+        return f"(414){self._gln}(254){extension}"
 
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingScheme, filter_value: SGLNFilterValue

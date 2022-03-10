@@ -72,7 +72,7 @@ class TestGS1KeyedMeta(type):
             def test(self: unittest.TestCase):
                 s: GS1Keyed = scheme.from_epc_uri(epc_uri)
                 try:
-                    self.assertEqual(s.gs1_element_string(**kwargs), gs1_element_string)
+                    self.assertEqual(s.gs1_element_string(), gs1_element_string)
                 except ConvertException:
                     self.fail(
                         f"{scheme} GS1 element string unexpectedly raised ConvertException for URI {epc_uri} and kwargs {kwargs}"

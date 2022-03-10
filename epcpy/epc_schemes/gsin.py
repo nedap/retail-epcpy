@@ -44,4 +44,4 @@ class GSIN(EPCScheme, GS1Keyed):
         return self._gsin
 
     def gs1_element_string(self) -> str:
-        return f"(401){self._gsin}"
+        return f"(402){self._gsin}"
