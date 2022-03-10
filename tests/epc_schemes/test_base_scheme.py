@@ -85,12 +85,15 @@ class TestGS1KeyedMeta(type):
             return test
 
         def generate_valid_from_gs1_element_string_test(
-            scheme: GS1Keyed, epc_uri: str, gs1_element_string: str, *args
+            scheme: GS1Keyed,
+            epc_uri: str,
+            gs1_element_string: str,
+            company_prefix_length: int,
         ):
             def test(self: unittest.TestCase):
                 try:
                     s: EPCScheme = scheme.from_gs1_element_string(
-                        gs1_element_string, *args
+                        gs1_element_string, company_prefix_length
                     )
                     self.assertEqual(s.epc_uri, epc_uri)
                 except ConvertException:
@@ -130,7 +133,7 @@ class TestGS1KeyedMeta(type):
                 scheme,
                 entry["uri"],
                 entry["gs1_element_string"],
-                *entry["args"] if "args" in entry else {},
+                entry["company_prefix_length"],
             )
 
         for entry in invalid_data:

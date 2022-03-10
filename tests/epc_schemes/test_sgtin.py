@@ -74,21 +74,21 @@ class TestSGTINGS1Key(
             "uri": "urn:epc:id:sgtin:50712192365.88..%25:.13%26",
             "gs1_key": "85071219236581",
             "gs1_element_string": "(01)85071219236581(21).%:.13&",
-            "args": [11],
+            "company_prefix_length": 11,
         },
         {
             "name": "test_valid_sgtin_gs1_key_2",
             "uri": "urn:epc:id:sgtin:00000000000.00.0",
             "gs1_key": "00000000000000",
             "gs1_element_string": "(01)00000000000000(21)0",
-            "args": [11],
+            "company_prefix_length": 11,
         },
         {
             "name": "test_valid_sgtin_gs1_key_3",
             "uri": "urn:epc:id:sgtin:5019265.123588..%25:.13%26",
             "gs1_key": "15019265235883",
             "gs1_element_string": "(01)15019265235883(21).%:.13&",
-            "args": [7],
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_sgtin_gs1_key_4",
@@ -96,7 +96,7 @@ class TestSGTINGS1Key(
             "kwargs": {"gtin_type": GTIN_TYPE.GTIN13},
             "gs1_key": "0000095010939",
             "gs1_element_string": "(01)00000095010939(21)Serial",
-            "args": [8],
+            "company_prefix_length": 8,
         },
         {
             "name": "test_valid_sgtin_gs1_key_5",
@@ -104,7 +104,7 @@ class TestSGTINGS1Key(
             "kwargs": {"gtin_type": GTIN_TYPE.GTIN12},
             "gs1_key": "000095010939",
             "gs1_element_string": "(01)00000095010939(21)Serial",
-            "args": [8],
+            "company_prefix_length": 8,
         },
         {
             "name": "test_valid_sgtin_gs1_key_6",
@@ -112,7 +112,7 @@ class TestSGTINGS1Key(
             "kwargs": {"gtin_type": GTIN_TYPE.GTIN8},
             "gs1_key": "95010939",
             "gs1_element_string": "(01)00000095010939(21)Serial",
-            "args": [8],
+            "company_prefix_length": 8,
         },
     ],
     invalid_data=[
