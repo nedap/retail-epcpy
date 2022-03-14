@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "epcpy"
+version = "0.1.0"
+description = "A Python module for creation, validation, and transformation of EPC representations as defined in GS1's EPC Tag Data Standard (https://www.gs1.org/standards/rfid/tds)."
+authors = ["Nedap Retail <info@nedap-retail.com>"]
+license = "Apache-2.0"
+
+[tool.poetry.scripts]
+test = 'scripts:test'
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

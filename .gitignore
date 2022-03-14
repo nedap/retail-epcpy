@@ -1,3 +1,7 @@
 venv
 __pycache__
-.ipynb_checkpoints
+.*
+!.gitignore
+
+# We're not commiting the lock file because this is a library.
+poetry.lock
