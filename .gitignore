@@ -2,6 +2,3 @@ venv
 __pycache__
 .*
 !.gitignore
-
-# We're not commiting the lock file because this is a library.
-poetry.lock
