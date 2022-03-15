@@ -8,6 +8,14 @@ GSIN_URI_REGEX = re.compile(GSIN_URI)
 
 
 def calculate_checksum(digits: str) -> int:
+    """Alternative calculation of the checksum used solely by GSIN schemes.
+
+    Args:
+        digits (str): String of digits
+
+    Returns:
+        int: Check digit
+    """
     digits = [int(d) for d in digits]
     odd, even = digits[1::2], digits[0::2]
 
@@ -20,6 +28,22 @@ def calculate_checksum(digits: str) -> int:
 
 
 class GSIN(EPCScheme, GS1Keyed):
+    """GSIN EPC scheme implementation.
+
+    GSIN pure identities are of the form:
+        urn:epc:id:gsin:<CompanyPrefix>.<ShipperReference>
+
+    Example:
+        urn:epc:id:gsin:0614141.123456789
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - GSIN.from_gs1_element_string
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gs1_element_string (str): GS1 element string
+    """
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -41,7 +65,17 @@ class GSIN(EPCScheme, GS1Keyed):
         self._gsin = f"{self._company_prefix}{self._shipper_ref}{check_digit}"
 
     def gs1_key(self) -> str:
+        """Returns the GS1 key
+
+        Returns:
+            str: GS1 key
+        """
         return self._gsin
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         return f"(401){self._gsin}"
