@@ -113,7 +113,7 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
 
     Attributes:
         gs1_key (str): GS1 key
-        gs1_element_string (str) GS1 element string
+        gs1_element_string (str): GS1 element string
         tag_uri (str): Tag URI
         binary (str): Binary representation
     """

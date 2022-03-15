@@ -12,6 +12,22 @@ GINC_URI_REGEX = re.compile(GINC_URI)
 
 
 class GINC(EPCScheme, GS1Keyed):
+    """GINC EPC scheme implementation.
+
+    GINC pure identities are of the form:
+        urn:epc:id:ginc:<CompanyPrefix>.<ConsignmentReference>
+
+    Example:
+        urn:epc:id:ginc:0614141.xyz3311cba
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - GINC.from_gs1_element_string
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gs1_element_string (str): GS1 element string
+    """
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -41,7 +57,17 @@ class GINC(EPCScheme, GS1Keyed):
         self._ginc = f"{company_prefix}{consignment_reference}"
 
     def gs1_key(self) -> str:
+        """Returns the GS1 key
+
+        Returns:
+            str: GS1 key
+        """
         return self._ginc
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         return f"(401){self._ginc}"

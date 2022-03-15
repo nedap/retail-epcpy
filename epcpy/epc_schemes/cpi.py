@@ -180,7 +180,7 @@ class CPI(EPCScheme, TagEncodable):
         - CPI.from_tag_uri
 
     Attributes:
-        gs1_element_string (str) GS1 element string
+        gs1_element_string (str): GS1 element string
         tag_uri (str): Tag URI
         binary (str): Binary representation
     """
