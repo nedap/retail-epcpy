@@ -88,6 +88,25 @@ class ADIFilterValue(Enum):
 
 
 class ADI(EPCScheme, TagEncodable):
+    """ADI EPC scheme implementation.
+
+    ADI pure identities are of the form:
+        urn:epc:id:adi:<CAGEOrDODAAC>.<OriginalPartNumber>.<Serial>
+
+    Example:
+        urn:epc:id:adi:W81X9C.3KL984PX1.2WMA52
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - ADI.from_binary
+        - ADI.from_hex
+        - ADI.from_base64
+        - ADI.from_tag_uri
+
+    Attributes:
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         ADI_VAR = "adi-var"
 
@@ -121,6 +140,15 @@ class ADI(EPCScheme, TagEncodable):
         filter_value: ADIFilterValue,
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.ADI_VAR,
     ) -> str:
+        """Return the tag URI belonging to this ADI with the provided binary coding scheme and filter value.
+
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (ADIFilterValue): Filter value
+
+        Returns:
+            str: Tag URI
+        """
         return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_value.value}.{self._cage_dodaac}.{self._part_number}.{self._serial}"
 
     def binary(
@@ -128,7 +156,15 @@ class ADI(EPCScheme, TagEncodable):
         filter_value: ADIFilterValue,
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.ADI_VAR,
     ) -> str:
+        """Return the binary representation belonging to this ADI with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (ADIFilterValue): Filter value
+
+        Returns:
+            str: binary representation
+        """
         header = ADI.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value.value, 6)
         cage_code_binary = encode_cage_code_six_bits(self._cage_dodaac)
@@ -146,7 +182,17 @@ class ADI(EPCScheme, TagEncodable):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> ADI:
+        """Create an ADI instance from a binary string
 
+        Args:
+            binary_string (str): binary representation of an ADI
+
+        Raises:
+            ConvertException: Missing 6-bit terminators in binary representation
+
+        Returns:
+            ADI: ADI instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),

@@ -106,7 +106,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
     """SGTIN EPC scheme implementation.
 
     SGTIN pure identities are of the form:
-        urn:epc:id:sgtin:CompanyPrefix.ItemRefAndIndicator.SerialNumber
+        urn:epc:id:sgtin:<CompanyPrefix>.<ItemRefAndIndicator>.<SerialNumber>
 
     Example:
         urn:epc:id:sgtin:0614141.112345.400
