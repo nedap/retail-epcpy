@@ -105,7 +105,6 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
         urn:epc:id:gdti:0614141.12345.400
 
     This class can be created using EPC pure identities via its constructor, or using:
-        - GDTI.from_gtin_plus_serial
         - GDTI.from_gs1_element_string
         - GDTI.from_binary
         - GDTI.from_hex
