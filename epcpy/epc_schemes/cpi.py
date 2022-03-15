@@ -152,10 +152,39 @@ class CPIFilterValue(Enum):
 
 
 def replace_cpi_escapes(cpi: str) -> str:
+    """Replace escaped characters in CPI URIs
+
+    Args:
+        cpi (str): CPI pure identity URI
+
+    Returns:
+        str: CPI escaped URI
+    """
     return cpi.replace("%23", "#").replace("%2F", "/")
 
 
 class CPI(EPCScheme, TagEncodable):
+    """CPI EPC scheme implementation.
+
+    CPI pure identities are of the form:
+        urn:epc:id:cpi:<CompanyPrefix>.<ComponentPartReference>.<Serial>
+
+    Example:
+        urn:epc:id:cpi:0614141.123ABC.123456789
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - CPI.from_gs1_element_string
+        - CPI.from_binary
+        - CPI.from_hex
+        - CPI.from_base64
+        - CPI.from_tag_uri
+
+    Attributes:
+        gs1_element_string (str) GS1 element string
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         CPI_96 = "cpi-96"
         CPI_VAR = "cpi-var"
@@ -184,6 +213,11 @@ class CPI(EPCScheme, TagEncodable):
         self.epc_uri = epc_uri
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         cp_ref = replace_cpi_escapes(self._cp_ref)
 
         return f"(8010){self._company_pref}{cp_ref}(8011){self._serial}"
@@ -191,7 +225,18 @@ class CPI(EPCScheme, TagEncodable):
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingScheme, filter_value: CPIFilterValue
     ) -> str:
+        """Return the tag URI belonging to this CPI with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (CPIFilterValue): Filter value
+
+        Raises:
+            ConvertException: Serial does not match requirements of provided coding scheme
+
+        Returns:
+            str: Tag URI
+        """
         if (
             binary_coding_scheme == CPI.BinaryCodingScheme.CPI_VAR
             and len(self._serial) > 12
@@ -215,7 +260,15 @@ class CPI(EPCScheme, TagEncodable):
         binary_coding_scheme: BinaryCodingScheme,
         filter_value: CPIFilterValue,
     ) -> str:
+        """Return the binary representation belonging to this CPI with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (CPIFilterValue): Filter value
+
+        Returns:
+            str: binary representation
+        """
         parts = [self._company_pref, self._cp_ref]
         serial = self._serial
 
@@ -238,6 +291,14 @@ class CPI(EPCScheme, TagEncodable):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> CPI:
+        """Create an CPI instance from a binary string
+
+        Args:
+            binary_string (str): binary representation of an CPI
+
+        Returns:
+            CPI: CPI instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),
