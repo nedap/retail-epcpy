@@ -93,6 +93,28 @@ class SSCCFilterValue(Enum):
 
 
 class SSCC(EPCScheme, TagEncodable, GS1Keyed):
+    """SSCC EPC scheme implementation.
+
+    SSCC pure identities are of the form:
+        urn:epc:id:sscc:<CompanyPrefix>.<SerialReference>
+
+    Example:
+        urn:epc:id:sscc:0614141.1234567890
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - SSCC.from_gs1_element_string
+        - SSCC.from_binary
+        - SSCC.from_hex
+        - SSCC.from_base64
+        - SSCC.from_tag_uri
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gs1_element_string (str): GS1 element string
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         SSCC_96 = "sscc-96"
 
@@ -125,9 +147,19 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
         )
 
     def gs1_key(self) -> str:
+        """GS1 key belonging to this SSCC instance
+
+        Returns:
+            str: GS1 key
+        """
         return self._sscc
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         return f"(00){self._sscc}"
 
     def tag_uri(
@@ -135,7 +167,16 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
         filter_value: SSCCFilterValue,
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SSCC_96,
     ) -> str:
+        """Return the tag URI belonging to this SSCC with the provided binary coding scheme and filter value.
 
+        Args:
+            filter_value (SSCCFilterValue): Filter value
+            binary_coding_scheme (BinaryCodingScheme, optional): Coding scheme
+                Defaults to BinaryCodingScheme.SSCC_96
+
+        Returns:
+            str: Tag URI
+        """
         return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._serial}"
 
     def binary(
@@ -143,7 +184,16 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
         filter_value: SSCCFilterValue,
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SSCC_96,
     ) -> str:
+        """Return the binary representation belonging to this SSCC with the provided binary coding scheme and filter value.
 
+        Args:
+            filter_value (SSCCFilterValue): Filter value
+            binary_coding_scheme (BinaryCodingScheme, optional): Coding scheme
+                Defaults to BinaryCodingScheme.SSCC_96
+
+        Returns:
+            str: binary representation
+        """
         parts = [self._company_pref, self._serial]
 
         header = SSCC.BinaryHeader[binary_coding_scheme.name].value
@@ -154,6 +204,14 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> SSCC:
+        """Create an SSCC instance from a binary string
+
+        Args:
+            binary_string (str): binary representation of an SSCC
+
+        Returns:
+            SSCC: SSCC instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),

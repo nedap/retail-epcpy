@@ -13,6 +13,21 @@ UPUI_URI_REGEX = re.compile(UPUI_URI)
 
 
 class UPUI(EPCScheme):
+    """UPUI EPC scheme implementation.
+
+    UPUI pure identities are of the form:
+        urn:epc:id:upui:<CompanyPrefix>.<ItemRefAndIndicator>.<TPX>
+
+    Example:
+        urn:epc:id:upui:1234567.089456.51qIgY)%3C%26Jp3*j7`SDB
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - UPUI.from_gs1_element_string
+
+    Attributes:
+        gs1_element_string (str): GS1 element string
+    """
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -43,4 +58,9 @@ class UPUI(EPCScheme):
         self._gs1_element_string = f"(01){self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}{check_digit}(235){self._tpx}"
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         return self._gs1_element_string
