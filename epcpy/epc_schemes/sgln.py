@@ -96,6 +96,28 @@ class SGLNFilterValue(Enum):
 
 
 class SGLN(EPCScheme, TagEncodable, GS1Keyed):
+    """SGLN EPC scheme implementation.
+
+    SGLN pure identities are of the form:
+        urn:epc:id:sgln:<CompanyPrefix>.<LocationReference>.<Extension>
+
+    Example:
+        urn:epc:id:sgln:0614141.12345.400
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - SGLN.from_gs1_element_string
+        - SGLN.from_binary
+        - SGLN.from_hex
+        - SGLN.from_base64
+        - SGLN.from_tag_uri
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gs1_element_string (str): GS1 element string
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         SGLN_96 = "sgln-96"
         SGLN_195 = "sgln-195"
@@ -130,9 +152,19 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
         self._gln = f"{self._company_pref}{self._location_ref}{check_digit}"
 
     def gs1_key(self) -> str:
+        """Returns the GS1 key
+
+        Returns:
+            str: GS1 key
+        """
         return self._gln
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         extension = replace_uri_escapes(self._serial)
         ext = "" if extension == "0" else f"(254){extension}"
 
@@ -141,7 +173,18 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingScheme, filter_value: SGLNFilterValue
     ) -> str:
+        """Return the tag URI belonging to this SGLN with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (SGLNFilterValue): Filter value
+
+        Raises:
+            ConvertException: Serial does not match requirements of provided coding scheme
+
+        Returns:
+            str: Tag URI
+        """
         if (
             binary_coding_scheme == SGLN.BinaryCodingScheme.SGLN_195
             and len(replace_uri_escapes(self._serial)) > 20
@@ -159,10 +202,18 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
 
     def binary(
         self,
-        filter_value: SGLNFilterValue,
         binary_coding_scheme: BinaryCodingScheme,
+        filter_value: SGLNFilterValue,
     ) -> str:
+        """Return the binary representation belonging to this SGLN with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (SGLNFilterValue): Filter value
+
+        Returns:
+            str: binary representation
+        """
         parts = [self._company_pref, self._location_ref]
 
         header = SGLN.BinaryHeader[binary_coding_scheme.name].value
@@ -178,6 +229,14 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> SGLN:
+        """Create an SGLN instance from a binary string
+
+        Args:
+            binary_string (str): binary representation of an SGLN
+
+        Returns:
+            SGLN: SGLN instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),

@@ -95,6 +95,28 @@ class SGCNFilterValue(Enum):
 
 
 class SGCN(EPCScheme, TagEncodable, GS1Keyed):
+    """SGCN EPC scheme implementation.
+
+    SGCN pure identities are of the form:
+        urn:epc:id:sgcn:<CompanyPrefix>.<CouponReference>.<SerialComponent>
+
+    Example:
+        urn:epc:id:sgcn:4012345.67890.04711
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - SGCN.from_gs1_element_string
+        - SGCN.from_binary
+        - SGCN.from_hex
+        - SGCN.from_base64
+        - SGCN.from_tag_uri
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gs1_element_string (str): GS1 element string
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         SGCN_96 = "sgcn-96"
 
@@ -126,9 +148,19 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
         self._gcn = f"{self._company_pref}{self._coupon_ref}{check_digit}{self._serial}"
 
     def gs1_key(self) -> str:
+        """Returns the GS1 key
+
+        Returns:
+            str: GS1 key
+        """
         return self._gcn
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         return f"(255){self._gcn}"
 
     def tag_uri(
@@ -136,7 +168,16 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
         filter_value: SGCNFilterValue,
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SGCN_96,
     ) -> str:
+        """Return the tag URI belonging to this SGCN with the provided binary coding scheme and filter value.
 
+        Args:
+            filter_value (SGCNFilterValue): Filter value
+            binary_coding_scheme (BinaryCodingScheme, optional): Coding scheme
+                Defaults to BinaryCodingScheme.SGCN_96
+
+        Returns:
+            str: Tag URI
+        """
         return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._coupon_ref}.{self._serial}"
 
     def binary(
@@ -144,7 +185,16 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
         filter_value: SGCNFilterValue,
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.SGCN_96,
     ) -> str:
+        """Return the binary representation belonging to this SGCN with the provided binary coding scheme and filter value.
 
+        Args:
+            filter_value (SGCNFilterValue): Filter value
+            binary_coding_scheme (BinaryCodingScheme, optional): Coding scheme
+                Defaults to BinaryCodingScheme.SGCN_96
+
+        Returns:
+            str: binary representation
+        """
         parts = [self._company_pref, self._coupon_ref]
 
         header = SGCN.BinaryHeader[binary_coding_scheme.name].value
@@ -156,6 +206,14 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> SGCN:
+        """Create an SGCN instance from a binary string
+
+        Args:
+            binary_string (str): binary representation of an SGCN
+
+        Returns:
+            SGCN: SGCN instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),

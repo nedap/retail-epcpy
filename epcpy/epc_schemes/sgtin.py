@@ -193,7 +193,8 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         """GS1 key belonging to this SGTIN instance
 
         Args:
-            gtin_type (GTIN_TYPE, optional): What GTIN length to return. Defaults to GTIN_TYPE.GTIN14.
+            gtin_type (GTIN_TYPE, optional): What GTIN length to return.
+                Defaults to GTIN_TYPE.GTIN14.
 
         Returns:
             str: GS1 key
@@ -204,7 +205,8 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         """GTIN belonging to this SGTIN instance
 
         Args:
-            gtin_type (GTIN_TYPE, optional): What GTIN length to return. Defaults to GTIN_TYPE.GTIN14.
+            gtin_type (GTIN_TYPE, optional): What GTIN length to return.
+                Defaults to GTIN_TYPE.GTIN14.
 
         Raises:
             ConvertException: GTIN does not match given
