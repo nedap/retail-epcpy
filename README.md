@@ -42,5 +42,10 @@ hex_to_epc("36300001DB011169E5E5A70EC000000000000000000000000000")
 ```
 
 ## Development
+
+This project uses [Poetry](https://python-poetry.org/) for project management.
+Poetry must be installed and available in `$PATH`.
+After cloning run `poetry install` to install (development) dependencies.
+
 ### Testing
-This module uses the Python unittest library. Run `python -m unittest discover` for running the tests.
+This module uses the Python unittest library. Run `poetry run tests` for running the tests.
