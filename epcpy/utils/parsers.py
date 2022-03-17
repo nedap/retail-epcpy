@@ -50,6 +50,7 @@ EPC_SCHEMES: List[EPCScheme] = [
     USDOD,
 ]
 GS1_KEYED_CLASSES: List[GS1Keyed] = [
+    CPI,
     GDTI,
     GIAI,
     GINC,
@@ -57,11 +58,13 @@ GS1_KEYED_CLASSES: List[GS1Keyed] = [
     GSIN,
     GSRN,
     GSRNP,
+    ITIP,
     PGLN,
     SGCN,
     SGLN,
     SGTIN,
     SSCC,
+    UPUI,
 ]
 TAG_ENCODABLE_CLASSES: List[TagEncodable] = [
     ADI,
