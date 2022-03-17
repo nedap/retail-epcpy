@@ -88,6 +88,9 @@ TAG_ENCODABLE_HEADERS = {
 }
 
 EPC_SCHEME_IDENTIFIERS = {cls.__name__.lower(): cls for cls in EPC_SCHEMES}
+TAG_ENCODABLE_SCHEME_IDENTIFIERS = {
+    cls.__name__.lower(): cls for cls in TAG_ENCODABLE_CLASSES
+}
 
 
 def epc_pure_identity_to_scheme(epc_pure_identity_uri: str) -> EPCScheme:
@@ -106,6 +109,24 @@ def epc_pure_identity_to_gs1_keyed(epc_pure_identity_uri: str) -> GS1Keyed:
         raise ConvertException(message="EPC URI has no GS1 Key")
 
     return scheme
+
+
+def epc_pure_identity_to_tag_encodable(epc_pure_identity_uri: str) -> TagEncodable:
+    scheme = epc_pure_identity_to_scheme(epc_pure_identity_uri)
+
+    if not isinstance(scheme, TagEncodable):
+        raise ConvertException(message="EPC URI is not tag encodable")
+
+    return scheme
+
+
+def tag_uri_to_epc(epc_tag_uri: str) -> TagEncodable:
+    identifier = epc_tag_uri.split(":")[3].split("-")[0]
+
+    if identifier not in TAG_ENCODABLE_SCHEME_IDENTIFIERS:
+        raise ConvertException("Unknown TagEncodable scheme identifier")
+
+    return TAG_ENCODABLE_SCHEME_IDENTIFIERS[identifier].from_tag_uri(epc_tag_uri)
 
 
 def binary_to_epc(binary_string: str) -> TagEncodable:

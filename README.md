@@ -1,7 +1,29 @@
 # EPCPY
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+
 
 A Python module for creation, validation, and transformation of EPC representations as defined in GS1's EPC Tag Data Standard (https://www.gs1.org/standards/rfid/tds).
+
+**Table of contents**
+- [EPCPY](#epcpy)
+  - [Requirements](#requirements)
+  - [Scheme types](#scheme-types)
+  - [Available schemes](#available-schemes)
+  - [Generic parsers](#generic-parsers)
+  - [Example usage](#example-usage)
+    - [SGTIN](#sgtin)
+      - [Pure identity](#pure-identity)
+      - [GS1Keyed](#gs1keyed)
+      - [Tag encoded](#tag-encoded)
+    - [Generic parsing](#generic-parsing)
+  - [Development](#development)
+    - [Testing](#testing)
+    - [Coverage](#coverage)
+
+## Requirements
+- Python >= 3.7
 
 ## Scheme types
 Every scheme is an instance of the `EPCScheme` class, which allows scheme initialization using a constructor which accepts a EPC pure identity such as `urn:epc:id:sgtin:00000950.01093.Serial` or using the class method `from_epc_uri`. Aside from this base class, schemes can also be instances of the `GS1Keyed` and/or `TagEncodable` classes. These provide the following methods:
@@ -53,11 +75,13 @@ An example highlighting the different options for the `SGTIN` scheme can be foun
 
 ## Generic parsers
 The following generic parser functions are available
-- `epc_pure_identity_to_scheme`,
-- `epc_pure_identity_to_gs1_keyed`,
-- `binary_to_epc`,
-- `hex_to_epc`,
-- `base64_to_epc`,
+- `base64_to_epc`
+- `binary_to_epc`
+- `hex_to_epc`
+- `tag_uri_to_epc`
+- `epc_pure_identity_to_gs1_keyed`
+- `epc_pure_identity_to_scheme`
+- `epc_pure_identity_to_tag_encodable`
 
 ## Example usage
 ### SGTIN
