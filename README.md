@@ -42,8 +42,12 @@ hex_to_epc("36300001DB011169E5E5A70EC000000000000000000000000000")
 ```
 
 ## Development
-### Testing
-This module uses the Python unittest library. Run `python -m unittest discover` for running the tests.
 
+This project uses [Poetry](https://python-poetry.org/) for project management.
+Poetry must be installed and available in `$PATH`.
+After cloning run `poetry install` to install (development) dependencies.
+
+### Testing
+This module uses the Python unittest library. Run `poetry run tests` for running the tests.
 ### Coverage
 Make sure the `coverage` package is installed using `pip install coverage`. Next run `coverage run -m unittest discover` to execute all tests with coverage. The resulting coverage can be reported using `coverage report` in the terminal and with `coverage html` for a webpage.
