@@ -1,16 +1,18 @@
 [tool.poetry]
 name = "epcpy"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Python module for creation, validation, and transformation of EPC representations as defined in GS1's EPC Tag Data Standard (https://www.gs1.org/standards/rfid/tds)."
 license = "MIT"
-authors = ["Nedap Retail <info@nedap-retail.com>"]
-readme = "README.md"
+authors = ["Nedap Retail <sander.meinderts@nedap.com>"]
+readme = "README_pip.md"
 homepage = "https://github.com/nedap/retail-epcpy"
 repository = "https://github.com/nedap/retail-epcpy"
 keywords =  [
     "gs1",
     "epc",
-    "python"
+    "python",
+    "gtin",
+    "sgtin"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
