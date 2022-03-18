@@ -94,6 +94,9 @@ sgtin = SGTIN.from_epc_uri("urn:epc:id:sgtin:00000950.01093.Serial")
 
 # Alternatively
 sgtin = SGTIN("urn:epc:id:sgtin:00000950.01093.Serial")
+
+sgtin.epc_uri
+# urn:epc:id:sgtin:00000950.01093.Serial
 ```
 
 
