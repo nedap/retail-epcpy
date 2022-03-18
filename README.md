@@ -26,16 +26,16 @@ A Python module for creation, validation, and transformation of EPC representati
 - Python >= 3.7
 
 ## Scheme types
-Every scheme is an instance of the `EPCScheme` class, which allows scheme initialization using a constructor which accepts a EPC pure identity such as `urn:epc:id:sgtin:00000950.01093.Serial` or using the class method `from_epc_uri`. Aside from this base class, schemes can also be instances of the `GS1Keyed` and/or `TagEncodable` classes. These provide the following methods:
+Every scheme is an instance of the `EPCScheme` class, which allows scheme initialization using a constructor which accepts a EPC pure identity such as `urn:epc:id:sgtin:00000950.01093.Serial` or using the class method `from_epc_uri`. Aside from this base class, schemes can also be instances of the `GS1Keyed`, `GS1Element` and/or `TagEncodable` classes. These provide the following methods:
 
 **EPCScheme**
 - *constructor*
 - `from_epc_uri`
 
-**GS1Keyed**
+**GS1Element / GS1Keyed**
 - `from_gs1_element_string`
 - `gs1_element_string`
-- `gs1_key`
+- `gs1_key` (if `GS1Keyed`)
 
 **TagEncodable**
 - `from_binary`
@@ -50,28 +50,28 @@ Every scheme is an instance of the `EPCScheme` class, which allows scheme initia
 An example highlighting the different options for the `SGTIN` scheme can be found [later in this document](#example-usage) .
 
 ## Available schemes
-| **Scheme** |   **GS1 keyed**    | **Tag encodable**  |
-| ---------- | :----------------: | :----------------: |
-| ADI        |                    | :heavy_check_mark: |
-| BIC        |                    |                    |
-| CPI        | :heavy_check_mark: | :heavy_check_mark: |
-| GDTI       | :heavy_check_mark: | :heavy_check_mark: |
-| GIAI       | :heavy_check_mark: | :heavy_check_mark: |
-| GID        |                    | :heavy_check_mark: |
-| GINC       | :heavy_check_mark: |                    |
-| GRAI       | :heavy_check_mark: | :heavy_check_mark: |
-| GSIN       | :heavy_check_mark: |                    |
-| GSRN       | :heavy_check_mark: | :heavy_check_mark: |
-| GSRNP      | :heavy_check_mark: | :heavy_check_mark: |
-| IMOVN      |                    |                    |
-| ITIP       | :heavy_check_mark: | :heavy_check_mark: |
-| PGLN       | :heavy_check_mark: |                    |
-| SGCN       | :heavy_check_mark: | :heavy_check_mark: |
-| SGLN       | :heavy_check_mark: | :heavy_check_mark: |
-| SGTIN      | :heavy_check_mark: | :heavy_check_mark: |
-| SSCC       | :heavy_check_mark: | :heavy_check_mark: |
-| UPUI       | :heavy_check_mark: |                    |
-| USDOD      |                    | :heavy_check_mark: |
+| **Scheme** |  **GS1 element**   |   **GS1 keyed**    | **Tag encodable**  |
+| ---------- | :----------------: | :----------------: | :----------------: |
+| ADI        |                    |                    | :heavy_check_mark: |
+| BIC        |                    |                    |                    |
+| CPI        | :heavy_check_mark: |                    | :heavy_check_mark: |
+| GDTI       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| GIAI       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| GID        |                    |                    | :heavy_check_mark: |
+| GINC       | :heavy_check_mark: | :heavy_check_mark: |                    |
+| GRAI       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| GSIN       | :heavy_check_mark: | :heavy_check_mark: |                    |
+| GSRN       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| GSRNP      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| IMOVN      |                    |                    |                    |
+| ITIP       | :heavy_check_mark: |                    | :heavy_check_mark: |
+| PGLN       | :heavy_check_mark: | :heavy_check_mark: |                    |
+| SGCN       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| SGLN       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| SGTIN      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| SSCC       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| UPUI       | :heavy_check_mark: |                    |                    |
+| USDOD      |                    |                    | :heavy_check_mark: |
 
 ## Generic parsers
 The following generic parser functions are available
