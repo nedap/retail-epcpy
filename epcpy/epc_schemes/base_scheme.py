@@ -173,25 +173,37 @@ class TagEncodable:
         }
 
 
-class GS1Keyed:
-    """Base class for GS1 keyed EPCSchemes
-
-    Attributes:
-        gs1_key (str): GS1 key of the EPC pure identity
-    """
-
-
 class GS1Element:
     def __init__(self) -> None:
         super().__init__()
 
     def gs1_element_string(self, *args, **kwargs) -> str:
+        """GS1 element string of the given EPC scheme
+
+        Raises:
+            NotImplementedError: not implemented by default
+
+        Returns:
+            str: GS1 element string
+        """
         raise NotImplementedError
 
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
     ) -> GS1Element:
+        """Create a GS1Element instance from a GS1 element string and company prefix length.
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            NotImplementedError: Base class does not implement any scheme
+
+        Returns:
+            GS1Element: GS1Element instance
+        """
         raise NotImplementedError
 
 

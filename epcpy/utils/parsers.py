@@ -107,6 +107,17 @@ def epc_pure_identity_to_gs1_keyed(epc_pure_identity_uri: str) -> GS1Keyed:
 
 
 def epc_pure_identity_to_tag_encodable(epc_pure_identity_uri: str) -> TagEncodable:
+    """Convert a EPC pure identity string into a TagEncodable scheme
+
+    Args:
+        epc_pure_identity_uri (str): EPC pure identity URI
+
+    Raises:
+        ConvertException: Scheme is not TagEncodable
+
+    Returns:
+        TagEncodable: TagEncodable instance of the URI
+    """
     scheme = epc_pure_identity_to_scheme(epc_pure_identity_uri)
 
     if not isinstance(scheme, TagEncodable):
@@ -116,6 +127,14 @@ def epc_pure_identity_to_tag_encodable(epc_pure_identity_uri: str) -> TagEncodab
 
 
 def tag_uri_to_epc(epc_tag_uri: str) -> TagEncodable:
+    """EPC tag URI to TagEncodable class
+
+    Args:
+        epc_tag_uri (str): EPC tag URI
+
+    Returns:
+        TagEncodable: TagEncodable class for this tag URI
+    """
     identifier = epc_tag_uri.split(":")[3].split("-")[0]
 
     if identifier not in TAG_ENCODABLE_SCHEME_IDENTIFIERS:

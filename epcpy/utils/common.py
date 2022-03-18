@@ -64,6 +64,14 @@ def replace_uri_escapes(uri: str) -> str:
 
 
 def revert_uri_escapes(uri: str) -> str:
+    """Revert the escaped character in a EPC pure identity URI
+
+    Args:
+        uri (str): EPC pure identity URI
+
+    Returns:
+        str: Reverted escaped characters URI
+    """
     return (
         uri.replace("%", "%25")
         .replace('"', "%22")
