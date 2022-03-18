@@ -1,7 +1,7 @@
 # EPCPY
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
+[![PyPI version](https://badge.fury.io/py/epcpy.svg)](https://badge.fury.io/py/epcpy)
 
 
 A Python module for creation, validation, and transformation of EPC representations as defined in GS1's EPC Tag Data Standard (https://www.gs1.org/standards/rfid/tds).
@@ -9,6 +9,7 @@ A Python module for creation, validation, and transformation of EPC representati
 **Table of contents**
 - [EPCPY](#epcpy)
   - [Requirements](#requirements)
+  - [Installation](#installation)
   - [Scheme types](#scheme-types)
   - [Available schemes](#available-schemes)
   - [Generic parsers](#generic-parsers)
@@ -26,6 +27,10 @@ A Python module for creation, validation, and transformation of EPC representati
 ## Requirements
 - Python >= 3.7
 
+## Installation
+```
+pip install epcpy
+```
 ## Scheme types
 Every scheme is an instance of the `EPCScheme` class, which allows scheme initialization using a constructor which accepts a EPC pure identity such as `urn:epc:id:sgtin:00000950.01093.Serial` or using the class method `from_epc_uri`. Aside from this base class, schemes can also be instances of the `GS1Keyed`, `GS1Element` and/or `TagEncodable` classes. These provide the following methods:
 
