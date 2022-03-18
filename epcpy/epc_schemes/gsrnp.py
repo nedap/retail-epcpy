@@ -162,7 +162,19 @@ class GSRNP(EPCScheme, TagEncodable, GS1Keyed):
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> GSRNP:
+        """Create a GSRNP instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: GSRNP GS1 element string invalid
+
+        Returns:
+            GSRNP: GSRNP scheme
+        """
         if not GSRNP_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GSRNP GS1 element string {gs1_element_string}"

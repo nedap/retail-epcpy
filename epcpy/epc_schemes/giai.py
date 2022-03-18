@@ -231,7 +231,19 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> GIAI:
+        """Create a GIAI instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: GIAI GS1 element string invalid
+
+        Returns:
+            GIAI: GIAI scheme
+        """
         if not GIAI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GIAI GS1 element string {gs1_element_string}"

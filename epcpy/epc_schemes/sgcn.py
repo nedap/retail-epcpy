@@ -168,7 +168,19 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> SGCN:
+        """Create a SGCN instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: SGCN GS1 element string invalid
+
+        Returns:
+            SGCN: SGCN scheme
+        """
         if not SGCN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid SGCN GS1 element string {gs1_element_string}"

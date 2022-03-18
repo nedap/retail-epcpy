@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element
@@ -68,7 +70,19 @@ class UPUI(EPCScheme, GS1Element):
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Element:
+    ) -> UPUI:
+        """Create a UPUI instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: UPUI GS1 element string invalid
+
+        Returns:
+            UPUI: UPUI scheme
+        """
         if not UPUI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid UPUI GS1 element string {gs1_element_string}"

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
@@ -84,7 +86,19 @@ class GSIN(EPCScheme, GS1Keyed):
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> GSIN:
+        """Create a GSIN instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: GSIN GS1 element string invalid
+
+        Returns:
+            GSIN: GSIN scheme
+        """
         if not GSIN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GSIN GS1 element string {gs1_element_string}"

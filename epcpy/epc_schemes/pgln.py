@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
@@ -63,7 +65,19 @@ class PGLN(EPCScheme, GS1Keyed):
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> PGLN:
+        """Create a PGLN instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: PGLN GS1 element string invalid
+
+        Returns:
+            PGLN: PGLN scheme
+        """
         if not PGLN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid PGLN GS1 element string {gs1_element_string}"

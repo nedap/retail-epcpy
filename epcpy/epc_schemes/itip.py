@@ -171,7 +171,19 @@ class ITIP(EPCScheme, GS1Element, TagEncodable):
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Element:
+    ) -> ITIP:
+        """Create a ITIP instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: ITIP GS1 element string invalid
+
+        Returns:
+            ITIP: ITIP scheme
+        """
         if not ITIP_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid ITIP GS1 element string {gs1_element_string}"
