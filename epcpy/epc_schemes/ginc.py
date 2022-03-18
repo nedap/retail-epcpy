@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
@@ -14,6 +16,22 @@ GINC_GS1_ELEMENT_STRING_REGEX = re.compile(GINC_GS1_ELEMENT_STRING)
 
 
 class GINC(EPCScheme, GS1Keyed):
+    """GINC EPC scheme implementation.
+
+    GINC pure identities are of the form:
+        urn:epc:id:ginc:<CompanyPrefix>.<ConsignmentReference>
+
+    Example:
+        urn:epc:id:ginc:0614141.xyz3311cba
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - GINC.from_gs1_element_string
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gs1_element_string (str): GS1 element string
+    """
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -43,15 +61,37 @@ class GINC(EPCScheme, GS1Keyed):
         self._ginc = f"{company_prefix}{consignment_reference}"
 
     def gs1_key(self) -> str:
+        """Returns the GS1 key
+
+        Returns:
+            str: GS1 key
+        """
         return self._ginc
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         return f"(401){self._ginc}"
 
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> GINC:
+        """Create a GINC instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: GINC GS1 element string invalid
+
+        Returns:
+            GINC: GINC scheme
+        """
         if not GINC_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GINC GS1 element string {gs1_element_string}"

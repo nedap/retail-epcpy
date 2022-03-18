@@ -98,6 +98,28 @@ class GDTIFilterValue(Enum):
 
 
 class GDTI(EPCScheme, TagEncodable, GS1Keyed):
+    """GDTI EPC scheme implementation.
+
+    GDTI pure identities are of the form:
+        urn:epc:id:gdti:<CompanyPrefix>.<DocumentType>.<SerialNumber>
+
+    Example:
+        urn:epc:id:gdti:0614141.12345.400
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - GDTI.from_gs1_element_string
+        - GDTI.from_binary
+        - GDTI.from_hex
+        - GDTI.from_base64
+        - GDTI.from_tag_uri
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gs1_element_string (str): GS1 element string
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         GDTI_96 = "gdti-96"
         GDTI_174 = "gdti-174"
@@ -132,15 +154,37 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
         self._gdti = f"{self._company_pref}{self._doc_type}{check_digit}{replace_uri_escapes(self._serial)}"
 
     def gs1_key(self) -> str:
+        """GS1 key belonging to this GDTI instance
+
+        Returns:
+            str: GS1 key
+        """
         return self._gdti
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         return f"(253){self._gdti}"
 
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> GDTI:
+        """Create a GDTI instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: GDTI GS1 element string invalid
+
+        Returns:
+            GDTI: GDTI scheme
+        """
         if not GDTI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GDTI GS1 element string {gs1_element_string}"
@@ -159,6 +203,18 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: GDTI.BinaryCodingScheme,
         filter_value: GDTIFilterValue,
     ) -> str:
+        """Return the tag URI belonging to this GDTI with the provided binary coding scheme and filter value.
+
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GDTIFilterValue): Filter value
+
+        Raises:
+            ConvertException: Serial does not match requirements of provided coding scheme
+
+        Returns:
+            str: Tag URI
+        """
         scheme = binary_coding_scheme.value
         filter_val = filter_value.value
 
@@ -182,7 +238,15 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme,
         filter_value: GDTIFilterValue,
     ) -> str:
+        """Return the binary representation belonging to this GDTI with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GDTIFilterValue): Filter value
+
+        Returns:
+            str: binary representation
+        """
         parts = [self._company_pref, self._doc_type]
 
         header = GDTI.BinaryHeader[binary_coding_scheme.name].value
@@ -199,6 +263,14 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> GDTI:
+        """Create an GDTI instance from a binary string
+
+        Args:
+            binary_string (str): binary representation of an GDTI
+
+        Returns:
+            GDTI: GDTI instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),

@@ -94,6 +94,28 @@ class GSRNFilterValue(Enum):
 
 
 class GSRN(EPCScheme, TagEncodable, GS1Keyed):
+    """GSRN EPC scheme implementation.
+
+    GSRN pure identities are of the form:
+        urn:epc:id:gsrn:<CompanyPrefix>.<ServiceReference>
+
+    Example:
+        urn:epc:id:gsrn:0614141.1234567890
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - GSRN.from_gs1_element_string
+        - GSRN.from_binary
+        - GSRN.from_hex
+        - GSRN.from_base64
+        - GSRN.from_tag_uri
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gs1_element_string (str): GS1 element string
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         GSRN_96 = "gsrn-96"
 
@@ -122,15 +144,37 @@ class GSRN(EPCScheme, TagEncodable, GS1Keyed):
         self._gsrn = f"{self._company_pref}{self._service_ref}{check_digit}"
 
     def gs1_key(self) -> str:
+        """GS1 key belonging to this GSRN instance
+
+        Returns:
+            str: GS1 key
+        """
         return self._gsrn
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         return f"(8018){self._gsrn}"
 
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> GSRN:
+        """Create a GSRN instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: GSRN GS1 element string invalid
+
+        Returns:
+            GSRN: GSRN scheme
+        """
         if not GSRN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GSRN GS1 element string {gs1_element_string}"
@@ -147,7 +191,15 @@ class GSRN(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GSRN_96,
         filter_value: GSRNFilterValue = GSRNFilterValue.ALL_OTHERS,
     ) -> str:
+        """Return the tag URI belonging to this GSRN with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GSRNFilterValue): Filter value
+
+        Returns:
+            str: Tag URI
+        """
         return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_value.value}.{self._company_pref}.{self._service_ref}"
 
     def binary(
@@ -155,7 +207,15 @@ class GSRN(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GSRN_96,
         filter_value: GSRNFilterValue = GSRNFilterValue.ALL_OTHERS,
     ) -> str:
+        """Return the binary representation belonging to this GSRN with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GSRNFilterValue): Filter value
+
+        Returns:
+            str: binary representation
+        """
         parts = [self._company_pref, self._service_ref]
 
         header = GSRN.BinaryHeader[binary_coding_scheme.name].value
@@ -166,7 +226,14 @@ class GSRN(EPCScheme, TagEncodable, GS1Keyed):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> GSRN:
+        """Create an GSRN instance from a binary string
 
+        Args:
+            binary_string (str): binary representation of an GSRN
+
+        Returns:
+            GSRN: GSRN instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),

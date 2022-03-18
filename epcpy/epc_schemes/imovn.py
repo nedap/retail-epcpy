@@ -8,6 +8,17 @@ IMOVN_URI_REGEX = re.compile(IMOVN_URI)
 
 
 class IMOVN(EPCScheme):
+    """IMOVN EPC scheme implementation.
+
+    IMOVN pure identities are of the form:
+        urn:epc:id:imovn:<IMOvesselNumber>
+
+    Example:
+        urn:epc:id:imovn:9176187
+
+    This class can be created using EPC pure identities via its constructor
+    """
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 

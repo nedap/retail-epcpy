@@ -105,6 +105,30 @@ class GTIN_TYPE(IntEnum):
 
 
 class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
+    """SGTIN EPC scheme implementation.
+
+    SGTIN pure identities are of the form:
+        urn:epc:id:sgtin:<CompanyPrefix>.<ItemRefAndIndicator>.<SerialNumber>
+
+    Example:
+        urn:epc:id:sgtin:0614141.112345.400
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - SGTIN.from_gtin_plus_serial
+        - SGTIN.from_gs1_element_string
+        - SGTIN.from_binary
+        - SGTIN.from_hex
+        - SGTIN.from_base64
+        - SGTIN.from_tag_uri
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gtin (str): GTIN
+        gs1_element_string (str): GS1 element string
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         SGTIN_96 = "sgtin-96"
         SGTIN_198 = "sgtin-198"
@@ -152,15 +176,46 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
     def from_gtin_plus_serial(
         cls, gtin: str, serial: str, company_prefix_length: int
     ) -> SGTIN:
+        """Create an SGTIN class from a gtin, serial and company prefix length
+
+        Args:
+            gtin (str): GTIN
+            serial (str): Serial value
+            company_prefix_length (int): Length of company prefix
+
+        Returns:
+            SGTIN: Instance of SGTIN class based on the provided data
+        """
         gtin = gtin.zfill(14)
         return cls(
             f"urn:epc:id:sgtin:{gtin[1:1 + company_prefix_length]}.{gtin[0]}{gtin[1 + company_prefix_length:-1]}.{str(serial)}"
         )
 
     def gs1_key(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
+        """GS1 key belonging to this SGTIN instance
+
+        Args:
+            gtin_type (GTIN_TYPE, optional): What GTIN length to return.
+                Defaults to GTIN_TYPE.GTIN14.
+
+        Returns:
+            str: GS1 key
+        """
         return self.gtin(gtin_type=gtin_type)
 
     def gtin(self, gtin_type=GTIN_TYPE.GTIN14) -> str:
+        """GTIN belonging to this SGTIN instance
+
+        Args:
+            gtin_type (GTIN_TYPE, optional): What GTIN length to return.
+                Defaults to GTIN_TYPE.GTIN14.
+
+        Raises:
+            ConvertException: GTIN does not match given
+
+        Returns:
+            str: GTIN
+        """
         if gtin_type != GTIN_TYPE.GTIN14:
             if not self._gtin.startswith((14 - gtin_type) * "0"):
                 raise ConvertException(message=f"Invalid GTIN{gtin_type}")
@@ -168,6 +223,11 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         return self._gtin[14 - gtin_type : 14]
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         gtin = self._gtin
         serial = replace_uri_escapes(self._serial)
 
@@ -176,7 +236,19 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> SGTIN:
+        """Create a SGTIN instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: SGTIN GS1 element string invalid
+
+        Returns:
+            SGTIN: SGTIN scheme
+        """
         if not SGTIN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid SGTIN GS1 element string {gs1_element_string}"
@@ -194,7 +266,18 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme,
         filter_value: SGTINFilterValue,
     ) -> str:
+        """Return the tag URI belonging to this SGTIN with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (SGTINFilterValue): Filter value
+
+        Raises:
+            ConvertException: Serial does not match requirements of provided coding scheme
+
+        Returns:
+            str: Tag URI
+        """
         if binary_coding_scheme == SGTIN.BinaryCodingScheme.SGTIN_96 and (
             not self._serial.isnumeric()
             or int(self._serial) >= pow(2, 38)
@@ -214,7 +297,15 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme,
         filter_value: SGTINFilterValue,
     ) -> str:
+        """Return the binary representation belonging to this SGTIN with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (SGTINFilterValue): Filter value
+
+        Returns:
+            str: binary representation
+        """
         parts = [self._company_pref, self._item_ref]
 
         header = SGTIN.BinaryHeader[binary_coding_scheme.name].value
@@ -231,6 +322,14 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> SGTIN:
+        """Create an SGTIN instance from a binary string
+
+        Args:
+            binary_string (str): binary representation of an SGTIN
+
+        Returns:
+            SGTIN: SGTIN instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),

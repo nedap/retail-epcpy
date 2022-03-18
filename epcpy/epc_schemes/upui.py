@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element
@@ -15,6 +17,21 @@ UPUI_GS1_ELEMENT_STRING_REGEX = re.compile(UPUI_GS1_ELEMENT_STRING)
 
 
 class UPUI(EPCScheme, GS1Element):
+    """UPUI EPC scheme implementation.
+
+    UPUI pure identities are of the form:
+        urn:epc:id:upui:<CompanyPrefix>.<ItemRefAndIndicator>.<TPX>
+
+    Example:
+        urn:epc:id:upui:1234567.089456.51qIgY)%3C%26Jp3*j7`SDB
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - UPUI.from_gs1_element_string
+
+    Attributes:
+        gs1_element_string (str): GS1 element string
+    """
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -40,6 +57,11 @@ class UPUI(EPCScheme, GS1Element):
         self.epc_uri = epc_uri
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         check_digit = calculate_checksum(
             f"{self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}"
         )
@@ -48,7 +70,19 @@ class UPUI(EPCScheme, GS1Element):
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Element:
+    ) -> UPUI:
+        """Create a UPUI instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: UPUI GS1 element string invalid
+
+        Returns:
+            UPUI: UPUI scheme
+        """
         if not UPUI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid UPUI GS1 element string {gs1_element_string}"

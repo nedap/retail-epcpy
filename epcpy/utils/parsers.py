@@ -67,6 +67,17 @@ TAG_ENCODABLE_SCHEME_IDENTIFIERS = {
 
 
 def epc_pure_identity_to_scheme(epc_pure_identity_uri: str) -> EPCScheme:
+    """Convert a EPC pure identity string into its schema class
+
+    Args:
+        epc_pure_identity_uri (str): EPC pure identity URI
+
+    Raises:
+        ConvertException: No matching class found for this URI
+
+    Returns:
+        EPCScheme: EPCScheme instance for this URI
+    """
     identifier = epc_pure_identity_uri.split(":")[3]
 
     if identifier not in EPC_SCHEME_IDENTIFIERS:
@@ -76,6 +87,17 @@ def epc_pure_identity_to_scheme(epc_pure_identity_uri: str) -> EPCScheme:
 
 
 def epc_pure_identity_to_gs1_keyed(epc_pure_identity_uri: str) -> GS1Keyed:
+    """Convert a EPC pure identity string into its GS1 keyed schema.
+
+    Args:
+        epc_pure_identity_uri (str): EPC pure identity URI
+
+    Raises:
+        ConvertException: Not a valid URI for a GS1 keyed schema
+
+    Returns:
+        GS1Keyed: GS1Keyed instance for this URI
+    """
     scheme = epc_pure_identity_to_scheme(epc_pure_identity_uri)
 
     if not isinstance(scheme, GS1Keyed):
@@ -85,6 +107,17 @@ def epc_pure_identity_to_gs1_keyed(epc_pure_identity_uri: str) -> GS1Keyed:
 
 
 def epc_pure_identity_to_tag_encodable(epc_pure_identity_uri: str) -> TagEncodable:
+    """Convert a EPC pure identity string into a TagEncodable scheme
+
+    Args:
+        epc_pure_identity_uri (str): EPC pure identity URI
+
+    Raises:
+        ConvertException: Scheme is not TagEncodable
+
+    Returns:
+        TagEncodable: TagEncodable instance of the URI
+    """
     scheme = epc_pure_identity_to_scheme(epc_pure_identity_uri)
 
     if not isinstance(scheme, TagEncodable):
@@ -94,6 +127,14 @@ def epc_pure_identity_to_tag_encodable(epc_pure_identity_uri: str) -> TagEncodab
 
 
 def tag_uri_to_epc(epc_tag_uri: str) -> TagEncodable:
+    """EPC tag URI to TagEncodable class
+
+    Args:
+        epc_tag_uri (str): EPC tag URI
+
+    Returns:
+        TagEncodable: TagEncodable class for this tag URI
+    """
     identifier = epc_tag_uri.split(":")[3].split("-")[0]
 
     if identifier not in TAG_ENCODABLE_SCHEME_IDENTIFIERS:
@@ -103,6 +144,17 @@ def tag_uri_to_epc(epc_tag_uri: str) -> TagEncodable:
 
 
 def binary_to_epc(binary_string: str) -> TagEncodable:
+    """Binary string to TagEncodable class
+
+    Args:
+        binary_string (str): Binary string
+
+    Raises:
+        ConvertException: Binary header does not belong to valid TagEncodable class
+
+    Returns:
+        TagEncodable: TagEncodable class for this binary string
+    """
     header = binary_string[:8]
 
     if header not in TAG_ENCODABLE_HEADERS:
@@ -112,12 +164,28 @@ def binary_to_epc(binary_string: str) -> TagEncodable:
 
 
 def hex_to_epc(hex_string: str) -> TagEncodable:
+    """Hexadecimal string to TagEncodable class
+
+    Args:
+        hex_string (str): Hexadecimal string
+
+    Returns:
+        TagEncodable: TagEncodable class for this hexadecimal string
+    """
     binary = hex_to_binary(hex_string)
 
     return binary_to_epc(binary)
 
 
 def base64_to_epc(base64_string: str) -> TagEncodable:
+    """Base64 string to TagEncodable class
+
+    Args:
+        base64_string (str): Base64 string
+
+    Returns:
+        TagEncodable: TagEncodable class for this base64 string
+    """
     hex_string = base64_to_hex(base64_string)
 
     return hex_to_epc(hex_string)

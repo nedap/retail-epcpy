@@ -16,6 +16,25 @@ GID_URI_REGEX = re.compile(GID_URI)
 
 
 class GID(EPCScheme, TagEncodable):
+    """GID EPC scheme implementation.
+
+    GID pure identities are of the form:
+        urn:epc:id:gid:<ManagerNumber>.<ObjectClass>.<SerialNumber>
+
+    Example:
+        urn:epc:id:gid:95100000.12345.400
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - GID.from_binary
+        - GID.from_hex
+        - GID.from_base64
+        - GID.from_tag_uri
+
+    Attributes:
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         GID_96 = "gid-96"
 
@@ -47,13 +66,30 @@ class GID(EPCScheme, TagEncodable):
         self,
         binary_coding_scheme: GID.BinaryCodingScheme.GID_96 = BinaryCodingScheme.GID_96,
     ) -> str:
+        """Return the tag URI belonging to this GID with the provided binary coding scheme and filter value.
+
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GIDFilterValue): Filter value
+
+        Returns:
+            str: Tag URI
+        """
         return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{self._manager}.{self._object}.{self._serial}"
 
     def binary(
         self,
         binary_coding_scheme: GID.BinaryCodingScheme.GID_96 = BinaryCodingScheme.GID_96,
     ) -> str:
+        """Return the binary representation belonging to this GID with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GIDFilterValue): Filter value
+
+        Returns:
+            str: binary representation
+        """
         header = GID.BinaryHeader[binary_coding_scheme.name].value
         manager_binary = str_to_binary(self._manager, 28)
         object_binary = str_to_binary(self._object, 24)
@@ -64,12 +100,30 @@ class GID(EPCScheme, TagEncodable):
 
     @classmethod
     def from_tag_uri(cls, epc_tag_uri: str, includes_filter=False):
+        """Create a GID instance from a tag URI
+
+        Args:
+            epc_tag_uri (str): GID tag URI
+            includes_filter (bool, optional): Whether this scheme contains a filter.
+                Defaults to False.
+
+        Returns:
+            GID: GID instance
+        """
         return super(GID, cls).from_tag_uri(
             epc_tag_uri, includes_filter=includes_filter
         )
 
     @classmethod
     def from_binary(cls, binary_string: str) -> GID:
+        """Create an GID instance from a binary string
+
+        Args:
+            binary_string (str): binary representation of an GID
+
+        Returns:
+            GID: GID instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),
