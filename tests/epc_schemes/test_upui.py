@@ -1,7 +1,7 @@
 import unittest
 
 from epcpy.epc_schemes.upui import UPUI
-from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1KeyedMeta
+from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1ElementMeta
 
 
 class TestUPUIInit(
@@ -58,7 +58,7 @@ class TestUPUIInit(
 
 class TestUPUIGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=UPUI,
     valid_data=[
         {

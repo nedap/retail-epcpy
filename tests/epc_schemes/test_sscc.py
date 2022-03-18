@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.sscc import SSCC, SSCCFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -50,7 +50,7 @@ class TestSSCCInit(
 
 class TestSSCCGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=SSCC,
     valid_data=[
         {

@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.gsrnp import GSRNP, GSRNPFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -74,7 +74,7 @@ class TestGSRNPInit(
 
 class TestGSRNPGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=GSRNP,
     valid_data=[
         {

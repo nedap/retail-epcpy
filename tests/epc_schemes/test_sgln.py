@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.sgln import SGLN, SGLNFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -70,7 +70,7 @@ class TestSGLNInit(
 
 class TestSGLNGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=SGLN,
     valid_data=[
         {

@@ -25,11 +25,6 @@ class ConvertException(Exception):
         self.message = message
         super().__init__(self.message, *args)
 
-class NoGS1KeyException(Exception):
-    def __init__(self, *args: object, message="") -> None:
-        self.message = message
-        super().__init__(self.message, *args)
-
 
 def ignore_errors_during_conversion(func, *args, **kwargs):
     try:
@@ -49,6 +44,7 @@ def replace_uri_escapes(uri: str) -> str:
         .replace("%25", "%")
     )
 
+
 def revert_uri_escapes(uri: str) -> str:
     return (
         uri.replace("%", "%25")
@@ -59,6 +55,7 @@ def revert_uri_escapes(uri: str) -> str:
         .replace(">", "%3E")
         .replace("?", "%3F")
     )
+
 
 def int_to_binary(integer: int, num_bits: int) -> str:
     return f"{integer:0{num_bits}b}"

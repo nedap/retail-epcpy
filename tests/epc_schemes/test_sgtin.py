@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.sgtin import GTIN_TYPE, SGTIN, SGTINFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -66,7 +66,7 @@ class TestSGTINInit(
 
 class TestSGTINGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=SGTIN,
     valid_data=[
         {

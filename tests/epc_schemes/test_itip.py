@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.itip import ITIP, ITIPFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -74,7 +74,7 @@ class TestITIPInit(
 
 class TestITIPGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=ITIP,
     valid_data=[
         {

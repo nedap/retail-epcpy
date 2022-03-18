@@ -1,8 +1,8 @@
 import unittest
 from typing import Any, Dict, List
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
-from epcpy.utils.common import ConvertException, NoGS1KeyException
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element, GS1Keyed, TagEncodable
+from epcpy.utils.common import ConvertException
 
 
 class TestEPCSchemeInitMeta(type):
@@ -42,7 +42,7 @@ class TestEPCSchemeInitMeta(type):
         return type.__new__(cls, name, bases, attrs)
 
 
-class TestGS1KeyedMeta(type):
+class TestGS1ElementMeta(type):
     def __new__(
         cls,
         name,
@@ -57,16 +57,12 @@ class TestGS1KeyedMeta(type):
         ):
             def test(self: unittest.TestCase):
                 s: GS1Keyed = scheme.from_epc_uri(epc_uri)
-                if gs1_key is None:
-                    with self.assertRaises(NoGS1KeyException):
-                        s.gs1_key(**kwargs)
-                else:
-                    try:
-                        self.assertEqual(s.gs1_key(**kwargs), gs1_key)
-                    except ConvertException:
-                        self.fail(
-                            f"{scheme} GS1Key unexpectedly raised ConvertException for URI {epc_uri} and kwargs {kwargs}"
-                        )
+                try:
+                    self.assertEqual(s.gs1_key(**kwargs), gs1_key)
+                except ConvertException:
+                    self.fail(
+                        f"{scheme} GS1Key unexpectedly raised ConvertException for URI {epc_uri} and kwargs {kwargs}"
+                    )
 
             return test
 
@@ -74,7 +70,7 @@ class TestGS1KeyedMeta(type):
             scheme: EPCScheme, epc_uri: str, gs1_element_string: str
         ):
             def test(self: unittest.TestCase):
-                s: GS1Keyed = scheme.from_epc_uri(epc_uri)
+                s: GS1Element = scheme.from_epc_uri(epc_uri)
                 try:
                     self.assertEqual(s.gs1_element_string(), gs1_element_string)
                 except ConvertException:
@@ -85,7 +81,7 @@ class TestGS1KeyedMeta(type):
             return test
 
         def generate_valid_from_gs1_element_string_test(
-            scheme: GS1Keyed,
+            scheme: GS1Element,
             epc_uri: str,
             gs1_element_string: str,
             company_prefix_length: int,
@@ -112,12 +108,13 @@ class TestGS1KeyedMeta(type):
             return test
 
         for entry in valid_data:
-            attrs[f"{entry['name']}_gs1_key"] = generate_valid_gs1_key_tests(
-                scheme,
-                entry["uri"],
-                entry["gs1_key"] if "gs1_key" in entry else None,
-                **entry["kwargs"] if "kwargs" in entry else {},
-            )
+            if issubclass(scheme, GS1Keyed):
+                attrs[f"{entry['name']}_gs1_key"] = generate_valid_gs1_key_tests(
+                    scheme,
+                    entry["uri"],
+                    entry["gs1_key"],
+                    **entry["kwargs"] if "kwargs" in entry else {},
+                )
 
             attrs[
                 f"{entry['name']}_gs1_element_string"

@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.giai import GIAI, GIAIFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -70,7 +70,7 @@ class TestGIAIInit(
 
 class TestGIAIGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=GIAI,
     valid_data=[
         {

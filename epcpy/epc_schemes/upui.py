@@ -1,9 +1,8 @@
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element
 from epcpy.utils.common import (
     ConvertException,
-    NoGS1KeyException,
     calculate_checksum,
     replace_uri_escapes,
     revert_uri_escapes,
@@ -15,7 +14,7 @@ UPUI_URI_REGEX = re.compile(UPUI_URI)
 UPUI_GS1_ELEMENT_STRING_REGEX = re.compile(UPUI_GS1_ELEMENT_STRING)
 
 
-class UPUI(EPCScheme, GS1Keyed):
+class UPUI(EPCScheme, GS1Element):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -40,11 +39,6 @@ class UPUI(EPCScheme, GS1Keyed):
 
         self.epc_uri = epc_uri
 
-    def gs1_key(self) -> None:
-        raise NoGS1KeyException(
-            message="UPUI has no GS1 key, only a GS1 element string"
-        )
-
     def gs1_element_string(self) -> str:
         check_digit = calculate_checksum(
             f"{self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}"
@@ -54,7 +48,7 @@ class UPUI(EPCScheme, GS1Keyed):
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> GS1Element:
         if not UPUI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid UPUI GS1 element string {gs1_element_string}"

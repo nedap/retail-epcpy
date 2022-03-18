@@ -1,7 +1,7 @@
 import unittest
 
 from epcpy.epc_schemes.ginc import GINC
-from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1KeyedMeta
+from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1ElementMeta
 
 
 class TestGINCInit(
@@ -66,7 +66,7 @@ class TestGINCInit(
 
 class TestGINCGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=GINC,
     valid_data=[
         {

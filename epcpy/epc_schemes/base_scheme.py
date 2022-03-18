@@ -82,12 +82,9 @@ class TagEncodable:
         }
 
 
-class GS1Keyed:
+class GS1Element:
     def __init__(self) -> None:
         super().__init__()
-
-    def gs1_key(self, *args, **kwargs) -> str:
-        raise NotImplementedError
 
     def gs1_element_string(self, *args, **kwargs) -> str:
         raise NotImplementedError
@@ -95,5 +92,13 @@ class GS1Keyed:
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> GS1Element:
+        raise NotImplementedError
+
+
+class GS1Keyed(GS1Element):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def gs1_key(self, *args, **kwargs) -> str:
         raise NotImplementedError

@@ -3,10 +3,9 @@ from __future__ import annotations
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element, TagEncodable
 from epcpy.utils.common import (
     ConvertException,
-    NoGS1KeyException,
     binary_to_int,
     calculate_checksum,
     decode_fixed_width_integer,
@@ -100,7 +99,7 @@ class ITIPFilterValue(Enum):
     RESERVED_7 = "7"
 
 
-class ITIP(EPCScheme, GS1Keyed, TagEncodable):
+class ITIP(EPCScheme, GS1Element, TagEncodable):
     class BinaryCodingScheme(Enum):
         ITIP_110 = "itip-110"
         ITIP_212 = "itip-212"
@@ -135,11 +134,6 @@ class ITIP(EPCScheme, GS1Keyed, TagEncodable):
 
         self.epc_uri = epc_uri
 
-    def gs1_key(self) -> None:
-        raise NoGS1KeyException(
-            message="ITIP has no GS1 key, only a GS1 element string"
-        )
-
     def gs1_element_string(self) -> str:
         indicator = self._item_ref[0]
 
@@ -151,7 +145,7 @@ class ITIP(EPCScheme, GS1Keyed, TagEncodable):
     @classmethod
     def from_gs1_element_string(
         cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Keyed:
+    ) -> GS1Element:
         if not ITIP_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid ITIP GS1 element string {gs1_element_string}"

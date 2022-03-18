@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.grai import GRAI, GRAIFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -78,7 +78,7 @@ class TestGRAIInit(
 
 class TestGRAIGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=GRAI,
     valid_data=[
         {

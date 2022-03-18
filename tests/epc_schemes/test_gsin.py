@@ -1,7 +1,7 @@
 import unittest
 
 from epcpy.epc_schemes.gsin import GSIN
-from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1KeyedMeta
+from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1ElementMeta
 
 
 class TestGSINInit(
@@ -70,7 +70,7 @@ class TestGSINInit(
 
 class TestGSINGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=GSIN,
     valid_data=[
         {

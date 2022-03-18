@@ -1,7 +1,7 @@
 import unittest
 
 from epcpy.epc_schemes.pgln import PGLN
-from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1KeyedMeta
+from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1ElementMeta
 
 
 class TestPGLNInit(
@@ -58,7 +58,7 @@ class TestPGLNInit(
 
 class TestPGLNGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=PGLN,
     valid_data=[
         {
