@@ -21,6 +21,7 @@ A Python module for creation, validation, and transformation of EPC representati
   - [Development](#development)
     - [Testing](#testing)
     - [Coverage](#coverage)
+    - [Notebook](#notebook)
 
 ## Requirements
 - Python >= 3.7
@@ -161,3 +162,6 @@ This module uses the Python unittest library. Run `poetry run tests` for running
 
 ### Coverage
 Run `poetry run coverage run -m unittest discover` to execute all tests with coverage. The resulting coverage can be reported using `poetry run coverage report` for a textual view the terminal and with `poetry run coverage html` for a webpage.
+
+### Notebook
+There is a sample notebook included in this repository, which can be used to quickly get a hands-on experience with the repository. The notebook might not be completely up-to-date and requires the `jupyter` package to run, which can be installed using `pip install jupyter`.
