@@ -14,12 +14,14 @@ from epcpy.utils.common import (
     encode_string,
     parse_header_and_truncate_binary,
     replace_uri_escapes,
+    revert_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import SGTIN_URI
+from epcpy.utils.regex import SGTIN_GS1_ELEMENT_STRING, SGTIN_URI
 
 SGTIN_REGEX = re.compile(SGTIN_URI)
+SGTIN_GS1_ELEMENT_STRING_REGEX = re.compile(SGTIN_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -230,6 +232,22 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         serial = replace_uri_escapes(self._serial)
 
         return f"(01){gtin}(21){serial}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not SGTIN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid SGTIN GS1 element string {gs1_element_string}"
+            )
+
+        _, digits, chars = re.split(f"\(.{{2}}\)", gs1_element_string)
+        chars = revert_uri_escapes(chars)
+
+        return cls(
+            f"urn:epc:id:sgtin:{digits[1:company_prefix_length+1]}.{digits[0]}{digits[1+company_prefix_length:-1]}.{chars}"
+        )
 
     def tag_uri(
         self,

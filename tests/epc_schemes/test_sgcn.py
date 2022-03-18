@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.sgcn import SGCN, SGCNFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -66,33 +66,43 @@ class TestSGCNInit(
 
 class TestSGCNGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=SGCN,
     valid_data=[
         {
             "name": "test_valid_sgcn_gs1_key_1",
             "uri": "urn:epc:id:sgcn:4012345.67890.04711",
             "gs1_key": "401234567890104711",
+            "gs1_element_string": "(255)401234567890104711",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_sgcn_gs1_key_2",
             "uri": "urn:epc:id:sgcn:4012345.67890.0",
             "gs1_key": "40123456789010",
+            "gs1_element_string": "(255)40123456789010",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_sgcn_gs1_key_3",
             "uri": "urn:epc:id:sgcn:4012345.67890.01",
             "gs1_key": "401234567890101",
+            "gs1_element_string": "(255)401234567890101",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_sgcn_gs1_key_4",
             "uri": "urn:epc:id:sgcn:401234512345..1",
             "gs1_key": "40123451234561",
+            "gs1_element_string": "(255)40123451234561",
+            "company_prefix_length": 12,
         },
         {
             "name": "test_valid_sgcn_gs1_key_5",
             "uri": "urn:epc:id:sgcn:401231.123465.999999999999",
             "gs1_key": "4012311234650999999999999",
+            "gs1_element_string": "(255)4012311234650999999999999",
+            "company_prefix_length": 6,
         },
     ],
     invalid_data=[],

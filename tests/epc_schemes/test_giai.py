@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.giai import GIAI, GIAIFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -70,38 +70,50 @@ class TestGIAIInit(
 
 class TestGIAIGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=GIAI,
     valid_data=[
         {
             "name": "test_valid_giai_gs1_key_1",
             "uri": "urn:epc:id:giai:0614141.12345400",
             "gs1_key": "061414112345400",
+            "gs1_element_string": "(8004)061414112345400",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_giai_gs1_key_2",
             "uri": "urn:epc:id:giai:0614141.0",
             "gs1_key": "06141410",
+            "gs1_element_string": "(8004)06141410",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_giai_gs1_key_3",
             "uri": "urn:epc:id:giai:0614141.1ABc%2FD",
             "gs1_key": "06141411ABc/D",
+            "gs1_element_string": "(8004)06141411ABc/D",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_giai_gs1_key_4",
             "uri": "urn:epc:id:giai:061411.01ABc%2FD",
             "gs1_key": "06141101ABc/D",
+            "gs1_element_string": "(8004)06141101ABc/D",
+            "company_prefix_length": 6,
         },
         {
             "name": "test_valid_giai_gs1_key_5",
             "uri": "urn:epc:id:giai:012345.012345678901234567890123",
             "gs1_key": "012345012345678901234567890123",
+            "gs1_element_string": "(8004)012345012345678901234567890123",
+            "company_prefix_length": 6,
         },
         {
             "name": "test_valid_giai_gs1_key_6",
             "uri": "urn:epc:id:giai:012345678901.012345678901234567",
             "gs1_key": "012345678901012345678901234567",
+            "gs1_element_string": "(8004)012345678901012345678901234567",
+            "company_prefix_length": 12,
         },
     ],
     invalid_data=[],

@@ -3,6 +3,7 @@ import unittest
 from epcpy.epc_schemes.cpi import CPI, CPIFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -59,6 +60,41 @@ class TestCPIInit(
             "uri": "urn:epc:id:cpi:0614141.1%231456.1234567891231",
         },
     ],
+):
+    pass
+
+
+class TestCPIGS1Key(
+    unittest.TestCase,
+    metaclass=TestGS1ElementMeta,
+    scheme=CPI,
+    valid_data=[
+        {
+            "name": "test_valid_cpi_gs1_key_1",
+            "uri": "urn:epc:id:cpi:0614141.123ABC.123456789",
+            "gs1_element_string": "(8010)0614141123ABC(8011)123456789",
+            "company_prefix_length": 7,
+        },
+        {
+            "name": "test_valid_cpi_gs1_key_2",
+            "uri": "urn:epc:id:cpi:0614141.12-456.123456789",
+            "gs1_element_string": "(8010)061414112-456(8011)123456789",
+            "company_prefix_length": 7,
+        },
+        {
+            "name": "test_valid_cpi_gs1_key_3",
+            "uri": "urn:epc:id:cpi:0614141.1%231456.123456789",
+            "gs1_element_string": "(8010)06141411#1456(8011)123456789",
+            "company_prefix_length": 7,
+        },
+        {
+            "name": "test_valid_cpi_gs1_key_4",
+            "uri": "urn:epc:id:cpi:06141412.123456.0",
+            "gs1_element_string": "(8010)06141412123456(8011)0",
+            "company_prefix_length": 8,
+        },
+    ],
+    invalid_data=[],
 ):
     pass
 

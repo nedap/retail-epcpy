@@ -13,11 +13,13 @@ from epcpy.utils.common import (
     encode_numeric_string,
     encode_partition_table,
     parse_header_and_truncate_binary,
+    revert_uri_escapes,
     str_to_binary,
 )
-from epcpy.utils.regex import SGCN_URI
+from epcpy.utils.regex import SGCN_GS1_ELEMENT_STRING, SGCN_URI
 
 SGCN_URI_REGEX = re.compile(SGCN_URI)
+SGCN_GS1_ELEMENT_STRING_REGEX = re.compile(SGCN_GS1_ELEMENT_STRING)
 
 
 PARTITION_TABLE_P = {
@@ -162,6 +164,23 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
             str: GS1 element string
         """
         return f"(255){self._gcn}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not SGCN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid SGCN GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[5:18]
+        chars = gs1_element_string[18:]
+        chars = revert_uri_escapes(chars)
+
+        return cls(
+            f"urn:epc:id:sgcn:{digits[:company_prefix_length]}.{digits[company_prefix_length:-1]}.{chars}"
+        )
 
     def tag_uri(
         self,

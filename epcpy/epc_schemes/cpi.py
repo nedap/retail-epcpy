@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element, TagEncodable
 from epcpy.utils.common import (
     ConvertException,
     binary_to_int,
@@ -12,9 +12,11 @@ from epcpy.utils.common import (
     parse_header_and_truncate_binary,
     str_to_binary,
 )
-from epcpy.utils.regex import CPI_URI
+from epcpy.utils.regex import CPI_GS1_ELEMENT_STRING, CPI_URI
 
 CPI_URI_REGEX = re.compile(CPI_URI)
+CPI_GS1_ELEMENT_STRING_REGEX = re.compile(CPI_GS1_ELEMENT_STRING)
+
 PARTITION_TABLE_P_96 = {
     0: {
         "P": 0,
@@ -163,6 +165,10 @@ def replace_cpi_escapes(cpi: str) -> str:
     return cpi.replace("%23", "#").replace("%2F", "/")
 
 
+def revert_cpi_escapes(cpi: str) -> str:
+    return cpi.replace("#", "%23").replace("/", "%2F")
+
+
 class CPI(EPCScheme, TagEncodable):
     """CPI EPC scheme implementation.
 
@@ -221,6 +227,22 @@ class CPI(EPCScheme, TagEncodable):
         cp_ref = replace_cpi_escapes(self._cp_ref)
 
         return f"(8010){self._company_pref}{cp_ref}(8011){self._serial}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Element:
+        if not CPI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid CPI GS1 element string {gs1_element_string}"
+            )
+
+        _, digits, serial_digits = re.split(f"\(.{{4}}\)", gs1_element_string)
+        chars = revert_cpi_escapes(digits[company_prefix_length:])
+
+        return cls(
+            f"urn:epc:id:cpi:{digits[:company_prefix_length]}.{chars}.{serial_digits}"
+        )
 
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingScheme, filter_value: CPIFilterValue

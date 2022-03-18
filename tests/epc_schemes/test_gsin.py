@@ -1,7 +1,7 @@
 import unittest
 
 from epcpy.epc_schemes.gsin import GSIN
-from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1KeyedMeta
+from tests.epc_schemes.test_base_scheme import TestEPCSchemeInitMeta, TestGS1ElementMeta
 
 
 class TestGSINInit(
@@ -70,43 +70,57 @@ class TestGSINInit(
 
 class TestGSINGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=GSIN,
     valid_data=[
         {
             "name": "test_valid_gsin_gs1_key_1",
             "uri": "urn:epc:id:gsin:0614141.123456789",
             "gs1_key": "06141411234567890",
+            "gs1_element_string": "(402)06141411234567890",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_gsin_gs1_key_2",
             "uri": "urn:epc:id:gsin:061414112345.0123",
             "gs1_key": "06141411234501238",
+            "gs1_element_string": "(402)06141411234501238",
+            "company_prefix_length": 12,
         },
         {
             "name": "test_valid_gsin_gs1_key_3",
             "uri": "urn:epc:id:gsin:061414.0123456789",
             "gs1_key": "06141401234567891",
+            "gs1_element_string": "(402)06141401234567891",
+            "company_prefix_length": 6,
         },
         {
             "name": "test_valid_gsin_gs1_key_4",
             "uri": "urn:epc:id:gsin:061414.0000000000",
             "gs1_key": "06141400000000006",
+            "gs1_element_string": "(402)06141400000000006",
+            "company_prefix_length": 6,
         },
         {
             "name": "test_valid_gsin_gs1_key_5",
             "uri": "urn:epc:id:gsin:000000.0000000000",
             "gs1_key": "00000000000000000",
+            "gs1_element_string": "(402)00000000000000000",
+            "company_prefix_length": 6,
         },
         {
             "name": "test_valid_gsin_gs1_key_6",
             "uri": "urn:epc:id:gsin:999999999999.9999",
             "gs1_key": "99999999999999992",
+            "gs1_element_string": "(402)99999999999999992",
+            "company_prefix_length": 12,
         },
         {
             "name": "test_valid_gsin_gs1_key_7",
             "uri": "urn:epc:id:gsin:999999.9999999999",
             "gs1_key": "99999999999999992",
+            "gs1_element_string": "(402)99999999999999992",
+            "company_prefix_length": 6,
         },
     ],
     invalid_data=[],

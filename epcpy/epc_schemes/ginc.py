@@ -4,11 +4,13 @@ from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
 from epcpy.utils.common import (
     ConvertException,
     replace_uri_escapes,
+    revert_uri_escapes,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import GINC_URI
+from epcpy.utils.regex import GINC_GS1_ELEMENT_STRING, GINC_URI
 
 GINC_URI_REGEX = re.compile(GINC_URI)
+GINC_GS1_ELEMENT_STRING_REGEX = re.compile(GINC_GS1_ELEMENT_STRING)
 
 
 class GINC(EPCScheme, GS1Keyed):
@@ -71,3 +73,18 @@ class GINC(EPCScheme, GS1Keyed):
             str: GS1 element string
         """
         return f"(401){self._ginc}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not GINC_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid GINC GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[5 : 5 + company_prefix_length]
+        chars = gs1_element_string[5 + company_prefix_length :]
+        chars = revert_uri_escapes(chars)
+
+        return cls(f"urn:epc:id:ginc:{digits}.{chars}")

@@ -13,6 +13,7 @@ class EPCScheme:
     Attributes:
         epc_uri (str): The EPC pure identity URI
     """
+
     def __init__(self) -> None:
         super().__init__()
         self.epc_uri = None
@@ -39,6 +40,7 @@ class TagEncodable:
         hex (str): Hexadecimal representation of the EPC tag URI
         base64 (str): Base64 representation of the EPC tag URI
     """
+
     TAG_URI_REGEX = re.compile(TAG_URI)
     TAG_URI_PREFIX = "urn:epc:tag:"
 
@@ -177,9 +179,25 @@ class GS1Keyed:
     Attributes:
         gs1_key (str): GS1 key of the EPC pure identity
     """
+
+
+class GS1Element:
     def __init__(self) -> None:
         super().__init__()
-        self._gs1_key = None
+
+    def gs1_element_string(self, *args, **kwargs) -> str:
+        raise NotImplementedError
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Element:
+        raise NotImplementedError
+
+
+class GS1Keyed(GS1Element):
+    def __init__(self) -> None:
+        super().__init__()
 
     def gs1_key(self, *args, **kwargs) -> str:
         """GS1 key of the given EPC scheme

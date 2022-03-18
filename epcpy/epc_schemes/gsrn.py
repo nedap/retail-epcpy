@@ -13,9 +13,10 @@ from epcpy.utils.common import (
     parse_header_and_truncate_binary,
     str_to_binary,
 )
-from epcpy.utils.regex import GSRN_URI
+from epcpy.utils.regex import GSRN_GS1_ELEMENT_STRING, GSRN_URI
 
 GSRN_URI_REGEX = re.compile(GSRN_URI)
+GSRN_GS1_ELEMENT_STRING_REGEX = re.compile(GSRN_GS1_ELEMENT_STRING)
 
 
 PARTITION_TABLE_P = {
@@ -157,6 +158,21 @@ class GSRN(EPCScheme, TagEncodable, GS1Keyed):
             str: GS1 element string
         """
         return f"(8018){self._gsrn}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not GSRN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid GSRN GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[6:]
+
+        return cls(
+            f"urn:epc:id:gsrn:{digits[:company_prefix_length]}.{digits[company_prefix_length:-1]}"
+        )
 
     def tag_uri(
         self,

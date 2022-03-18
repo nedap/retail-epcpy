@@ -14,12 +14,14 @@ from epcpy.utils.common import (
     encode_string,
     parse_header_and_truncate_binary,
     replace_uri_escapes,
+    revert_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import GRAI_URI
+from epcpy.utils.regex import GRAI_GS1_ELEMENT_STRING, GRAI_URI
 
 GRAI_URI_REGEX = re.compile(GRAI_URI)
+GRAI_GS1_ELEMENT_STRING_REGEX = re.compile(GRAI_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -164,6 +166,23 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
             str: GS1 element string
         """
         return f"(8003)0{self._grai}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not GRAI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid GRAI GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[7:20]
+        chars = gs1_element_string[20:]
+        chars = revert_uri_escapes(chars)
+
+        return cls(
+            f"urn:epc:id:grai:{digits[:company_prefix_length]}.{digits[company_prefix_length:-1]}.{chars}"
+        )
 
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingScheme, filter_value: GRAIFilterValue

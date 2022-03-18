@@ -13,10 +13,10 @@ from epcpy.utils.common import (
     parse_header_and_truncate_binary,
     str_to_binary,
 )
-from epcpy.utils.regex import SSCC_URI
+from epcpy.utils.regex import SSCC_GS1_ELEMENT_STRING, SSCC_URI
 
 SSCC_URI_REGEX = re.compile(SSCC_URI)
-
+SSCC_GS1_ELEMENT_STRING_REGEX = re.compile(SSCC_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -161,6 +161,21 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
             str: GS1 element string
         """
         return f"(00){self._sscc}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not SSCC_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid SSCC GS1 element string {gs1_element_string}"
+            )
+
+        _, digits = re.split(f"\(.{{2}}\)", gs1_element_string)
+
+        return cls(
+            f"urn:epc:id:sscc:{digits[1:company_prefix_length+1]}.{digits[0]}{digits[1+company_prefix_length:-1]}"
+        )
 
     def tag_uri(
         self,

@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.sgln import SGLN, SGLNFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -70,43 +70,57 @@ class TestSGLNInit(
 
 class TestSGLNGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=SGLN,
     valid_data=[
         {
             "name": "test_valid_sgln_gs1_key_1",
             "uri": "urn:epc:id:sgln:0614141.12345.400",
             "gs1_key": "0614141123452",
+            "gs1_element_string": "(414)0614141123452(254)400",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_sgln_gs1_key_2",
             "uri": "urn:epc:id:sgln:0614141.12345.0",
             "gs1_key": "0614141123452",
+            "gs1_element_string": "(414)0614141123452(254)0",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_sgln_gs1_key_3",
             "uri": "urn:epc:id:sgln:0614141.12345.01",
             "gs1_key": "0614141123452",
+            "gs1_element_string": "(414)0614141123452(254)01",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_sgln_gs1_key_4",
             "uri": "urn:epc:id:sgln:061411.012345.01",
             "gs1_key": "0614110123452",
+            "gs1_element_string": "(414)0614110123452(254)01",
+            "company_prefix_length": 6,
         },
         {
             "name": "test_valid_sgln_gs1_key_5",
             "uri": "urn:epc:id:sgln:061411123456..01",
             "gs1_key": "0614111234560",
+            "gs1_element_string": "(414)0614111234560(254)01",
+            "company_prefix_length": 12,
         },
         {
             "name": "test_valid_sgln_gs1_key_6",
             "uri": "urn:epc:id:sgln:061411123456..A%2F-BCDEFGHIJKLMNOPQR",
             "gs1_key": "0614111234560",
+            "gs1_element_string": "(414)0614111234560(254)A/-BCDEFGHIJKLMNOPQR",
+            "company_prefix_length": 12,
         },
         {
             "name": "test_valid_sgln_gs1_key_7",
             "uri": "urn:epc:id:sgln:061411123456..2199023255552",
             "gs1_key": "0614111234560",
+            "gs1_element_string": "(414)0614111234560(254)2199023255552",
+            "company_prefix_length": 12,
         },
     ],
     invalid_data=[],
