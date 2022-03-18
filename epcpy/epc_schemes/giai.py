@@ -11,12 +11,14 @@ from epcpy.utils.common import (
     encode_partition_table,
     parse_header_and_truncate_binary,
     replace_uri_escapes,
+    revert_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import GIAI_URI
+from epcpy.utils.regex import GIAI_GS1_ELEMENT_STRING, GIAI_URI
 
 GIAI_URI_REGEX = re.compile(GIAI_URI)
+GIAI_GS1_ELEMENT_STRING_REGEX = re.compile(GIAI_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P_96 = {
     0: {
@@ -193,6 +195,21 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
 
     def gs1_element_string(self) -> str:
         return f"(8004){self._giai}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not GIAI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid GIAI GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[6 : 6 + company_prefix_length]
+        chars = gs1_element_string[6 + company_prefix_length :]
+        chars = revert_uri_escapes(chars)
+
+        return cls(f"urn:epc:id:giai:{digits}.{chars}")
 
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingScheme, filter_value: GIAIFilterValue

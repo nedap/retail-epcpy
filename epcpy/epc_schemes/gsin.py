@@ -2,9 +2,10 @@ import re
 
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
 from epcpy.utils.common import ConvertException
-from epcpy.utils.regex import GSIN_URI
+from epcpy.utils.regex import GSIN_GS1_ELEMENT_STRING, GSIN_URI
 
 GSIN_URI_REGEX = re.compile(GSIN_URI)
+GSIN_GS1_ELEMENT_STRING_REGEX = re.compile(GSIN_GS1_ELEMENT_STRING)
 
 
 def calculate_checksum(digits: str) -> int:
@@ -44,4 +45,19 @@ class GSIN(EPCScheme, GS1Keyed):
         return self._gsin
 
     def gs1_element_string(self) -> str:
-        return f"(401){self._gsin}"
+        return f"(402){self._gsin}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not GSIN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid GSIN GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[5:-1]
+
+        return cls(
+            f"urn:epc:id:gsin:{digits[:company_prefix_length]}.{digits[company_prefix_length:]}"
+        )

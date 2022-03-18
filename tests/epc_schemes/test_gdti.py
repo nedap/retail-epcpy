@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.gdti import GDTI, GDTIFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -66,28 +66,36 @@ class TestGDTIInit(
 
 class TestGDTIGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=GDTI,
     valid_data=[
         {
             "name": "test_valid_gdti_gs1_key_1",
             "uri": "urn:epc:id:gdti:0614141.12345.ABCD1234%2F",
             "gs1_key": "0614141123452ABCD1234/",
+            "gs1_element_string": "(253)0614141123452ABCD1234/",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_gdti_gs1_key_2",
             "uri": "urn:epc:id:gdti:0614141.12345.40000000000000000",
             "gs1_key": "061414112345240000000000000000",
+            "gs1_element_string": "(253)061414112345240000000000000000",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_gdti_gs1_key_3",
             "uri": "urn:epc:id:gdti:0614141.12345.0",
             "gs1_key": "06141411234520",
+            "gs1_element_string": "(253)06141411234520",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_gdti_gs1_key_4",
             "uri": "urn:epc:id:gdti:061414.123451.40000000000000000",
             "gs1_key": "061414123451640000000000000000",
+            "gs1_element_string": "(253)061414123451640000000000000000",
+            "company_prefix_length": 6,
         },
     ],
     invalid_data=[],

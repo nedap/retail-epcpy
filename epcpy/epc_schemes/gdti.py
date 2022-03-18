@@ -14,12 +14,14 @@ from epcpy.utils.common import (
     encode_string,
     parse_header_and_truncate_binary,
     replace_uri_escapes,
+    revert_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import GDTI_URI
+from epcpy.utils.regex import GDTI_GS1_ELEMENT_STRING, GDTI_URI
 
 GDTI_URI_REGEX = re.compile(GDTI_URI)
+GDTI_GS1_ELEMENT_STRING_REGEX = re.compile(GDTI_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -134,6 +136,23 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
 
     def gs1_element_string(self) -> str:
         return f"(253){self._gdti}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Keyed:
+        if not GDTI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid GDTI GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[5:18]
+        chars = gs1_element_string[18:]
+        chars = revert_uri_escapes(chars)
+
+        return cls(
+            f"urn:epc:id:gdti:{digits[:company_prefix_length]}.{digits[company_prefix_length:-1]}.{chars}"
+        )
 
     def tag_uri(
         self,

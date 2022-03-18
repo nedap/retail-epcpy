@@ -1,18 +1,20 @@
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCScheme
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element
 from epcpy.utils.common import (
     ConvertException,
     calculate_checksum,
     replace_uri_escapes,
+    revert_uri_escapes,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import UPUI_URI
+from epcpy.utils.regex import UPUI_GS1_ELEMENT_STRING, UPUI_URI
 
 UPUI_URI_REGEX = re.compile(UPUI_URI)
+UPUI_GS1_ELEMENT_STRING_REGEX = re.compile(UPUI_GS1_ELEMENT_STRING)
 
 
-class UPUI(EPCScheme):
+class UPUI(EPCScheme, GS1Element):
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -35,12 +37,27 @@ class UPUI(EPCScheme):
                 message=f"Wrong company prefix + item ref size (!=13)"
             )
 
+        self.epc_uri = epc_uri
+
+    def gs1_element_string(self) -> str:
         check_digit = calculate_checksum(
             f"{self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}"
         )
+        return f"(01){self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}{check_digit}(235){self._tpx}"
 
-        self.epc_uri = epc_uri
-        self._gs1_element_string = f"(01){self._item_ref[0]}{self._company_pref}{self._item_ref[1:]}{check_digit}(235){self._tpx}"
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GS1Element:
+        if not UPUI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid UPUI GS1 element string {gs1_element_string}"
+            )
 
-    def gs1_element_string(self) -> str:
-        return self._gs1_element_string
+        digits = gs1_element_string[4:18]
+        chars = gs1_element_string[23:]
+        chars = revert_uri_escapes(chars)
+
+        return cls(
+            f"urn:epc:id:upui:{digits[1:1+company_prefix_length]}.{digits[0]}{digits[1+company_prefix_length:-1]}.{chars}"
+        )

@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.sscc import SSCC, SSCCFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -50,28 +50,36 @@ class TestSSCCInit(
 
 class TestSSCCGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=SSCC,
     valid_data=[
         {
             "name": "test_valid_sscc_gs1_key_1",
             "uri": "urn:epc:id:sscc:0614141.1234567890",
             "gs1_key": "106141412345678908",
+            "gs1_element_string": "(00)106141412345678908",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_sscc_gs1_key_2",
             "uri": "urn:epc:id:sscc:061414.12345678901",
             "gs1_key": "106141423456789018",
+            "gs1_element_string": "(00)106141423456789018",
+            "company_prefix_length": 6,
         },
         {
             "name": "test_valid_sscc_gs1_key_3",
             "uri": "urn:epc:id:sscc:061414123456.12345",
             "gs1_key": "106141412345623458",
+            "gs1_element_string": "(00)106141412345623458",
+            "company_prefix_length": 12,
         },
         {
             "name": "test_valid_sscc_gs1_key_4",
             "uri": "urn:epc:id:sscc:061414123456.00000",
             "gs1_key": "006141412345600001",
+            "gs1_element_string": "(00)006141412345600001",
+            "company_prefix_length": 12,
         },
     ],
     invalid_data=[],
