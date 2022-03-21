@@ -67,21 +67,8 @@ TAG_ENCODABLE_SCHEME_IDENTIFIERS = {
 }
 
 
-def ignore_errors(func: Callable[..., Any], *args, **kwargs) -> Any:
-    """Helper function to support large scale conversions where its fine to have some invalid URIs.
-    Does log the exception on debug level.
 
-    Args:
-        func (Callable[..., Any]): Function to execute
 
-    Returns:
-        Any: Value from the provided function
-    """
-    try:
-        return func(*args, **kwargs)
-    except ConvertException as e:
-        logging.debug(e)
-        return None
 
 
 def epc_pure_identity_to_scheme(epc_pure_identity_uri: str) -> EPCScheme:
@@ -186,6 +173,23 @@ def epc_pure_identity_to_tag_encodable(epc_pure_identity_uri: str) -> TagEncodab
         raise ConvertException(message="EPC URI is not tag encodable")
 
     return scheme
+
+
+    """
+    for regex, scheme in GS1_ELEMENT_STRING_REGEX_TO_SCHEME.items():
+        if regex.fullmatch(gs1_element_string):
+            return scheme.from_gs1_element_string(
+                gs1_element_string, company_prefix_length
+            )
+
+    raise ConvertException(message=f"Unknown GS1 element string: {gs1_element_string}")
+
+
+def idpat_to_gs1_key(idpat: str) -> str:
+    identifier = idpat.split(":")[3]
+
+    if identifier not in GS1_KEYED_CLASSES:
+        raise ConvertException(message="Unknown GS1Keyed identifier")
 
 
 def tag_uri_to_tag_encodable(epc_tag_uri: str) -> TagEncodable:
