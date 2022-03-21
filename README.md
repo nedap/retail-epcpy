@@ -2,6 +2,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI version](https://badge.fury.io/py/epcpy.svg)](https://badge.fury.io/py/epcpy)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/epcpy.svg)](https://pypi.org/project/epcpy/)
 
 
 A Python module for creation, validation, and transformation of EPC representations as defined in GS1's EPC Tag Data Standard (https://www.gs1.org/standards/rfid/tds).
@@ -156,6 +157,18 @@ from epcpy import hex_to_epc
 hex_to_epc("36300001DB011169E5E5A70EC000000000000000000000000000")
 ```
 
+The following parsers are available:
+- `base64_to_tag_encodable`
+- `binary_to_tag_encodable`
+- `epc_pure_identity_to_gs1_element`
+- `epc_pure_identity_to_gs1_element_string`
+- `epc_pure_identity_to_gs1_key`
+- `epc_pure_identity_to_gs1_keyed`
+- `epc_pure_identity_to_scheme`
+- `epc_pure_identity_to_tag_encodable`
+- `hex_to_tag_encodable`
+- `tag_uri_to_tag_encodable`
+
 ## Development
 
 This project uses [Poetry](https://python-poetry.org/) for project management.
@@ -166,7 +179,7 @@ After cloning run `poetry install` to install (development) dependencies.
 This module uses the Python unittest library. Run `poetry run tests` for running the tests.
 
 ### Coverage
-Run `poetry run coverage run -m unittest discover` to execute all tests with coverage. The resulting coverage can be reported using `poetry run coverage report` for a textual view the terminal and with `poetry run coverage html` for a webpage.
+Run `poetry run coverage run -m unittest discover` to execute all tests with coverage. The resulting coverage can be reported using `poetry run coverage report --omit="*/test*"` for a textual view the terminal and with `poetry run coverage html --omit="*/test*"` for a webpage.
 
 ### Notebook
 There is a sample notebook included in this repository, which can be used to quickly get a hands-on experience with the repository. The notebook might not be completely up-to-date and requires the `jupyter` package to run, which can be installed using `pip install jupyter`.

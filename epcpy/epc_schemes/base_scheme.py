@@ -18,6 +18,20 @@ class EPCScheme:
         super().__init__()
         self.epc_uri = None
 
+    def __eq__(self, other: object) -> bool:
+        """Verify equality of two classes by validing if its an EPCScheme and whether the EPC URIs are equal.
+
+        Args:
+            other (object): Other object to compare against
+
+        Returns:
+            bool: Whether the other object is equal to this object
+        """
+        if not isinstance(other, EPCScheme):
+            return False
+
+        return self.epc_uri == other.epc_uri
+
     @classmethod
     def from_epc_uri(cls, epc_uri: str) -> EPCScheme:
         """Instantiate an EPCScheme class from an EPC pure identity URI.

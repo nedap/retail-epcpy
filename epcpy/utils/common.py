@@ -2,7 +2,7 @@ import base64
 import re
 from enum import Enum
 from math import inf, log
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Dict, List, Tuple
 
 from epcpy.utils.regex import VERIFY_GS3A3_CHARS
 
@@ -26,21 +26,6 @@ class ConvertException(Exception):
     def __init__(self, *args: object, message="") -> None:
         self.message = message
         super().__init__(self.message, *args)
-
-
-def ignore_errors_during_conversion(func: Callable[..., Any], *args, **kwargs) -> Any:
-    """Helper function to support large scale conversions where its fine to have some invalid URIs.
-
-    Args:
-        func (Callable[..., Any]): Function to execute
-
-    Returns:
-        Any: Value from the provided function
-    """
-    try:
-        return func(*args, **kwargs)
-    except ConvertException:
-        return None
 
 
 def replace_uri_escapes(uri: str) -> str:
