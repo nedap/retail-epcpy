@@ -7,7 +7,6 @@ from .utils.parsers import (
     epc_pure_identity_to_gs1_keyed,
     epc_pure_identity_to_scheme,
     epc_pure_identity_to_tag_encodable,
-    get_gs1_key,
     hex_to_tag_encodable,
     tag_uri_to_tag_encodable,
 )
