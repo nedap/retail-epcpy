@@ -24,6 +24,7 @@ from epcpy.epc_schemes.upui import UPUI
 from epcpy.epc_schemes.usdod import USDOD
 from epcpy.utils.common import ConvertException, base64_to_hex, hex_to_binary
 from epcpy.utils.regex import (
+    BINARY_HEADERS,
     CPI_GS1_ELEMENT_STRING,
     EPC_URI,
     GDTI_GS1_ELEMENT_STRING,
@@ -34,6 +35,7 @@ from epcpy.utils.regex import (
     GSIN_GS1_ELEMENT_STRING,
     GSRN_GS1_ELEMENT_STRING,
     GSRNP_GS1_ELEMENT_STRING,
+    HEX_HEADERS,
     IDPAT_URI,
     ITIP_GS1_ELEMENT_STRING,
     PGLN_GS1_ELEMENT_STRING,
@@ -49,6 +51,8 @@ EPC_URI_REGEX = re.compile(EPC_URI)
 GS1_ELEMENT_STRING_REGEX = re.compile(GS1_ELEMENT_STRING)
 IDPAT_URI_REGEX = re.compile(IDPAT_URI)
 TAG_URI_REGEX = re.compile(TAG_URI)
+BINARY_HEADERS_REGEX = re.compile(BINARY_HEADERS)
+HEX_HEADERS_REGEX = re.compile(HEX_HEADERS)
 
 GS1_ELEMENT_STRING_REGEX_TO_SCHEME: Union[re.Pattern, GS1Element] = {
     re.compile(SGTIN_GS1_ELEMENT_STRING): SGTIN,
@@ -136,6 +140,10 @@ def get_gs1_key(source: str, company_prefix_length: int = None, **kwargs) -> str
         scheme = tag_uri_to_tag_encodable(source)
     elif IDPAT_URI_REGEX.fullmatch(source):
         scheme = idpat_to_gs1_keyed_scheme(source)
+    elif BINARY_HEADERS_REGEX.fullmatch(source[:8]):
+        scheme = binary_to_tag_encodable(source)
+    elif HEX_HEADERS_REGEX.fullmatch(source[:2]):
+        scheme = hex_to_tag_encodable(source)
 
     if not isinstance(scheme, GS1Keyed):
         raise ConvertException(
