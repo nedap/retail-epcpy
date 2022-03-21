@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import List, Union
 
 from epcpy.epc_schemes.adi import ADI
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element, GS1Keyed, TagEncodable
@@ -23,10 +23,50 @@ from epcpy.epc_schemes.sscc import SSCC
 from epcpy.epc_schemes.upui import UPUI
 from epcpy.epc_schemes.usdod import USDOD
 from epcpy.utils.common import ConvertException, base64_to_hex, hex_to_binary
-from epcpy.utils.regex import TAG_URI
+from epcpy.utils.regex import (
+    CPI_GS1_ELEMENT_STRING,
+    EPC_URI,
+    GDTI_GS1_ELEMENT_STRING,
+    GIAI_GS1_ELEMENT_STRING,
+    GINC_GS1_ELEMENT_STRING,
+    GRAI_GS1_ELEMENT_STRING,
+    GS1_ELEMENT_STRING,
+    GSIN_GS1_ELEMENT_STRING,
+    GSRN_GS1_ELEMENT_STRING,
+    GSRNP_GS1_ELEMENT_STRING,
+    IDPAT_URI,
+    ITIP_GS1_ELEMENT_STRING,
+    PGLN_GS1_ELEMENT_STRING,
+    SGCN_GS1_ELEMENT_STRING,
+    SGLN_GS1_ELEMENT_STRING,
+    SGTIN_GS1_ELEMENT_STRING,
+    SSCC_GS1_ELEMENT_STRING,
+    TAG_URI,
+    UPUI_GS1_ELEMENT_STRING,
+)
 
+EPC_URI_REGEX = re.compile(EPC_URI)
+GS1_ELEMENT_STRING_REGEX = re.compile(GS1_ELEMENT_STRING)
+IDPAT_URI_REGEX = re.compile(IDPAT_URI)
 TAG_URI_REGEX = re.compile(TAG_URI)
 
+GS1_ELEMENT_STRING_REGEX_TO_SCHEME: Union[re.Pattern, GS1Element] = {
+    re.compile(SGTIN_GS1_ELEMENT_STRING): SGTIN,
+    re.compile(SSCC_GS1_ELEMENT_STRING): SSCC,
+    re.compile(SGLN_GS1_ELEMENT_STRING): SGLN,
+    re.compile(GRAI_GS1_ELEMENT_STRING): GRAI,
+    re.compile(GIAI_GS1_ELEMENT_STRING): GIAI,
+    re.compile(GSRN_GS1_ELEMENT_STRING): GSRN,
+    re.compile(GSRNP_GS1_ELEMENT_STRING): GSRNP,
+    re.compile(GDTI_GS1_ELEMENT_STRING): GDTI,
+    re.compile(CPI_GS1_ELEMENT_STRING): CPI,
+    re.compile(SGCN_GS1_ELEMENT_STRING): SGCN,
+    re.compile(GINC_GS1_ELEMENT_STRING): GINC,
+    re.compile(GSIN_GS1_ELEMENT_STRING): GSIN,
+    re.compile(ITIP_GS1_ELEMENT_STRING): ITIP,
+    re.compile(UPUI_GS1_ELEMENT_STRING): UPUI,
+    re.compile(PGLN_GS1_ELEMENT_STRING): PGLN,
+}
 EPC_SCHEMES: List[EPCScheme] = [
     ADI,
     BIC,
@@ -64,6 +104,45 @@ EPC_SCHEME_IDENTIFIERS = {cls.__name__.lower(): cls for cls in EPC_SCHEMES}
 TAG_ENCODABLE_SCHEME_IDENTIFIERS = {
     cls.__name__.lower(): cls for cls in TAG_ENCODABLE_CLASSES
 }
+GS1_KEYED_SCHEME_IDENTIFIERS = {cls.__name__.lower(): cls for cls in GS1_KEYED_CLASSES}
+
+
+def get_gs1_key(source: str, company_prefix_length: int = None, **kwargs) -> str:
+    """Get the GS1 key belonging to the source string.
+    This method can identify and parse:
+    - EPC pure identity URIs
+    - EPC tag URIs
+    - GS1 element strings (company_prefix_length should be provided)
+    - IDPAT URIs
+
+    Args:
+        source (str): Source string
+        company_prefix_length (int, optional): Company prefix length, required for gs1 element strings.
+            Defaults to None.
+
+    Raises:
+        ConvertException: Source could not be converted to GS1 key
+
+    Returns:
+        str: GS1 key of source string
+    """
+    scheme = None
+
+    if EPC_URI_REGEX.fullmatch(source):
+        scheme = epc_pure_identity_to_scheme(source)
+    elif GS1_ELEMENT_STRING_REGEX.fullmatch(source):
+        scheme = gs1_element_string_to_gs1_element(source, company_prefix_length)
+    elif TAG_URI_REGEX.fullmatch(source):
+        scheme = tag_uri_to_tag_encodable(source)
+    elif IDPAT_URI_REGEX.fullmatch(source):
+        scheme = idpat_to_gs1_keyed_scheme(source)
+
+    if not isinstance(scheme, GS1Keyed):
+        raise ConvertException(
+            message="Source could not be converted to proper GS1Keyed scheme"
+        )
+
+    return scheme.gs1_key(**kwargs)
 
 
 def epc_pure_identity_to_scheme(epc_pure_identity_uri: str) -> EPCScheme:
@@ -168,6 +247,71 @@ def epc_pure_identity_to_tag_encodable(epc_pure_identity_uri: str) -> TagEncodab
         raise ConvertException(message="EPC URI is not tag encodable")
 
     return scheme
+
+
+def gs1_element_string_to_gs1_element(
+    gs1_element_string: str, company_prefix_length: int
+) -> GS1Element:
+    """EPC gs1 element string to GS1Element class
+
+    Args:
+        gs1_element_string (str): GS1 element string
+
+    Raises:
+        ConvertException: Scheme is not GS1Element
+
+    Returns:
+        GS1Element: GS1Element class for this gs1 element string
+    """
+    for regex, scheme in GS1_ELEMENT_STRING_REGEX_TO_SCHEME.items():
+        if regex.fullmatch(gs1_element_string):
+            return scheme.from_gs1_element_string(
+                gs1_element_string, company_prefix_length
+            )
+
+    raise ConvertException(message=f"Unknown GS1 element string: {gs1_element_string}")
+
+
+MAX_ALLOWED_PATTERNS = {
+    "sgtin": 1,
+    "sgln": 1,
+    "grai": 1,
+    "gdti": 1,
+    "cpi": 1,
+}
+
+
+def idpat_to_gs1_keyed_scheme(idpat: str) -> GS1Keyed:
+    """Create a GS1Keyed scheme from an IDPAT URI
+    Since an IDPAT can target a group of EPCs, the returned scheme should only be used for the GS1 key.
+
+    Args:
+        idpat (str): ID pattern URI
+
+    Returns:
+        GS1Keyed: GS1 keyed scheme
+    """
+    identifier = idpat.split(":")[3]
+
+    if identifier not in GS1_KEYED_SCHEME_IDENTIFIERS:
+        raise ConvertException(message="Unknown GS1Keyed identifier")
+
+    # Create URI from idpat
+    uri = idpat.replace("idpat", "id", 1)
+
+    # URI already matches existing scheme
+    if EPC_URI_REGEX.fullmatch(uri):
+        return GS1_KEYED_SCHEME_IDENTIFIERS[identifier].from_epc_uri(uri)
+
+    if identifier not in MAX_ALLOWED_PATTERNS:
+        raise ConvertException(message="URI exceeds maximum number of escaped patterns")
+
+    # Create URI with dummy serial to create GS1 key
+    dummy_uri = re.sub("\.\*$", ".0", uri, 1)
+    if EPC_URI_REGEX.fullmatch(dummy_uri):
+        return GS1_KEYED_SCHEME_IDENTIFIERS[identifier].from_epc_uri(dummy_uri)
+
+    raise ConvertException(message="Could not create valid scheme from given id pat")
 
 
 def tag_uri_to_tag_encodable(epc_tag_uri: str) -> TagEncodable:
