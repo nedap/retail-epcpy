@@ -150,13 +150,12 @@ SGTIN.from_hex("36300001DB011169E5E5A70EC000000000000000000000000000")
 ```
 
 ### Generic parsing
-When dealing with arbitrary tags epcpy also provides generic parsing options
+When dealing with arbitrary tags epcpy also provides generic parsing options.
 ```python
 from epcpy import hex_to_epc
 
 hex_to_epc("36300001DB011169E5E5A70EC000000000000000000000000000")
 ```
-
 The following parsers are available:
 - `base64_to_tag_encodable`
 - `binary_to_tag_encodable`
@@ -168,6 +167,27 @@ The following parsers are available:
 - `epc_pure_identity_to_tag_encodable`
 - `hex_to_tag_encodable`
 - `tag_uri_to_tag_encodable`
+
+Alternatively, the `get_gs1_key` method can be used to distill the GS1 key from a given string.
+```python
+from epcpy import get_gs1_key
+
+get_gs1_key("36300001DB011169E5E5A70EC000000000000000000000000000")
+# 00000095010939
+
+get_gs1_key("urn:epc:tag:sgtin-198:1.00000950.01093.Serial")
+# 00000095010939
+
+get_gs1_key("urn:epc:idpat:sgtin:00000950.01093.*")
+# 00000095010939
+```
+`get_gs1_key` is able to parse the following sources:
+- EPC pure identity URIs
+- EPC tag URIs
+- GS1 element strings (company_prefix_length should be provided)
+- EPC id pattern URIs
+- Binary strings
+- Hexadecimal strings
 
 ## Development
 
