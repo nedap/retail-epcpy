@@ -1,6 +1,5 @@
-import logging
 import re
-from typing import Any, Callable, List
+from typing import List
 
 from epcpy.epc_schemes.adi import ADI
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element, GS1Keyed, TagEncodable
@@ -65,10 +64,6 @@ EPC_SCHEME_IDENTIFIERS = {cls.__name__.lower(): cls for cls in EPC_SCHEMES}
 TAG_ENCODABLE_SCHEME_IDENTIFIERS = {
     cls.__name__.lower(): cls for cls in TAG_ENCODABLE_CLASSES
 }
-
-
-
-
 
 
 def epc_pure_identity_to_scheme(epc_pure_identity_uri: str) -> EPCScheme:
@@ -173,23 +168,6 @@ def epc_pure_identity_to_tag_encodable(epc_pure_identity_uri: str) -> TagEncodab
         raise ConvertException(message="EPC URI is not tag encodable")
 
     return scheme
-
-
-    """
-    for regex, scheme in GS1_ELEMENT_STRING_REGEX_TO_SCHEME.items():
-        if regex.fullmatch(gs1_element_string):
-            return scheme.from_gs1_element_string(
-                gs1_element_string, company_prefix_length
-            )
-
-    raise ConvertException(message=f"Unknown GS1 element string: {gs1_element_string}")
-
-
-def idpat_to_gs1_key(idpat: str) -> str:
-    identifier = idpat.split(":")[3]
-
-    if identifier not in GS1_KEYED_CLASSES:
-        raise ConvertException(message="Unknown GS1Keyed identifier")
 
 
 def tag_uri_to_tag_encodable(epc_tag_uri: str) -> TagEncodable:
