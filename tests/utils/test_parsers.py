@@ -8,7 +8,6 @@ from epcpy import (
     epc_pure_identity_to_scheme,
     epc_pure_identity_to_tag_encodable,
     hex_to_tag_encodable,
-    ignore_errors,
     tag_uri_to_tag_encodable,
 )
 from epcpy.epc_schemes.adi import ADI
@@ -360,5 +359,3 @@ class TestParsersInvalid(unittest.TestCase):
         with self.assertRaises(ConvertException):
             tag_uri_to_tag_encodable("urn:epc:tag:imovn-96:0.9176187")
 
-    def test_ignore_errors(self):
-        ignore_errors(tag_uri_to_tag_encodable, "urn:epc:tag:imovn-96:0.9176187")

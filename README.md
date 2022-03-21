@@ -20,7 +20,6 @@ A Python module for creation, validation, and transformation of EPC representati
       - [GS1Keyed](#gs1keyed)
       - [Tag encoded](#tag-encoded)
     - [Generic parsing](#generic-parsing)
-    - [Ignore errors](#ignore-errors)
   - [Development](#development)
     - [Testing](#testing)
     - [Coverage](#coverage)
@@ -169,14 +168,6 @@ The following parsers are available:
 - `epc_pure_identity_to_tag_encodable`
 - `hex_to_tag_encodable`
 - `tag_uri_to_tag_encodable`
-
-### Ignore errors
-In case you want to convert a large list of EPC URIs of which some might not be valid, the function `ignore_errors` catches `ConvertException` and returns `None` instead.
-```python
-from epcpy import ignore_errors, epc_pure_identity_to_scheme
-
-ignore_errors(epc_pure_identity_to_scheme, "urn:epc:id:sgtin:0.0.0")
-```
 
 ## Development
 
