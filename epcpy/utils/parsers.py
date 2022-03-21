@@ -118,6 +118,8 @@ def get_gs1_key(source: str, company_prefix_length: int = None, **kwargs) -> str
     - EPC tag URIs
     - GS1 element strings (company_prefix_length should be provided)
     - IDPAT URIs
+    - Binary strings
+    - Hexadecimal strings
 
     Args:
         source (str): Source string
