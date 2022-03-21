@@ -8,6 +8,7 @@ from epcpy import (
     epc_pure_identity_to_scheme,
     epc_pure_identity_to_tag_encodable,
     hex_to_tag_encodable,
+    ignore_errors,
     tag_uri_to_tag_encodable,
 )
 from epcpy.epc_schemes.adi import ADI
@@ -53,8 +54,9 @@ VALID_TEST_DATA = [
         "scheme": CPI,
         "tag_encodable": True,
         "gs1_keyed": False,
-        "gs1_element": False,
+        "gs1_element": True,
         "uri": "urn:epc:id:cpi:0614141.12-456.123456789",
+        "gs1_element_string": "(8010)061414112-456(8011)123456789",
         "tag_uri": "urn:epc:tag:cpi-var:0.0614141.12-456.123456789",
         "hex": "3D14257BF71CADD35D8000075BCD1500",
     },
@@ -254,7 +256,7 @@ VALID_TEST_DATA = [
 ]
 
 
-class TestParsers(unittest.TestCase):
+class TestParsersValid(unittest.TestCase):
     def test_epc_pure_identity_to_scheme(self):
         for epc in VALID_TEST_DATA:
             expected_scheme = epc["scheme"].from_epc_uri(epc["uri"])
@@ -319,3 +321,44 @@ class TestParsers(unittest.TestCase):
                 actual_scheme = hex_to_tag_encodable(epc["hex"])
 
                 self.assertEqual(expected_scheme, actual_scheme)
+
+
+class TestParsersInvalid(unittest.TestCase):
+    def test_invalid_epc_pure_identity_to_gs1_element(self):
+        with self.assertRaises(ConvertException):
+            epc_pure_identity_to_gs1_element("urn:epc:id:adi:W81X9C.3KL984PX1.2WMA-52")
+
+    def test_invalid_epc_pure_identity_to_gs1_element_string(self):
+        with self.assertRaises(ConvertException):
+            epc_pure_identity_to_gs1_element_string("urn:epc:id:bic:CSQJ3054381")
+
+    def test_invalid_epc_pure_identity_to_gs1_key(self):
+        with self.assertRaises(ConvertException):
+            epc_pure_identity_to_gs1_key(
+                "urn:epc:id:itip:012345678901.0.00.00.ABCDEFGHIJKLMNOP%2FRST"
+            )
+
+    def test_invalid_epc_pure_identity_to_gs1_keyed(self):
+        with self.assertRaises(ConvertException):
+            epc_pure_identity_to_gs1_keyed(
+                "urn:epc:id:upui:1234567.089456.51qIgY)%3C%26Jp3*j7'SDB"
+            )
+
+    def test_invalid_epc_pure_identity_to_scheme(self):
+        with self.assertRaises(ConvertException):
+            epc_pure_identity_to_scheme("urn:epc:id:dod:2S194.68719476735")
+
+    def test_invalid_epc_pure_identity_to_tag_encodable(self):
+        with self.assertRaises(ConvertException):
+            epc_pure_identity_to_tag_encodable("urn:epc:id:pgln:0123456789.01")
+
+    def test_invalid_hex_to_tag_encodable(self):
+        with self.assertRaises(ConvertException):
+            hex_to_tag_encodable("3AFFFFFFFFFFFFFFFFFFFFFF")
+
+    def test_invalid_tag_uri_to_tag_encodable(self):
+        with self.assertRaises(ConvertException):
+            tag_uri_to_tag_encodable("urn:epc:tag:imovn-96:0.9176187")
+
+    def test_ignore_errors(self):
+        ignore_errors(tag_uri_to_tag_encodable, "urn:epc:tag:imovn-96:0.9176187")
