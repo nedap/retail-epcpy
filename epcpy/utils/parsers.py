@@ -141,7 +141,7 @@ def get_gs1_key(source: str, company_prefix_length: int = None, **kwargs) -> str
     elif TAG_URI_REGEX.fullmatch(source):
         scheme = tag_uri_to_tag_encodable(source)
     elif IDPAT_URI_REGEX.fullmatch(source):
-        scheme = idpat_to_gs1_keyed_scheme(source)
+        scheme = _idpat_to_gs1_keyed_scheme(source)
     elif BINARY_HEADERS_REGEX.fullmatch(source[:8]):
         scheme = binary_to_tag_encodable(source)
     elif HEX_HEADERS_REGEX.fullmatch(source[:2]):
@@ -291,7 +291,7 @@ MAX_ALLOWED_PATTERNS = {
 }
 
 
-def idpat_to_gs1_keyed_scheme(idpat: str) -> GS1Keyed:
+def _idpat_to_gs1_keyed_scheme(idpat: str) -> GS1Keyed:
     """Create a GS1Keyed scheme from an IDPAT URI
     Since an IDPAT can target a group of EPCs, the returned scheme should only be used for the GS1 key.
 
