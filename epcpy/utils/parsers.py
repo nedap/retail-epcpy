@@ -133,7 +133,7 @@ def epc_pure_identity_to_gs1_element_string(epc_pure_identity_uri: str) -> str:
     Returns:
         str: GS1 element string for this URI
     """
-    return epc_pure_identity_to_gs1_keyed(epc_pure_identity_uri).gs1_element_string()
+    return epc_pure_identity_to_gs1_element(epc_pure_identity_uri).gs1_element_string()
 
 
 def epc_pure_identity_to_gs1_keyed(epc_pure_identity_uri: str) -> GS1Keyed:
