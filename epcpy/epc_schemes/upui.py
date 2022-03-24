@@ -13,7 +13,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import UPUI_GS1_ELEMENT_STRING, UPUI_URI
 
 UPUI_URI_REGEX = re.compile(UPUI_URI)
-UPUI_GS1_ELEMENT_STRING_REGEX = re.compile(UPUI_GS1_ELEMENT_STRING)
 
 
 class UPUI(EPCScheme, GS1Element):
@@ -31,6 +30,8 @@ class UPUI(EPCScheme, GS1Element):
     Attributes:
         gs1_element_string (str): GS1 element string
     """
+
+    gs1_element_string_regex = re.compile(UPUI_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
         super().__init__()
@@ -83,7 +84,7 @@ class UPUI(EPCScheme, GS1Element):
         Returns:
             UPUI: UPUI scheme
         """
-        if not UPUI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not UPUI.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid UPUI GS1 element string {gs1_element_string}"
             )

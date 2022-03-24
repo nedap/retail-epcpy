@@ -19,7 +19,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import SGCN_GS1_ELEMENT_STRING, SGCN_URI
 
 SGCN_URI_REGEX = re.compile(SGCN_URI)
-SGCN_GS1_ELEMENT_STRING_REGEX = re.compile(SGCN_GS1_ELEMENT_STRING)
 
 
 PARTITION_TABLE_P = {
@@ -125,6 +124,8 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
     class BinaryHeader(Enum):
         SGCN_96 = "00111111"
 
+    gs1_element_string_regex = re.compile(SGCN_GS1_ELEMENT_STRING)
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -181,7 +182,7 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
         Returns:
             SGCN: SGCN scheme
         """
-        if not SGCN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not SGCN.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid SGCN GS1 element string {gs1_element_string}"
             )

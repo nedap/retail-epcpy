@@ -23,7 +23,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import ITIP_GS1_ELEMENT_STRING, ITIP_URI
 
 ITIP_URI_REGEX = re.compile(ITIP_URI)
-ITIP_GS1_ELEMENT_STRING_REGEX = re.compile(ITIP_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -129,6 +128,8 @@ class ITIP(EPCScheme, GS1Element, TagEncodable):
         ITIP_110 = "01000000"
         ITIP_212 = "01000001"
 
+    gs1_element_string_regex = re.compile(ITIP_GS1_ELEMENT_STRING)
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -184,7 +185,7 @@ class ITIP(EPCScheme, GS1Element, TagEncodable):
         Returns:
             ITIP: ITIP scheme
         """
-        if not ITIP_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not ITIP.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid ITIP GS1 element string {gs1_element_string}"
             )

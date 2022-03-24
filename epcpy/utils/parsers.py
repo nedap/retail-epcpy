@@ -28,50 +28,13 @@ from epcpy.utils.common import (
     binary_to_hex,
     hex_to_binary,
 )
-from epcpy.utils.regex import (
-    CPI_GS1_ELEMENT_STRING,
-    EPC_URI,
-    GDTI_GS1_ELEMENT_STRING,
-    GIAI_GS1_ELEMENT_STRING,
-    GINC_GS1_ELEMENT_STRING,
-    GRAI_GS1_ELEMENT_STRING,
-    GS1_ELEMENT_STRING,
-    GSIN_GS1_ELEMENT_STRING,
-    GSRN_GS1_ELEMENT_STRING,
-    GSRNP_GS1_ELEMENT_STRING,
-    IDPAT_URI,
-    ITIP_GS1_ELEMENT_STRING,
-    PGLN_GS1_ELEMENT_STRING,
-    SGCN_GS1_ELEMENT_STRING,
-    SGLN_GS1_ELEMENT_STRING,
-    SGTIN_GS1_ELEMENT_STRING,
-    SSCC_GS1_ELEMENT_STRING,
-    TAG_URI,
-    UPUI_GS1_ELEMENT_STRING,
-)
+from epcpy.utils.regex import EPC_URI, GS1_ELEMENT_STRING, IDPAT_URI, TAG_URI
 
 EPC_URI_REGEX = re.compile(EPC_URI)
 GS1_ELEMENT_STRING_REGEX = re.compile(GS1_ELEMENT_STRING)
 IDPAT_URI_REGEX = re.compile(IDPAT_URI)
 TAG_URI_REGEX = re.compile(TAG_URI)
 
-GS1_ELEMENT_STRING_REGEX_TO_SCHEME: Union[re.Pattern, GS1Element] = {
-    re.compile(SGTIN_GS1_ELEMENT_STRING): SGTIN,
-    re.compile(SSCC_GS1_ELEMENT_STRING): SSCC,
-    re.compile(SGLN_GS1_ELEMENT_STRING): SGLN,
-    re.compile(GRAI_GS1_ELEMENT_STRING): GRAI,
-    re.compile(GIAI_GS1_ELEMENT_STRING): GIAI,
-    re.compile(GSRN_GS1_ELEMENT_STRING): GSRN,
-    re.compile(GSRNP_GS1_ELEMENT_STRING): GSRNP,
-    re.compile(GDTI_GS1_ELEMENT_STRING): GDTI,
-    re.compile(CPI_GS1_ELEMENT_STRING): CPI,
-    re.compile(SGCN_GS1_ELEMENT_STRING): SGCN,
-    re.compile(GINC_GS1_ELEMENT_STRING): GINC,
-    re.compile(GSIN_GS1_ELEMENT_STRING): GSIN,
-    re.compile(ITIP_GS1_ELEMENT_STRING): ITIP,
-    re.compile(UPUI_GS1_ELEMENT_STRING): UPUI,
-    re.compile(PGLN_GS1_ELEMENT_STRING): PGLN,
-}
 EPC_SCHEMES: List[EPCScheme] = [
     ADI,
     BIC,
@@ -110,6 +73,9 @@ TAG_ENCODABLE_HEX_HEADERS = {
     for h in cls.BinaryHeader
 }
 
+GS1_ELEMENT_STRING_REGEX_TO_SCHEME: Union[re.Pattern, GS1Element] = {
+    cls.gs1_element_string_regex: cls for cls in EPC_SCHEMES if issubclass(cls, GS1Element)
+}
 
 EPC_SCHEME_IDENTIFIERS = {cls.__name__.lower(): cls for cls in EPC_SCHEMES}
 TAG_ENCODABLE_SCHEME_IDENTIFIERS = {

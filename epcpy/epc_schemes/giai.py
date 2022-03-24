@@ -18,7 +18,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import GIAI_GS1_ELEMENT_STRING, GIAI_URI
 
 GIAI_URI_REGEX = re.compile(GIAI_URI)
-GIAI_GS1_ELEMENT_STRING_REGEX = re.compile(GIAI_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P_96 = {
     0: {
@@ -187,6 +186,8 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
         GIAI_96 = "00110100"
         GIAI_202 = "00111000"
 
+    gs1_element_string_regex = re.compile(GIAI_GS1_ELEMENT_STRING)
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -244,7 +245,7 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
         Returns:
             GIAI: GIAI scheme
         """
-        if not GIAI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not GIAI.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GIAI GS1 element string {gs1_element_string}"
             )

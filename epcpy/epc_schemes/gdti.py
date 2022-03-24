@@ -21,7 +21,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import GDTI_GS1_ELEMENT_STRING, GDTI_URI
 
 GDTI_URI_REGEX = re.compile(GDTI_URI)
-GDTI_GS1_ELEMENT_STRING_REGEX = re.compile(GDTI_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -128,6 +127,8 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
         GDTI_96 = "00101100"
         GDTI_174 = "00111110"
 
+    gs1_element_string_regex = re.compile(GDTI_GS1_ELEMENT_STRING)
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -185,7 +186,7 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
         Returns:
             GDTI: GDTI scheme
         """
-        if not GDTI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not GDTI.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GDTI GS1 element string {gs1_element_string}"
             )

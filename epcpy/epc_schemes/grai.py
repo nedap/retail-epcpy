@@ -21,7 +21,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import GRAI_GS1_ELEMENT_STRING, GRAI_URI
 
 GRAI_URI_REGEX = re.compile(GRAI_URI)
-GRAI_GS1_ELEMENT_STRING_REGEX = re.compile(GRAI_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -128,6 +127,8 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
         GRAI_96 = "00110011"
         GRAI_170 = "00110111"
 
+    gs1_element_string_regex = re.compile(GRAI_GS1_ELEMENT_STRING)
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -183,7 +184,7 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
         Returns:
             GRAI: GRAI scheme
         """
-        if not GRAI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not GRAI.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GRAI GS1 element string {gs1_element_string}"
             )
