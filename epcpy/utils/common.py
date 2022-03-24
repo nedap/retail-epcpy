@@ -143,6 +143,19 @@ def hex_to_binary(hex_string: str) -> str:
     return f"{int(hex_string, 16):0{len(hex_string * 4)}b}"
 
 
+def binary_to_hex(binary_string: str) -> str:
+    """Convert binary string to hexadecimal string
+    Resulting hex will be uppercase
+
+    Args:
+        binary_string (str): Binary string
+
+    Returns:
+        str: Hexadecimal string
+    """
+    return f"{int(binary_string, 2):x}".upper()
+
+
 def encode_string(string: str, num_bits: int) -> str:
     """Encode a string into a bit string of a certain length
 

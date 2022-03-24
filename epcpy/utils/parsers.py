@@ -22,9 +22,13 @@ from epcpy.epc_schemes.sgtin import SGTIN
 from epcpy.epc_schemes.sscc import SSCC
 from epcpy.epc_schemes.upui import UPUI
 from epcpy.epc_schemes.usdod import USDOD
-from epcpy.utils.common import ConvertException, base64_to_hex, hex_to_binary
+from epcpy.utils.common import (
+    ConvertException,
+    base64_to_hex,
+    binary_to_hex,
+    hex_to_binary,
+)
 from epcpy.utils.regex import (
-    BINARY_HEADERS,
     CPI_GS1_ELEMENT_STRING,
     EPC_URI,
     GDTI_GS1_ELEMENT_STRING,
@@ -35,7 +39,6 @@ from epcpy.utils.regex import (
     GSIN_GS1_ELEMENT_STRING,
     GSRN_GS1_ELEMENT_STRING,
     GSRNP_GS1_ELEMENT_STRING,
-    HEX_HEADERS,
     IDPAT_URI,
     ITIP_GS1_ELEMENT_STRING,
     PGLN_GS1_ELEMENT_STRING,
@@ -51,8 +54,6 @@ EPC_URI_REGEX = re.compile(EPC_URI)
 GS1_ELEMENT_STRING_REGEX = re.compile(GS1_ELEMENT_STRING)
 IDPAT_URI_REGEX = re.compile(IDPAT_URI)
 TAG_URI_REGEX = re.compile(TAG_URI)
-BINARY_HEADERS_REGEX = re.compile(BINARY_HEADERS)
-HEX_HEADERS_REGEX = re.compile(HEX_HEADERS)
 
 GS1_ELEMENT_STRING_REGEX_TO_SCHEME: Union[re.Pattern, GS1Element] = {
     re.compile(SGTIN_GS1_ELEMENT_STRING): SGTIN,
@@ -100,9 +101,15 @@ TAG_ENCODABLE_CLASSES: List[TagEncodable] = [
     cls for cls in EPC_SCHEMES if issubclass(cls, TagEncodable)
 ]
 
-TAG_ENCODABLE_HEADERS = {
+TAG_ENCODABLE_BINARY_HEADERS = {
     h.value: cls for cls in TAG_ENCODABLE_CLASSES for h in cls.BinaryHeader
 }
+TAG_ENCODABLE_HEX_HEADERS = {
+    binary_to_hex(h.value): cls
+    for cls in TAG_ENCODABLE_CLASSES
+    for h in cls.BinaryHeader
+}
+
 
 EPC_SCHEME_IDENTIFIERS = {cls.__name__.lower(): cls for cls in EPC_SCHEMES}
 TAG_ENCODABLE_SCHEME_IDENTIFIERS = {
@@ -142,9 +149,9 @@ def get_gs1_key(source: str, company_prefix_length: int = None, **kwargs) -> str
         scheme = tag_uri_to_tag_encodable(source)
     elif IDPAT_URI_REGEX.fullmatch(source):
         scheme = _idpat_to_gs1_keyed_scheme(source)
-    elif BINARY_HEADERS_REGEX.fullmatch(source[:8]):
+    elif source[:8] in TAG_ENCODABLE_BINARY_HEADERS.keys():
         scheme = binary_to_tag_encodable(source)
-    elif HEX_HEADERS_REGEX.fullmatch(source[:2]):
+    elif source[:2].upper() in TAG_ENCODABLE_HEX_HEADERS.keys():
         scheme = hex_to_tag_encodable(source)
 
     if not isinstance(scheme, GS1Keyed):
@@ -355,10 +362,10 @@ def binary_to_tag_encodable(binary_string: str) -> TagEncodable:
     """
     header = binary_string[:8]
 
-    if header not in TAG_ENCODABLE_HEADERS:
+    if header not in TAG_ENCODABLE_BINARY_HEADERS:
         raise ConvertException(message="Unknown header")
 
-    return TAG_ENCODABLE_HEADERS[header].from_binary(binary_string)
+    return TAG_ENCODABLE_BINARY_HEADERS[header].from_binary(binary_string)
 
 
 def hex_to_tag_encodable(hex_string: str) -> TagEncodable:
