@@ -11,3 +11,5 @@ from .utils.parsers import (
     hex_to_tag_encodable,
     tag_uri_to_tag_encodable,
 )
+
+from .utils.common import ConvertException

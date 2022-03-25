@@ -20,6 +20,7 @@ A Python module for creation, validation, and transformation of EPC representati
       - [GS1Keyed](#gs1keyed)
       - [Tag encoded](#tag-encoded)
     - [Generic parsing](#generic-parsing)
+  - [Exceptions](#exceptions)
   - [Development](#development)
     - [Testing](#testing)
     - [Coverage](#coverage)
@@ -82,20 +83,24 @@ An example highlighting the different options for the `SGTIN` scheme can be foun
 
 ## Generic parsers
 The following generic parser functions are available
-- `base64_to_epc`
-- `binary_to_epc`
-- `hex_to_epc`
-- `tag_uri_to_epc`
+- `base64_to_tag_encodable`
+- `binary_to_tag_encodable`
+- `hex_to_tag_encodable`
+- `tag_uri_to_tag_encodable`
+- `epc_pure_identity_to_gs1_element`
+- `epc_pure_identity_to_gs1_element_string`
+- `epc_pure_identity_to_gs1_key`
 - `epc_pure_identity_to_gs1_keyed`
 - `epc_pure_identity_to_scheme`
 - `epc_pure_identity_to_tag_encodable`
+- `get_gs1_key`
 
 ## Example usage
 ### SGTIN
 #### Pure identity
 Given an `SGTIN` in EPC URI representation, `urn:epc:id:sgtin:00000950.01093.Serial`, an epcpy `SGTIN` object can be created as follows
 ```python
-from epcpy.epc_schemes.sgtin import SGTIN
+from epcpy.epc_schemes import SGTIN
 
 sgtin = SGTIN.from_epc_uri("urn:epc:id:sgtin:00000950.01093.Serial")
 
@@ -188,6 +193,18 @@ get_gs1_key("urn:epc:idpat:sgtin:00000950.01093.*")
 - EPC id pattern URIs
 - Binary strings
 - Hexadecimal strings
+
+## Exceptions
+Especially when applying generic parsing, exceptions may be thrown when passing invalid data. One can import the `ConvertException` class to specially deal with exceptions thrown by this library:
+```python
+from epcpy import ConvertException, get_gs1_key
+
+try:
+  get_gs1_key("urn:epc:idpat:sgtin:00000950.*.*")
+except ConvertException as e:
+  print(e)
+  # Could not create valid scheme from given id pat
+```
 
 ## Development
 
