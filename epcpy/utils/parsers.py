@@ -74,7 +74,9 @@ TAG_ENCODABLE_HEX_HEADERS = {
 }
 
 GS1_ELEMENT_STRING_REGEX_TO_SCHEME: Union[re.Pattern, GS1Element] = {
-    cls.gs1_element_string_regex: cls for cls in EPC_SCHEMES if issubclass(cls, GS1Element)
+    cls.gs1_element_string_regex: cls
+    for cls in EPC_SCHEMES
+    if issubclass(cls, GS1Element)
 }
 
 EPC_SCHEME_IDENTIFIERS = {cls.__name__.lower(): cls for cls in EPC_SCHEMES}
@@ -255,13 +257,16 @@ def gs1_element_string_to_gs1_element(
     raise ConvertException(message=f"Unknown GS1 element string: {gs1_element_string}")
 
 
-MAX_ALLOWED_PATTERNS = {
-    "sgtin": 1,
-    "sgln": 1,
-    "grai": 1,
-    "gdti": 1,
-    "cpi": 1,
-}
+ONE_ESCAPE_ALLOWED_SCHEMES = [
+    cls.__name__.lower()
+    for cls in [
+        SGTIN,
+        SGLN,
+        GRAI,
+        GDTI,
+        CPI,
+    ]
+]
 
 
 def _idpat_to_gs1_keyed_scheme(idpat: str) -> GS1Keyed:
@@ -286,7 +291,7 @@ def _idpat_to_gs1_keyed_scheme(idpat: str) -> GS1Keyed:
     if EPC_URI_REGEX.fullmatch(uri):
         return GS1_KEYED_SCHEME_IDENTIFIERS[identifier].from_epc_uri(uri)
 
-    if identifier not in MAX_ALLOWED_PATTERNS:
+    if identifier not in ONE_ESCAPE_ALLOWED_SCHEMES:
         raise ConvertException(message="URI exceeds maximum number of escaped patterns")
 
     # Create URI with dummy serial to create GS1 key
