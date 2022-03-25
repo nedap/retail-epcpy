@@ -1,8 +1,8 @@
 import unittest
 from typing import Any, Dict, List
 
+from epcpy import ConvertException
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element, GS1Keyed, TagEncodable
-from epcpy.utils.common import ConvertException
 
 
 class TestEPCSchemeInitMeta(type):
