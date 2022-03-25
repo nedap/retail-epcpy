@@ -21,7 +21,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import SGTIN_GS1_ELEMENT_STRING, SGTIN_URI
 
 SGTIN_REGEX = re.compile(SGTIN_URI)
-SGTIN_GS1_ELEMENT_STRING_REGEX = re.compile(SGTIN_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -137,6 +136,8 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         SGTIN_96 = "00110000"
         SGTIN_198 = "00110110"
 
+    gs1_element_string_regex = re.compile(SGTIN_GS1_ELEMENT_STRING)
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -249,7 +250,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
         Returns:
             SGTIN: SGTIN scheme
         """
-        if not SGTIN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not SGTIN.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid SGTIN GS1 element string {gs1_element_string}"
             )

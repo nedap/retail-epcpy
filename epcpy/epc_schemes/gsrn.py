@@ -16,7 +16,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import GSRN_GS1_ELEMENT_STRING, GSRN_URI
 
 GSRN_URI_REGEX = re.compile(GSRN_URI)
-GSRN_GS1_ELEMENT_STRING_REGEX = re.compile(GSRN_GS1_ELEMENT_STRING)
 
 
 PARTITION_TABLE_P = {
@@ -122,6 +121,8 @@ class GSRN(EPCScheme, TagEncodable, GS1Keyed):
     class BinaryHeader(Enum):
         GSRN_96 = "00101101"
 
+    gs1_element_string_regex = re.compile(GSRN_GS1_ELEMENT_STRING)
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -175,7 +176,7 @@ class GSRN(EPCScheme, TagEncodable, GS1Keyed):
         Returns:
             GSRN: GSRN scheme
         """
-        if not GSRN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not GSRN.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GSRN GS1 element string {gs1_element_string}"
             )

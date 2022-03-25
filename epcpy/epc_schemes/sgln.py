@@ -21,7 +21,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import SGLN_GS1_ELEMENT_STRING, SGLN_URI
 
 SGLN_URI_REGEX = re.compile(SGLN_URI)
-SGLN_GS1_ELEMENT_STRING_REGEX = re.compile(SGLN_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -128,6 +127,8 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
         SGLN_96 = "00110010"
         SGLN_195 = "00111001"
 
+    gs1_element_string_regex = re.compile(SGLN_GS1_ELEMENT_STRING)
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -186,7 +187,7 @@ class SGLN(EPCScheme, TagEncodable, GS1Keyed):
         Returns:
             SGLN: SGLN scheme
         """
-        if not SGLN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not SGLN.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid SGLN GS1 element string {gs1_element_string}"
             )

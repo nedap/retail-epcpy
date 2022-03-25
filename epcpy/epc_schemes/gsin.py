@@ -7,7 +7,6 @@ from epcpy.utils.common import ConvertException
 from epcpy.utils.regex import GSIN_GS1_ELEMENT_STRING, GSIN_URI
 
 GSIN_URI_REGEX = re.compile(GSIN_URI)
-GSIN_GS1_ELEMENT_STRING_REGEX = re.compile(GSIN_GS1_ELEMENT_STRING)
 
 
 def calculate_checksum(digits: str) -> int:
@@ -46,6 +45,8 @@ class GSIN(EPCScheme, GS1Keyed):
         gs1_key (str): GS1 key
         gs1_element_string (str): GS1 element string
     """
+
+    gs1_element_string_regex = re.compile(GSIN_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
         super().__init__()
@@ -99,7 +100,7 @@ class GSIN(EPCScheme, GS1Keyed):
         Returns:
             GSIN: GSIN scheme
         """
-        if not GSIN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not GSIN.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GSIN GS1 element string {gs1_element_string}"
             )

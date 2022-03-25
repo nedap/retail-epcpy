@@ -16,7 +16,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import SSCC_GS1_ELEMENT_STRING, SSCC_URI
 
 SSCC_URI_REGEX = re.compile(SSCC_URI)
-SSCC_GS1_ELEMENT_STRING_REGEX = re.compile(SSCC_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P = {
     0: {
@@ -120,6 +119,7 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
 
     class BinaryHeader(Enum):
         SSCC_96 = "00110001"
+    gs1_element_string_regex = re.compile(SSCC_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
         super().__init__()
@@ -178,7 +178,7 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
         Returns:
             SSCC: SSCC scheme
         """
-        if not SSCC_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not SSCC.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid SSCC GS1 element string {gs1_element_string}"
             )

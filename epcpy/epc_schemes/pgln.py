@@ -7,7 +7,6 @@ from epcpy.utils.common import ConvertException, calculate_checksum
 from epcpy.utils.regex import PGLN_GS1_ELEMENT_STRING, PGLN_URI
 
 PGLN_URI_REGEX = re.compile(PGLN_URI)
-PGLN_GS1_ELEMENT_STRING_REGEX = re.compile(PGLN_GS1_ELEMENT_STRING)
 
 
 class PGLN(EPCScheme, GS1Keyed):
@@ -26,6 +25,7 @@ class PGLN(EPCScheme, GS1Keyed):
         gs1_key (str): GS1 key
         gs1_element_string (str): GS1 element string
     """
+    gs1_element_string_regex = re.compile(PGLN_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
         super().__init__()
@@ -78,7 +78,7 @@ class PGLN(EPCScheme, GS1Keyed):
         Returns:
             PGLN: PGLN scheme
         """
-        if not PGLN_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not PGLN.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid PGLN GS1 element string {gs1_element_string}"
             )

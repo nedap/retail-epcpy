@@ -12,7 +12,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import GINC_GS1_ELEMENT_STRING, GINC_URI
 
 GINC_URI_REGEX = re.compile(GINC_URI)
-GINC_GS1_ELEMENT_STRING_REGEX = re.compile(GINC_GS1_ELEMENT_STRING)
 
 
 class GINC(EPCScheme, GS1Keyed):
@@ -31,6 +30,8 @@ class GINC(EPCScheme, GS1Keyed):
         gs1_key (str): GS1 key
         gs1_element_string (str): GS1 element string
     """
+
+    gs1_element_string_regex = re.compile(GINC_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
         super().__init__()
@@ -92,7 +93,7 @@ class GINC(EPCScheme, GS1Keyed):
         Returns:
             GINC: GINC scheme
         """
-        if not GINC_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not GINC.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid GINC GS1 element string {gs1_element_string}"
             )

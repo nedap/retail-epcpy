@@ -15,7 +15,6 @@ from epcpy.utils.common import (
 from epcpy.utils.regex import CPI_GS1_ELEMENT_STRING, CPI_URI
 
 CPI_URI_REGEX = re.compile(CPI_URI)
-CPI_GS1_ELEMENT_STRING_REGEX = re.compile(CPI_GS1_ELEMENT_STRING)
 
 PARTITION_TABLE_P_96 = {
     0: {
@@ -199,6 +198,8 @@ class CPI(EPCScheme, GS1Element, TagEncodable):
         CPI_96 = "00111100"
         CPI_VAR = "00111101"
 
+    gs1_element_string_regex = re.compile(CPI_GS1_ELEMENT_STRING)
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 
@@ -244,7 +245,7 @@ class CPI(EPCScheme, GS1Element, TagEncodable):
         Returns:
             CPI: CPI scheme
         """
-        if not CPI_GS1_ELEMENT_STRING_REGEX.fullmatch(gs1_element_string):
+        if not CPI.gs1_element_string_regex.fullmatch(gs1_element_string):
             raise ConvertException(
                 message=f"Invalid CPI GS1 element string {gs1_element_string}"
             )
