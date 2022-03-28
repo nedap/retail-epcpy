@@ -11,6 +11,7 @@ from .gsrn import GSRN
 from .gsrnp import GSRNP
 from .imovn import IMOVN
 from .itip import ITIP
+from .lgtin import LGTIN
 from .pgln import PGLN
 from .sgcn import SGCN
 from .sgln import SGLN

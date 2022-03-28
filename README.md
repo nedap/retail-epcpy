@@ -73,6 +73,7 @@ An example highlighting the different options for the `SGTIN` scheme can be foun
 | GSRNP      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | IMOVN      |                    |                    |                    |
 | ITIP       | :heavy_check_mark: |                    | :heavy_check_mark: |
+| LGTIN      | :heavy_check_mark: | :heavy_check_mark: |                    |
 | PGLN       | :heavy_check_mark: | :heavy_check_mark: |                    |
 | SGCN       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | SGLN       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
