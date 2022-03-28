@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "epcpy"
-version = "0.1.5"
+version = "0.1.6"
 description = "A Python module for creation, validation, and transformation of EPC representations as defined in GS1's EPC Tag Data Standard."
 license = "MIT"
 authors = ["Nedap Retail <sander.meinderts@nedap.com>"]
