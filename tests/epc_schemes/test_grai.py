@@ -3,7 +3,7 @@ import unittest
 from epcpy.epc_schemes.grai import GRAI, GRAIFilterValue
 from tests.epc_schemes.test_base_scheme import (
     TestEPCSchemeInitMeta,
-    TestGS1KeyedMeta,
+    TestGS1ElementMeta,
     TestTagEncodableMeta,
 )
 
@@ -78,43 +78,57 @@ class TestGRAIInit(
 
 class TestGRAIGS1Key(
     unittest.TestCase,
-    metaclass=TestGS1KeyedMeta,
+    metaclass=TestGS1ElementMeta,
     scheme=GRAI,
     valid_data=[
         {
             "name": "test_valid_grai_gs1_key_1",
             "uri": "urn:epc:id:grai:0614141.12345.400",
             "gs1_key": "0614141123452400",
+            "gs1_element_string": "(8003)00614141123452400",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_grai_gs1_key_2",
             "uri": "urn:epc:id:grai:0614141.12345.4000000000000000",
             "gs1_key": "06141411234524000000000000000",
+            "gs1_element_string": "(8003)006141411234524000000000000000",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_grai_gs1_key_3",
             "uri": "urn:epc:id:grai:061414113245..0",
             "gs1_key": "06141411324540",
+            "gs1_element_string": "(8003)006141411324540",
+            "company_prefix_length": 12,
         },
         {
             "name": "test_valid_grai_gs1_key_4",
             "uri": "urn:epc:id:grai:061414113245..01",
             "gs1_key": "061414113245401",
+            "gs1_element_string": "(8003)0061414113245401",
+            "company_prefix_length": 12,
         },
         {
             "name": "test_valid_grai_gs1_key_5",
             "uri": "urn:epc:id:grai:0614141.12345.ABCD1234%2F",
             "gs1_key": "0614141123452ABCD1234/",
+            "gs1_element_string": "(8003)00614141123452ABCD1234/",
+            "company_prefix_length": 7,
         },
         {
             "name": "test_valid_grai_gs1_key_6",
             "uri": "urn:epc:id:grai:061414113245..274877906944",
             "gs1_key": "0614141132454274877906944",
+            "gs1_element_string": "(8003)00614141132454274877906944",
+            "company_prefix_length": 12,
         },
         {
             "name": "test_valid_grai_gs1_key_7",
             "uri": "urn:epc:id:grai:0614141.12345.ABCDEFGHIJKLMNOP",
             "gs1_key": "0614141123452ABCDEFGHIJKLMNOP",
+            "gs1_element_string": "(8003)00614141123452ABCDEFGHIJKLMNOP",
+            "company_prefix_length": 7,
         },
     ],
     invalid_data=[],

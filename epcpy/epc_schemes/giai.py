@@ -11,10 +11,11 @@ from epcpy.utils.common import (
     encode_partition_table,
     parse_header_and_truncate_binary,
     replace_uri_escapes,
+    revert_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import GIAI_URI
+from epcpy.utils.regex import GIAI_GS1_ELEMENT_STRING, GIAI_URI
 
 GIAI_URI_REGEX = re.compile(GIAI_URI)
 
@@ -155,6 +156,28 @@ class GIAIFilterValue(Enum):
 
 
 class GIAI(EPCScheme, TagEncodable, GS1Keyed):
+    """GIAI EPC scheme implementation.
+
+    GIAI pure identities are of the form:
+        urn:epc:id:giai:<CompanyPrefix>.<IndividulAssetReference>
+
+    Example:
+        urn:epc:id:giai:0614141.12345400
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - GIAI.from_gs1_element_string
+        - GIAI.from_binary
+        - GIAI.from_hex
+        - GIAI.from_base64
+        - GIAI.from_tag_uri
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gs1_element_string (str): GS1 element string
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         GIAI_96 = "giai-96"
         GIAI_202 = "giai-202"
@@ -162,6 +185,8 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
     class BinaryHeader(Enum):
         GIAI_96 = "00110100"
         GIAI_202 = "00111000"
+
+    gs1_element_string_regex = re.compile(GIAI_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
         super().__init__()
@@ -189,14 +214,63 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
         self._giai = f"{company_prefix}{replace_uri_escapes(asset_reference)}"
 
     def gs1_key(self) -> str:
+        """GS1 key belonging to this GIAI instance
+
+        Returns:
+            str: GS1 key
+        """
         return self._giai
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         return f"(8004){self._giai}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GIAI:
+        """Create a GIAI instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: GIAI GS1 element string invalid
+
+        Returns:
+            GIAI: GIAI scheme
+        """
+        if not GIAI.gs1_element_string_regex.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid GIAI GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[6 : 6 + company_prefix_length]
+        chars = gs1_element_string[6 + company_prefix_length :]
+        chars = revert_uri_escapes(chars)
+
+        return cls(f"urn:epc:id:giai:{digits}.{chars}")
 
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingScheme, filter_value: GIAIFilterValue
     ) -> str:
+        """Return the tag URI belonging to this GIAI with the provided binary coding scheme and filter value.
+
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GIAIFilterValue): Filter value
+
+        Raises:
+            ConvertException: Asset reference value does not match requirements of provided coding scheme
+
+        Returns:
+            str: Tag URI
+        """
         filter_val = filter_value.value
 
         if (
@@ -225,7 +299,15 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme,
         filter_value: GIAIFilterValue,
     ) -> str:
+        """Return the binary representation belonging to this GIAI with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GIAIFilterValue): Filter value
+
+        Returns:
+            str: binary representation
+        """
         header = GIAI.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value.value, 3)
         parts = [self._company_pref, self._asset_ref]
@@ -245,6 +327,14 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> GIAI:
+        """Create an GIAI instance from a binary string
+
+        Args:
+            binary_string (str): binary representation of an GIAI
+
+        Returns:
+            GIAI: GIAI instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),

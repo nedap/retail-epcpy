@@ -1,8 +1,8 @@
 import unittest
 from typing import Any, Dict, List
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
-from epcpy.utils.common import ConvertException
+from epcpy import ConvertException
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element, GS1Keyed, TagEncodable
 
 
 class TestEPCSchemeInitMeta(type):
@@ -42,7 +42,7 @@ class TestEPCSchemeInitMeta(type):
         return type.__new__(cls, name, bases, attrs)
 
 
-class TestGS1KeyedMeta(type):
+class TestGS1ElementMeta(type):
     def __new__(
         cls,
         name,
@@ -66,6 +66,39 @@ class TestGS1KeyedMeta(type):
 
             return test
 
+        def generate_valid_gs1_element_string_tests(
+            scheme: EPCScheme, epc_uri: str, gs1_element_string: str
+        ):
+            def test(self: unittest.TestCase):
+                s: GS1Element = scheme.from_epc_uri(epc_uri)
+                try:
+                    self.assertEqual(s.gs1_element_string(), gs1_element_string)
+                except ConvertException:
+                    self.fail(
+                        f"{scheme} GS1 element string unexpectedly raised ConvertException for URI {epc_uri}"
+                    )
+
+            return test
+
+        def generate_valid_from_gs1_element_string_test(
+            scheme: GS1Element,
+            epc_uri: str,
+            gs1_element_string: str,
+            company_prefix_length: int,
+        ):
+            def test(self: unittest.TestCase):
+                try:
+                    s: EPCScheme = scheme.from_gs1_element_string(
+                        gs1_element_string, company_prefix_length
+                    )
+                    self.assertEqual(s.epc_uri, epc_uri)
+                except ConvertException:
+                    self.fail(
+                        f"{scheme} from gs1 element string unexpectedly raised ConvertException for GS1 element string {gs1_element_string}"
+                    )
+
+            return test
+
         def generate_invalid_gs1_key_tests(scheme: EPCScheme, epc_uri: str, **kwargs):
             def test(self: unittest.TestCase):
                 s: GS1Keyed = scheme.from_epc_uri(epc_uri)
@@ -75,11 +108,29 @@ class TestGS1KeyedMeta(type):
             return test
 
         for entry in valid_data:
-            attrs[entry["name"]] = generate_valid_gs1_key_tests(
+            if issubclass(scheme, GS1Keyed):
+                attrs[f"{entry['name']}_gs1_key"] = generate_valid_gs1_key_tests(
+                    scheme,
+                    entry["uri"],
+                    entry["gs1_key"],
+                    **entry["kwargs"] if "kwargs" in entry else {},
+                )
+
+            attrs[
+                f"{entry['name']}_gs1_element_string"
+            ] = generate_valid_gs1_element_string_tests(
                 scheme,
                 entry["uri"],
-                entry["gs1_key"],
-                **entry["kwargs"] if "kwargs" in entry else {},
+                entry["gs1_element_string"],
+            )
+
+            attrs[
+                f"{entry['name']}_from_gs1_element_string"
+            ] = generate_valid_from_gs1_element_string_test(
+                scheme,
+                entry["uri"],
+                entry["gs1_element_string"],
+                entry["company_prefix_length"],
             )
 
         for entry in invalid_data:

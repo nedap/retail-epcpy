@@ -14,10 +14,11 @@ from epcpy.utils.common import (
     encode_string,
     parse_header_and_truncate_binary,
     replace_uri_escapes,
+    revert_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import GRAI_URI
+from epcpy.utils.regex import GRAI_GS1_ELEMENT_STRING, GRAI_URI
 
 GRAI_URI_REGEX = re.compile(GRAI_URI)
 
@@ -96,6 +97,28 @@ class GRAIFilterValue(Enum):
 
 
 class GRAI(EPCScheme, TagEncodable, GS1Keyed):
+    """GRAI EPC scheme implementation.
+
+    GRAI pure identities are of the form:
+        urn:epc:id:grai:<CompanyPrefix>.<AssetType>.<SerialNumber>
+
+    Example:
+        urn:epc:id:grai:0614141.12345.400
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - GRAI.from_gs1_element_string
+        - GRAI.from_binary
+        - GRAI.from_hex
+        - GRAI.from_base64
+        - GRAI.from_tag_uri
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gs1_element_string (str): GS1 element string
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         GRAI_96 = "grai-96"
         GRAI_170 = "grai-170"
@@ -103,6 +126,8 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
     class BinaryHeader(Enum):
         GRAI_96 = "00110011"
         GRAI_170 = "00110111"
+
+    gs1_element_string_regex = re.compile(GRAI_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
         super().__init__()
@@ -128,15 +153,65 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
         self._grai = f"{self._company_pref}{self._asset_type}{check_digit}{replace_uri_escapes(self._serial)}"
 
     def gs1_key(self) -> str:
+        """GS1 key belonging to this GRAI instance
+
+        Returns:
+            str: GS1 key
+        """
         return self._grai
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         return f"(8003)0{self._grai}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GRAI:
+        """Create a GRAI instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: GRAI GS1 element string invalid
+
+        Returns:
+            GRAI: GRAI scheme
+        """
+        if not GRAI.gs1_element_string_regex.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid GRAI GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[7:20]
+        chars = gs1_element_string[20:]
+        chars = revert_uri_escapes(chars)
+
+        return cls(
+            f"urn:epc:id:grai:{digits[:company_prefix_length]}.{digits[company_prefix_length:-1]}.{chars}"
+        )
 
     def tag_uri(
         self, binary_coding_scheme: BinaryCodingScheme, filter_value: GRAIFilterValue
     ) -> str:
+        """Return the tag URI belonging to this GRAI with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GRAIFilterValue): Filter value
+
+        Raises:
+            ConvertException: Serial does not match requirements of provided coding scheme
+
+        Returns:
+            str: Tag URI
+        """
         filter_val = filter_value.value
 
         if (
@@ -159,7 +234,15 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme,
         filter_value: GRAIFilterValue,
     ) -> str:
+        """Return the binary representation belonging to this GRAI with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GRAIFilterValue): Filter value
+
+        Returns:
+            str: binary representation
+        """
         parts = [self._company_pref, self._asset_type]
 
         header = GRAI.BinaryHeader[binary_coding_scheme.name].value
@@ -176,6 +259,14 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> GRAI:
+        """Create an GRAI instance from a binary string
+
+        Args:
+            binary_string (str): binary representation of an GRAI
+
+        Returns:
+            GRAI: GRAI instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),

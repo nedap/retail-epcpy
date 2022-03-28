@@ -13,7 +13,7 @@ from epcpy.utils.common import (
     parse_header_and_truncate_binary,
     str_to_binary,
 )
-from epcpy.utils.regex import GSRNP_URI
+from epcpy.utils.regex import GSRNP_GS1_ELEMENT_STRING, GSRNP_URI
 
 GSRNP_URI_REGEX = re.compile(GSRNP_URI)
 
@@ -93,11 +93,35 @@ class GSRNPFilterValue(Enum):
 
 
 class GSRNP(EPCScheme, TagEncodable, GS1Keyed):
+    """GSRNP EPC scheme implementation.
+
+    GSRNP pure identities are of the form:
+        urn:epc:id:gsrnp:<CompanyPrefix>.<ServiceReference>
+
+    Example:
+        urn:epc:id:gsrnp:0614141.1234567890
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - GSRNP.from_gs1_element_string
+        - GSRNP.from_binary
+        - GSRNP.from_hex
+        - GSRNP.from_base64
+        - GSRNP.from_tag_uri
+
+    Attributes:
+        gs1_key (str): GS1 key
+        gs1_element_string (str): GS1 element string
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         GSRNP_96 = "gsrnp-96"
 
     class BinaryHeader(Enum):
         GSRNP_96 = "00101110"
+
+    gs1_element_string_regex = re.compile(GSRNP_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
         super().__init__()
@@ -121,17 +145,62 @@ class GSRNP(EPCScheme, TagEncodable, GS1Keyed):
         self._gsrnp = f"{self._company_pref}{self._service_ref}{check_digit}"
 
     def gs1_key(self) -> str:
+        """GS1 key belonging to this GSRNP instance
+
+        Returns:
+            str: GS1 key
+        """
         return self._gsrnp
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         return f"(8017){self._gsrnp}"
+
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> GSRNP:
+        """Create a GSRNP instance from a GS1 element string and company prefix
+
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: GSRNP GS1 element string invalid
+
+        Returns:
+            GSRNP: GSRNP scheme
+        """
+        if not GSRNP.gs1_element_string_regex.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid GSRNP GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[6:]
+
+        return cls(
+            f"urn:epc:id:gsrnp:{digits[:company_prefix_length]}.{digits[company_prefix_length:-1]}"
+        )
 
     def tag_uri(
         self,
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GSRNP_96,
         filter_value: GSRNPFilterValue = GSRNPFilterValue.ALL_OTHERS,
     ) -> str:
+        """Return the tag URI belonging to this GSRNP with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GSRNPFilterValue): Filter value
+
+        Returns:
+            str: Tag URI
+        """
         filter_val = filter_value.value
 
         return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_val}.{self._company_pref}.{self._service_ref}"
@@ -141,7 +210,15 @@ class GSRNP(EPCScheme, TagEncodable, GS1Keyed):
         binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GSRNP_96,
         filter_value: GSRNPFilterValue = GSRNPFilterValue.ALL_OTHERS,
     ) -> str:
+        """Return the binary representation belonging to this GSRNP with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (GSRNPFilterValue): Filter value
+
+        Returns:
+            str: binary representation
+        """
         parts = [self._company_pref, self._service_ref]
 
         header = GSRNP.BinaryHeader[binary_coding_scheme.name].value
@@ -152,6 +229,14 @@ class GSRNP(EPCScheme, TagEncodable, GS1Keyed):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> GSRNP:
+        """Create an GSRNP instance from a binary string
+
+        Args:
+            binary_string (str): binary representation of an GSRNP
+
+        Returns:
+            GSRNP: GSRNP instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),

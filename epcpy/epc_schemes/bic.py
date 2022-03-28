@@ -8,6 +8,17 @@ BIC_URI_REGEX = re.compile(BIC_URI)
 
 
 class BIC(EPCScheme):
+    """BIC EPC scheme implementation.
+
+    BIC pure identities are of the form:
+        urn:epc:id:bic:<BICcontainerCode>
+
+    Example:
+        urn:epc:id:bic:CSQU3054383
+
+    This class can be created using EPC pure identities via its constructor
+    """
+
     def __init__(self, epc_uri) -> None:
         super().__init__()
 

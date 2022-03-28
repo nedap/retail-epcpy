@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
+from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element, TagEncodable
 from epcpy.utils.common import (
     ConvertException,
     binary_to_int,
@@ -16,10 +16,11 @@ from epcpy.utils.common import (
     encode_string,
     parse_header_and_truncate_binary,
     replace_uri_escapes,
+    revert_uri_escapes,
     str_to_binary,
     verify_gs3a3_component,
 )
-from epcpy.utils.regex import ITIP_URI
+from epcpy.utils.regex import ITIP_GS1_ELEMENT_STRING, ITIP_URI
 
 ITIP_URI_REGEX = re.compile(ITIP_URI)
 
@@ -97,7 +98,28 @@ class ITIPFilterValue(Enum):
     RESERVED_7 = "7"
 
 
-class ITIP(EPCScheme, TagEncodable):
+class ITIP(EPCScheme, GS1Element, TagEncodable):
+    """ITIP EPC scheme implementation.
+
+    ITIP pure identities are of the form:
+        urn:epc:id:itip:<CompanyPrefix>.<ItemRefAndIndicator>.<Piece>.<Total>.<SerialNumber>
+
+    Example:
+        urn:epc:id:itip:4012345.012345.01.02.987
+
+    This class can be created using EPC pure identities via its constructor, or using:
+        - ITIP.from_gs1_element_string
+        - ITIP.from_binary
+        - ITIP.from_hex
+        - ITIP.from_base64
+        - ITIP.from_tag_uri
+
+    Attributes:
+        gs1_element_string (str): GS1 element string
+        tag_uri (str): Tag URI
+        binary (str): Binary representation
+    """
+
     class BinaryCodingScheme(Enum):
         ITIP_110 = "itip-110"
         ITIP_212 = "itip-212"
@@ -105,6 +127,8 @@ class ITIP(EPCScheme, TagEncodable):
     class BinaryHeader(Enum):
         ITIP_110 = "01000000"
         ITIP_212 = "01000001"
+
+    gs1_element_string_regex = re.compile(ITIP_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
         super().__init__()
@@ -133,6 +157,11 @@ class ITIP(EPCScheme, TagEncodable):
         self.epc_uri = epc_uri
 
     def gs1_element_string(self) -> str:
+        """Returns the GS1 element string
+
+        Returns:
+            str: GS1 element string
+        """
         indicator = self._item_ref[0]
 
         check_digit = calculate_checksum(
@@ -140,10 +169,50 @@ class ITIP(EPCScheme, TagEncodable):
         )
         return f"(8006){indicator}{self._company_pref}{self._item_ref[1:]}{check_digit}{self._piece}{self._total}(21){replace_uri_escapes(self._serial)}"
 
-    def tag_uri(
-        self, filter_value: ITIPFilterValue, binary_coding_scheme: BinaryCodingScheme
-    ) -> str:
+    @classmethod
+    def from_gs1_element_string(
+        cls, gs1_element_string: str, company_prefix_length: int
+    ) -> ITIP:
+        """Create a ITIP instance from a GS1 element string and company prefix
 
+        Args:
+            gs1_element_string (str): GS1 element string
+            company_prefix_length (int): Company prefix length
+
+        Raises:
+            ConvertException: ITIP GS1 element string invalid
+
+        Returns:
+            ITIP: ITIP scheme
+        """
+        if not ITIP.gs1_element_string_regex.fullmatch(gs1_element_string):
+            raise ConvertException(
+                message=f"Invalid ITIP GS1 element string {gs1_element_string}"
+            )
+
+        digits = gs1_element_string[6:24]
+        chars = gs1_element_string[28:]
+        chars = revert_uri_escapes(chars)
+
+        return cls(
+            f"urn:epc:id:itip:{digits[1:1+company_prefix_length]}.{digits[0]}{digits[1+company_prefix_length:-5]}.{digits[-4:-2]}.{digits[-2:]}.{chars}"
+        )
+
+    def tag_uri(
+        self, binary_coding_scheme: BinaryCodingScheme, filter_value: ITIPFilterValue
+    ) -> str:
+        """Return the tag URI belonging to this ITIP with the provided binary coding scheme and filter value.
+
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (ITIPFilterValue): Filter value
+
+        Raises:
+            ConvertException: Serial does not match requirements of provided coding scheme
+
+        Returns:
+            str: Tag URI
+        """
         filter_val = filter_value.value
 
         if (
@@ -166,7 +235,15 @@ class ITIP(EPCScheme, TagEncodable):
         filter_value: ITIPFilterValue,
         binary_coding_scheme: BinaryCodingScheme,
     ) -> str:
+        """Return the binary representation belonging to this ITIP with the provided binary coding scheme and filter value.
 
+        Args:
+            binary_coding_scheme (BinaryCodingScheme): Coding scheme
+            filter_value (ITIPFilterValue): Filter value
+
+        Returns:
+            str: binary representation
+        """
         parts = [self._company_pref, self._item_ref]
 
         header = ITIP.BinaryHeader[binary_coding_scheme.name].value
@@ -191,6 +268,14 @@ class ITIP(EPCScheme, TagEncodable):
 
     @classmethod
     def from_binary(cls, binary_string: str) -> ITIP:
+        """Create an ITIP instance from a binary string
+
+        Args:
+            binary_string (str): binary representation of an ITIP
+
+        Returns:
+            ITIP: ITIP instance
+        """
         binary_coding_scheme, truncated_binary = parse_header_and_truncate_binary(
             binary_string,
             cls.header_to_schemes(),
