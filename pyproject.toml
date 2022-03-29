@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "epcpy"
+version = "0.1.6"
+description = "A Python module for creation, validation, and transformation of EPC representations as defined in GS1's EPC Tag Data Standard."
+license = "MIT"
+authors = ["Nedap Retail <sander.meinderts@nedap.com>"]
+readme = "README_pip.md"
+homepage = "https://github.com/nedap/retail-epcpy"
+repository = "https://github.com/nedap/retail-epcpy"
+keywords =  [
+    "gs1",
+    "epc",
+    "python",
+    "gtin",
+    "sgtin"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+
+[tool.poetry.scripts]
+test = "scripts:test"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+[tool.poetry.dev-dependencies]
+black = "22.1.0"
+coverage = "^6.3.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
