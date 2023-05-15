@@ -209,6 +209,8 @@ class TagEncodable(EPCScheme):
 
 
 class GS1Element(EPCScheme):
+    gs1_element_string_regex: re.Pattern
+
     def __init__(self, epc_uri: str) -> None:
         super().__init__(epc_uri)
 
