@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
+from epcpy.epc_schemes.base_scheme import TagEncodable
 from epcpy.utils.common import (
     ConvertException,
     binary_to_int,
@@ -92,7 +92,7 @@ class USDOD(TagEncodable):
         Returns:
             str: Tag URI
         """
-        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.USDOD_96.value}:{filter_value.value}.{self._cage_dodaac}.{self._serial}"
+        return f"{self.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_value.value}.{self._cage_dodaac}.{self._serial}"
 
     def binary(
         self,
@@ -109,7 +109,7 @@ class USDOD(TagEncodable):
         Returns:
             str: binary representation
         """
-        header = USDOD.BinaryHeader[binary_coding_scheme.USDOD_96.name].value
+        header = USDOD.BinaryHeader[binary_coding_scheme.name].value
         filter_binary = str_to_binary(filter_value.value, 4)
         cage_code_binary = encode_cage_code(f"{self._cage_dodaac:>6}")
         serial_binary = str_to_binary(self._serial, 36)

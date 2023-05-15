@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import re
 from enum import Enum
-from typing import Any, Dict
+from typing import Dict, Optional, Type, TypeVar
 
 from epcpy.utils.common import ConvertException, hex_to_base64, hex_to_binary
 from epcpy.utils.regex import TAG_URI
+
+T_EPCScheme = TypeVar("T_EPCScheme", bound="EPCScheme")
+T_GS1Element = TypeVar("T_GS1Element", bound="GS1Element")
+T_TagEncodable = TypeVar("T_TagEncodable", bound="TagEncodable")
 
 
 class EPCScheme:
@@ -34,7 +38,7 @@ class EPCScheme:
         return self.epc_uri == other.epc_uri
 
     @classmethod
-    def from_epc_uri(cls, epc_uri: str) -> EPCScheme:
+    def from_epc_uri(cls: Type[T_EPCScheme], epc_uri: str) -> EPCScheme:
         """Instantiate an EPCScheme class from an EPC pure identity URI.
 
         Args:
@@ -72,10 +76,10 @@ class TagEncodable(EPCScheme):
     def __init__(self, epc_uri: str) -> None:
         super().__init__(epc_uri)
 
-        self._base64 = None
-        self._binary = None
-        self._hex = None
-        self._tag_uri = None
+        self._base64: Optional[str] = None
+        self._binary: Optional[str] = None
+        self._hex: Optional[str] = None
+        self._tag_uri: Optional[str] = None
 
     def tag_uri(self, *args, **kwargs) -> str:
         """Return the tag URI of the tag encodable
@@ -123,7 +127,9 @@ class TagEncodable(EPCScheme):
         return hex_to_base64(hex_string)
 
     @classmethod
-    def from_binary(cls, tag_binary_string: str) -> TagEncodable:
+    def from_binary(
+        cls: Type[T_TagEncodable], tag_binary_string: str
+    ) -> T_TagEncodable:
         """Instantiate a TagEncodable class from a binary string.
 
         Args:
@@ -135,7 +141,7 @@ class TagEncodable(EPCScheme):
         raise NotImplementedError
 
     @classmethod
-    def from_hex(cls, tag_hex_string: str) -> TagEncodable:
+    def from_hex(cls: Type[T_TagEncodable], tag_hex_string: str) -> T_TagEncodable:
         """Instantiate a TagEncodable class from a hexidecimal string.
 
         Args:
@@ -147,7 +153,9 @@ class TagEncodable(EPCScheme):
         return cls.from_binary(hex_to_binary(tag_hex_string))
 
     @classmethod
-    def from_base64(cls, tag_base64_string: str) -> TagEncodable:
+    def from_base64(
+        cls: Type[T_TagEncodable], tag_base64_string: str
+    ) -> T_TagEncodable:
         """Instantiate a TagEncodable class from a base64 string.
 
         Args:
@@ -160,8 +168,8 @@ class TagEncodable(EPCScheme):
 
     @classmethod
     def from_tag_uri(
-        cls, epc_tag_uri: str, includes_filter: bool = True
-    ) -> TagEncodable:
+        cls: Type[T_TagEncodable], epc_tag_uri: str, includes_filter: bool = True
+    ) -> T_TagEncodable:
         """Instantiate a TagEncodable class from a tag URI.
 
         Args:
@@ -188,7 +196,7 @@ class TagEncodable(EPCScheme):
         return cls(f"urn:epc:id:{epc_scheme.split('-')[0]}:{value}")
 
     @classmethod
-    def header_to_schemes(cls) -> Dict[str, Any]:
+    def header_to_schemes(cls: Type[T_TagEncodable]) -> Dict[str, Enum]:
         """Create dictionary of binary header -> binary coding scheme
 
         Returns:
@@ -217,8 +225,8 @@ class GS1Element(EPCScheme):
 
     @classmethod
     def from_gs1_element_string(
-        cls, gs1_element_string: str, company_prefix_length: int
-    ) -> GS1Element:
+        cls: Type[T_GS1Element], gs1_element_string: str, company_prefix_length: int
+    ) -> T_GS1Element:
         """Create a GS1Element instance from a GS1 element string and company prefix length.
 
         Args:

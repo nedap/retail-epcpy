@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
+from epcpy.epc_schemes.base_scheme import TagEncodable
 from epcpy.utils.common import (
     ConvertException,
     binary_to_int,
@@ -64,7 +64,7 @@ class GID(TagEncodable):
 
     def tag_uri(
         self,
-        binary_coding_scheme: GID.BinaryCodingScheme.GID_96 = BinaryCodingScheme.GID_96,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GID_96,
     ) -> str:
         """Return the tag URI belonging to this GID with the provided binary coding scheme and filter value.
 
@@ -79,7 +79,7 @@ class GID(TagEncodable):
 
     def binary(
         self,
-        binary_coding_scheme: GID.BinaryCodingScheme.GID_96 = BinaryCodingScheme.GID_96,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GID_96,
     ) -> str:
         """Return the binary representation belonging to this GID with the provided binary coding scheme and filter value.
 

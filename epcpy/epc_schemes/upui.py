@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element
+from epcpy.epc_schemes.base_scheme import GS1Element
 from epcpy.utils.common import (
     ConvertException,
     calculate_checksum,
@@ -39,11 +39,11 @@ class UPUI(GS1Element):
         if not UPUI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid UPUI URI {epc_uri}")
 
-        self._company_pref, self._item_ref, *tpx = ":".join(
+        self._company_pref, self._item_ref, *tpx_components = ":".join(
             epc_uri.split(":")[4:]
         ).split(".")
 
-        tpx = ".".join(tpx)
+        tpx = ".".join(tpx_components)
         verify_gs3a3_component(tpx)
         self._tpx = replace_uri_escapes(tpx)
 

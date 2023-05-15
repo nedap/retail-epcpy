@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from enum import IntEnum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
+from epcpy.epc_schemes.base_scheme import GS1Keyed
 from epcpy.utils.common import (
     ConvertException,
     calculate_checksum,
