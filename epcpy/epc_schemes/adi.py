@@ -87,7 +87,7 @@ class ADIFilterValue(Enum):
     RESERVED_63 = "63"
 
 
-class ADI(EPCScheme, TagEncodable):
+class ADI(TagEncodable):
     """ADI EPC scheme implementation.
 
     ADI pure identities are of the form:
@@ -114,7 +114,7 @@ class ADI(EPCScheme, TagEncodable):
         ADI_VAR = "00111011"
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not ADI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid ADI URI {epc_uri}")

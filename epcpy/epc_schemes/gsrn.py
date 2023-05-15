@@ -92,7 +92,7 @@ class GSRNFilterValue(Enum):
     RESERVED_7 = "7"
 
 
-class GSRN(EPCScheme, TagEncodable, GS1Keyed):
+class GSRN(TagEncodable, GS1Keyed):
     """GSRN EPC scheme implementation.
 
     GSRN pure identities are of the form:
@@ -124,7 +124,7 @@ class GSRN(EPCScheme, TagEncodable, GS1Keyed):
     gs1_element_string_regex = re.compile(GSRN_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not GSRN_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GSRN URI {epc_uri}")

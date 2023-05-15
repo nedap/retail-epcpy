@@ -14,7 +14,7 @@ from epcpy.utils.regex import GINC_GS1_ELEMENT_STRING, GINC_URI
 GINC_URI_REGEX = re.compile(GINC_URI)
 
 
-class GINC(EPCScheme, GS1Keyed):
+class GINC(GS1Keyed):
     """GINC EPC scheme implementation.
 
     GINC pure identities are of the form:
@@ -34,7 +34,7 @@ class GINC(EPCScheme, GS1Keyed):
     gs1_element_string_regex = re.compile(GINC_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not GINC_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GINC URI {epc_uri}")

@@ -20,7 +20,7 @@ class BIC(EPCScheme):
     """
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not BIC_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid BIC URI {epc_uri}")

@@ -29,7 +29,7 @@ def calculate_checksum(digits: str) -> int:
     return checksum
 
 
-class GSIN(EPCScheme, GS1Keyed):
+class GSIN(GS1Keyed):
     """GSIN EPC scheme implementation.
 
     GSIN pure identities are of the form:
@@ -49,7 +49,7 @@ class GSIN(EPCScheme, GS1Keyed):
     gs1_element_string_regex = re.compile(GSIN_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not GSIN_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GSIN URI {epc_uri}")

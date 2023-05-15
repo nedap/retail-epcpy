@@ -15,7 +15,7 @@ from epcpy.utils.regex import GID_URI
 GID_URI_REGEX = re.compile(GID_URI)
 
 
-class GID(EPCScheme, TagEncodable):
+class GID(TagEncodable):
     """GID EPC scheme implementation.
 
     GID pure identities are of the form:
@@ -42,7 +42,7 @@ class GID(EPCScheme, TagEncodable):
         GID_96 = "00110101"
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not GID_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GID URI {epc_uri}")

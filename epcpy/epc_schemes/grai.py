@@ -96,7 +96,7 @@ class GRAIFilterValue(Enum):
     RESERVED_7 = "7"
 
 
-class GRAI(EPCScheme, TagEncodable, GS1Keyed):
+class GRAI(TagEncodable, GS1Keyed):
     """GRAI EPC scheme implementation.
 
     GRAI pure identities are of the form:
@@ -130,7 +130,7 @@ class GRAI(EPCScheme, TagEncodable, GS1Keyed):
     gs1_element_string_regex = re.compile(GRAI_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not GRAI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GRAI URI {epc_uri}")

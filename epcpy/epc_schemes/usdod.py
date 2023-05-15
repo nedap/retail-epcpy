@@ -36,7 +36,7 @@ class USDODFilterValue(Enum):
     RESERVED_15 = "15"
 
 
-class USDOD(EPCScheme, TagEncodable):
+class USDOD(TagEncodable):
     """USDOD EPC scheme implementation.
 
     USDOD pure identities are of the form:
@@ -55,6 +55,7 @@ class USDOD(EPCScheme, TagEncodable):
         tag_uri (str): Tag URI
         binary (str): Binary representation
     """
+
     class BinaryCodingScheme(Enum):
         USDOD_96 = "usdod-96"
 
@@ -62,7 +63,7 @@ class USDOD(EPCScheme, TagEncodable):
         USDOD_96 = "00101111"
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not USDOD_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid USDOD URI {epc_uri}")

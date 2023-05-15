@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from enum import Enum
 from typing import Any, Dict
 
 from epcpy.utils.common import ConvertException, hex_to_base64, hex_to_binary
@@ -14,9 +15,9 @@ class EPCScheme:
         epc_uri (str): The EPC pure identity URI
     """
 
-    def __init__(self) -> None:
+    def __init__(self, epc_uri: str) -> None:
         super().__init__()
-        self.epc_uri = None
+        self.epc_uri = epc_uri
 
     def __eq__(self, other: object) -> bool:
         """Verify equality of two classes by validing if its an EPCScheme and whether the EPC URIs are equal.
@@ -45,7 +46,7 @@ class EPCScheme:
         return cls(epc_uri)
 
 
-class TagEncodable:
+class TagEncodable(EPCScheme):
     """Base class for tag encodable EPCSchemes
 
     Attributes:
@@ -55,17 +56,28 @@ class TagEncodable:
         base64 (str): Base64 representation of the EPC tag URI
     """
 
+    class BinaryCodingScheme(Enum):
+        """Binary coding schemes for tag encodable EPC schemes"""
+
+        pass
+
+    class BinaryHeader(Enum):
+        """Binary headers for tag encodable EPC schemes"""
+
+        pass
+
     TAG_URI_REGEX = re.compile(TAG_URI)
     TAG_URI_PREFIX = "urn:epc:tag:"
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, epc_uri: str) -> None:
+        super().__init__(epc_uri)
+
         self._base64 = None
         self._binary = None
         self._hex = None
         self._tag_uri = None
 
-    def tag_uri(self, **kwargs) -> str:
+    def tag_uri(self, *args, **kwargs) -> str:
         """Return the tag URI of the tag encodable
 
         Raises:
@@ -76,7 +88,7 @@ class TagEncodable:
         """
         raise NotImplementedError
 
-    def binary(self, **kwargs) -> str:
+    def binary(self, *args, **kwargs) -> str:
         """Return the binary representation of the tag encodable
 
         Raises:
@@ -87,7 +99,7 @@ class TagEncodable:
         """
         raise NotImplementedError
 
-    def hex(self, **kwargs) -> str:
+    def hex(self, *args, **kwargs) -> str:
         """Return the hexadecimal representation of the tag encodable
 
         Returns:
@@ -100,7 +112,7 @@ class TagEncodable:
 
         return f"{int(padded_binary, 2):X}"
 
-    def base64(self, **kwargs) -> str:
+    def base64(self, *args, **kwargs) -> str:
         """Return the base64 representation of the tag encodable
 
         Returns:
@@ -110,7 +122,8 @@ class TagEncodable:
 
         return hex_to_base64(hex_string)
 
-    def from_binary(tag_binary_string: str) -> TagEncodable:
+    @classmethod
+    def from_binary(cls, tag_binary_string: str) -> TagEncodable:
         """Instantiate a TagEncodable class from a binary string.
 
         Args:
@@ -187,9 +200,9 @@ class TagEncodable:
         }
 
 
-class GS1Element:
-    def __init__(self) -> None:
-        super().__init__()
+class GS1Element(EPCScheme):
+    def __init__(self, epc_uri: str) -> None:
+        super().__init__(epc_uri)
 
     def gs1_element_string(self, *args, **kwargs) -> str:
         """GS1 element string of the given EPC scheme
@@ -222,8 +235,8 @@ class GS1Element:
 
 
 class GS1Keyed(GS1Element):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, epc_uri: str) -> None:
+        super().__init__(epc_uri)
 
     def gs1_key(self, *args, **kwargs) -> str:
         """GS1 key of the given EPC scheme

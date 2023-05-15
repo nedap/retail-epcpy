@@ -95,7 +95,7 @@ class SGCNFilterValue(Enum):
     RESERVED_7 = "7"
 
 
-class SGCN(EPCScheme, TagEncodable, GS1Keyed):
+class SGCN(TagEncodable, GS1Keyed):
     """SGCN EPC scheme implementation.
 
     SGCN pure identities are of the form:
@@ -127,7 +127,7 @@ class SGCN(EPCScheme, TagEncodable, GS1Keyed):
     gs1_element_string_regex = re.compile(SGCN_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not SGCN_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid SGCN URI {epc_uri}")

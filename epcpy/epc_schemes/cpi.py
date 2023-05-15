@@ -168,7 +168,7 @@ def revert_cpi_escapes(cpi: str) -> str:
     return cpi.replace("#", "%23").replace("/", "%2F")
 
 
-class CPI(EPCScheme, GS1Element, TagEncodable):
+class CPI(GS1Element, TagEncodable):
     """CPI EPC scheme implementation.
 
     CPI pure identities are of the form:
@@ -201,7 +201,7 @@ class CPI(EPCScheme, GS1Element, TagEncodable):
     gs1_element_string_regex = re.compile(CPI_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not CPI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid CPI URI {epc_uri}")

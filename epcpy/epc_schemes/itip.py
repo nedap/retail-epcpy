@@ -98,7 +98,7 @@ class ITIPFilterValue(Enum):
     RESERVED_7 = "7"
 
 
-class ITIP(EPCScheme, GS1Element, TagEncodable):
+class ITIP(GS1Element, TagEncodable):
     """ITIP EPC scheme implementation.
 
     ITIP pure identities are of the form:
@@ -131,7 +131,7 @@ class ITIP(EPCScheme, GS1Element, TagEncodable):
     gs1_element_string_regex = re.compile(ITIP_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not ITIP_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid ITIP URI {epc_uri}")

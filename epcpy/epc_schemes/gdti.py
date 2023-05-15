@@ -96,7 +96,7 @@ class GDTIFilterValue(Enum):
     RESERVED_7 = "7"
 
 
-class GDTI(EPCScheme, TagEncodable, GS1Keyed):
+class GDTI(TagEncodable, GS1Keyed):
     """GDTI EPC scheme implementation.
 
     GDTI pure identities are of the form:
@@ -130,7 +130,7 @@ class GDTI(EPCScheme, TagEncodable, GS1Keyed):
     gs1_element_string_regex = re.compile(GDTI_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not GDTI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GDTI URI {epc_uri}")

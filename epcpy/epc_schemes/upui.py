@@ -15,7 +15,7 @@ from epcpy.utils.regex import UPUI_GS1_ELEMENT_STRING, UPUI_URI
 UPUI_URI_REGEX = re.compile(UPUI_URI)
 
 
-class UPUI(EPCScheme, GS1Element):
+class UPUI(GS1Element):
     """UPUI EPC scheme implementation.
 
     UPUI pure identities are of the form:
@@ -34,7 +34,7 @@ class UPUI(EPCScheme, GS1Element):
     gs1_element_string_regex = re.compile(UPUI_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not UPUI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid UPUI URI {epc_uri}")
