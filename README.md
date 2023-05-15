@@ -214,7 +214,7 @@ Poetry must be installed and available in `$PATH`.
 After cloning run `poetry install` to install (development) dependencies.
 
 ### Testing
-This module uses the Python unittest library. Run `poetry run tests` for running the tests.
+This module uses the Python unittest library. Run `poetry run test` for running the tests.
 
 ### Coverage
 Run `poetry run coverage run -m unittest discover` to execute all tests with coverage. The resulting coverage can be reported using `poetry run coverage report --omit="*/test*"` for a textual view the terminal and with `poetry run coverage html --omit="*/test*"` for a webpage.
