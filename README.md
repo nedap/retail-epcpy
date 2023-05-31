@@ -27,7 +27,7 @@ A Python module for creation, validation, and transformation of EPC representati
     - [Notebook](#notebook)
 
 ## Requirements
-- Python >= 3.7
+- Python >= 3.8
 
 ## Installation
 ```
