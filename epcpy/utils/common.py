@@ -1,7 +1,7 @@
 import base64
 import re
 from enum import Enum
-from math import inf, log
+from math import log
 from typing import Dict, List, Tuple
 
 from epcpy.utils.regex import VERIFY_GS3A3_CHARS
@@ -171,9 +171,9 @@ def encode_string(string: str, num_bits: int) -> str:
         if len(g) == 0:
             continue
         elif g[0] != "%":
-            res += "".join([str_to_binary(ord(s), 7) for s in g])
+            res += "".join([str_to_binary(str(ord(s)), 7) for s in g])
         else:
-            res += str_to_binary(int(g[1:], 16), 7)
+            res += str_to_binary(str(int(g[1:], 16)), 7)
     return f"{res:<0{num_bits}}"
 
 
@@ -230,7 +230,7 @@ def encode_string_six_bits(string: str) -> str:
                 ]
             )
         else:
-            res += str_to_binary(int(g[1:], 16), 6)
+            res += str_to_binary(str(int(g[1:], 16)), 6)
     return f"{res}000000"
 
 
@@ -272,7 +272,7 @@ def decode_string(binary: str) -> str:
 
 def encode_partition_table(
     parts: List[str],
-    partition_table: List[Dict[str, Dict[str, int]]],
+    partition_table: Dict[int, Dict[str, int]],
     string_partition=False,
     six_bit_variable_partition=False,
 ) -> str:
@@ -313,7 +313,7 @@ def encode_partition_table(
 
 def decode_partition_table(
     binary_string: str,
-    partition_table: List[Dict[str, Dict[str, int]]],
+    partition_table: Dict[int, Dict[str, int]],
     unpadded_partition=False,
     string_partition=False,
     six_bit_variable_partition=False,
@@ -349,7 +349,7 @@ def decode_partition_table(
     elif six_bit_variable_partition:
         D = decode_string_six_bits(D_bin, partition["K"])
     else:
-        D = binary_to_int(D_bin) if partition["K"] != 0 else ""
+        D = str(binary_to_int(D_bin)) if partition["K"] != 0 else ""
 
     compare_D = not (
         unpadded_partition or string_partition or six_bit_variable_partition
@@ -357,7 +357,7 @@ def decode_partition_table(
 
     if not C < pow(10, partition["L"]):
         raise ConvertException(message=f"Company prefix length too large")
-    if D != "" and compare_D and not D < pow(10, partition["K"]):
+    if D != "" and compare_D and not int(D) < pow(10, partition["K"]):
         raise ConvertException(message=f"Item reference length too large")
 
     return f"{C:>0{partition['L']}}.{D:>0{partition['K'] if compare_D else 0}}"
@@ -478,7 +478,7 @@ def decode_cage_code_six_bits(binary: str) -> str:
     if binary.startswith("100000"):
         binary = binary[6:]
 
-    return decode_string_six_bits(binary, inf)
+    return decode_string_six_bits(binary, 6)
 
 
 def encode_cage_code_six_bits(chars: str) -> str:
@@ -527,8 +527,8 @@ def calculate_checksum(digits: str) -> int:
     Returns:
         int: Check digit
     """
-    digits = [int(d) for d in digits]
-    odd, even = digits[1::2], digits[0::2]
+    digit_list = [int(d) for d in digits]
+    odd, even = digit_list[1::2], digit_list[0::2]
 
     if len(digits) % 2 == 0:
         val1 = sum(odd)
@@ -543,7 +543,7 @@ def calculate_checksum(digits: str) -> int:
 
 
 def parse_header_and_truncate_binary(
-    binary_string: str, header_to_schemes: Dict[str, str]
+    binary_string: str, header_to_schemes: Dict[str, Enum]
 ) -> Tuple[Enum, str]:
     """Parse a binary header, detect the scheme and truncate the binary string based on the scheme.
 

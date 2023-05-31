@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
+from epcpy.epc_schemes.base_scheme import GS1Keyed
 from epcpy.utils.common import (
     ConvertException,
     replace_uri_escapes,
@@ -14,7 +14,7 @@ from epcpy.utils.regex import GINC_GS1_ELEMENT_STRING, GINC_URI
 GINC_URI_REGEX = re.compile(GINC_URI)
 
 
-class GINC(EPCScheme, GS1Keyed):
+class GINC(GS1Keyed):
     """GINC EPC scheme implementation.
 
     GINC pure identities are of the form:
@@ -34,16 +34,16 @@ class GINC(EPCScheme, GS1Keyed):
     gs1_element_string_regex = re.compile(GINC_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not GINC_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GINC URI {epc_uri}")
 
-        company_prefix, *consignment_reference = ":".join(epc_uri.split(":")[4:]).split(
-            "."
-        )
+        company_prefix, *consignment_reference_components = ":".join(
+            epc_uri.split(":")[4:]
+        ).split(".")
 
-        consignment_reference = ".".join(consignment_reference)
+        consignment_reference = ".".join(consignment_reference_components)
         verify_gs3a3_component(consignment_reference)
         consignment_reference = replace_uri_escapes(consignment_reference)
 

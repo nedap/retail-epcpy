@@ -1,5 +1,5 @@
 import re
-from typing import List, Union
+from typing import Dict, List, Optional, Type
 
 from epcpy.epc_schemes import (
     ADI,
@@ -38,7 +38,7 @@ GS1_ELEMENT_STRING_REGEX = re.compile(GS1_ELEMENT_STRING)
 IDPAT_URI_REGEX = re.compile(IDPAT_URI)
 TAG_URI_REGEX = re.compile(TAG_URI)
 
-EPC_SCHEMES: List[EPCScheme] = [
+EPC_SCHEMES: List[Type[EPCScheme]] = [
     ADI,
     BIC,
     CPI,
@@ -61,10 +61,10 @@ EPC_SCHEMES: List[EPCScheme] = [
     UPUI,
     USDOD,
 ]
-GS1_KEYED_CLASSES: List[GS1Keyed] = [
+GS1_KEYED_CLASSES: List[Type[GS1Keyed]] = [
     cls for cls in EPC_SCHEMES if issubclass(cls, GS1Keyed)
 ]
-TAG_ENCODABLE_CLASSES: List[TagEncodable] = [
+TAG_ENCODABLE_CLASSES: List[Type[TagEncodable]] = [
     cls for cls in EPC_SCHEMES if issubclass(cls, TagEncodable)
 ]
 
@@ -77,7 +77,7 @@ TAG_ENCODABLE_HEX_HEADERS = {
     for h in cls.BinaryHeader
 }
 
-GS1_ELEMENT_STRING_REGEX_TO_SCHEME: Union[re.Pattern, GS1Element] = {
+GS1_ELEMENT_STRING_REGEX_TO_SCHEME: Dict[re.Pattern, Type[GS1Element]] = {
     cls.gs1_element_string_regex: cls
     for cls in EPC_SCHEMES
     if issubclass(cls, GS1Element)
@@ -90,7 +90,9 @@ TAG_ENCODABLE_SCHEME_IDENTIFIERS = {
 GS1_KEYED_SCHEME_IDENTIFIERS = {cls.__name__.lower(): cls for cls in GS1_KEYED_CLASSES}
 
 
-def get_gs1_key(source: str, company_prefix_length: int = None, **kwargs) -> str:
+def get_gs1_key(
+    source: str, company_prefix_length: Optional[int] = None, **kwargs
+) -> str:
     """Get the GS1 key belonging to the source string.
     This method can identify and parse:
     - EPC pure identity URIs
@@ -115,7 +117,7 @@ def get_gs1_key(source: str, company_prefix_length: int = None, **kwargs) -> str
 
     if EPC_URI_REGEX.fullmatch(source):
         scheme = epc_pure_identity_to_scheme(source)
-    elif GS1_ELEMENT_STRING_REGEX.fullmatch(source):
+    elif GS1_ELEMENT_STRING_REGEX.fullmatch(source) and company_prefix_length:
         scheme = gs1_element_string_to_gs1_element(source, company_prefix_length)
     elif TAG_URI_REGEX.fullmatch(source):
         scheme = tag_uri_to_tag_encodable(source)
@@ -293,7 +295,7 @@ def _idpat_to_gs1_keyed_scheme(idpat: str) -> GS1Keyed:
 
     # URI already matches existing scheme
     if EPC_URI_REGEX.fullmatch(uri):
-        return GS1_KEYED_SCHEME_IDENTIFIERS[identifier].from_epc_uri(uri)
+        return GS1_KEYED_SCHEME_IDENTIFIERS[identifier](uri)
 
     if identifier not in ONE_ESCAPE_ALLOWED_SCHEMES:
         raise ConvertException(message="URI exceeds maximum number of escaped patterns")
@@ -301,7 +303,7 @@ def _idpat_to_gs1_keyed_scheme(idpat: str) -> GS1Keyed:
     # Create URI with dummy serial to create GS1 key
     dummy_uri = re.sub("\.\*$", ".0", uri, 1)
     if EPC_URI_REGEX.fullmatch(dummy_uri):
-        return GS1_KEYED_SCHEME_IDENTIFIERS[identifier].from_epc_uri(dummy_uri)
+        return GS1_KEYED_SCHEME_IDENTIFIERS[identifier](dummy_uri)
 
     raise ConvertException(message="Could not create valid scheme from given id pat")
 

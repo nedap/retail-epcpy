@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
+from epcpy.epc_schemes.base_scheme import GS1Keyed, TagEncodable
 from epcpy.utils.common import (
     ConvertException,
     binary_to_int,
@@ -155,7 +155,7 @@ class GIAIFilterValue(Enum):
     RESERVED_7 = "7"
 
 
-class GIAI(EPCScheme, TagEncodable, GS1Keyed):
+class GIAI(TagEncodable, GS1Keyed):
     """GIAI EPC scheme implementation.
 
     GIAI pure identities are of the form:
@@ -189,7 +189,7 @@ class GIAI(EPCScheme, TagEncodable, GS1Keyed):
     gs1_element_string_regex = re.compile(GIAI_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not GIAI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GIAI URI {epc_uri}")

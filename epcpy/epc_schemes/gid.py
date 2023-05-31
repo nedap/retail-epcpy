@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
+from epcpy.epc_schemes.base_scheme import TagEncodable
 from epcpy.utils.common import (
     ConvertException,
     binary_to_int,
@@ -15,7 +15,7 @@ from epcpy.utils.regex import GID_URI
 GID_URI_REGEX = re.compile(GID_URI)
 
 
-class GID(EPCScheme, TagEncodable):
+class GID(TagEncodable):
     """GID EPC scheme implementation.
 
     GID pure identities are of the form:
@@ -42,7 +42,7 @@ class GID(EPCScheme, TagEncodable):
         GID_96 = "00110101"
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not GID_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GID URI {epc_uri}")
@@ -64,7 +64,7 @@ class GID(EPCScheme, TagEncodable):
 
     def tag_uri(
         self,
-        binary_coding_scheme: GID.BinaryCodingScheme.GID_96 = BinaryCodingScheme.GID_96,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GID_96,
     ) -> str:
         """Return the tag URI belonging to this GID with the provided binary coding scheme and filter value.
 
@@ -79,7 +79,7 @@ class GID(EPCScheme, TagEncodable):
 
     def binary(
         self,
-        binary_coding_scheme: GID.BinaryCodingScheme.GID_96 = BinaryCodingScheme.GID_96,
+        binary_coding_scheme: BinaryCodingScheme = BinaryCodingScheme.GID_96,
     ) -> str:
         """Return the binary representation belonging to this GID with the provided binary coding scheme and filter value.
 

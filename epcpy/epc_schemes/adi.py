@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import math
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, TagEncodable
+from epcpy.epc_schemes.base_scheme import TagEncodable
 from epcpy.utils.common import (
     ConvertException,
     binary_to_int,
@@ -87,7 +86,7 @@ class ADIFilterValue(Enum):
     RESERVED_63 = "63"
 
 
-class ADI(EPCScheme, TagEncodable):
+class ADI(TagEncodable):
     """ADI EPC scheme implementation.
 
     ADI pure identities are of the form:
@@ -114,7 +113,7 @@ class ADI(EPCScheme, TagEncodable):
         ADI_VAR = "00111011"
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not ADI_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid ADI URI {epc_uri}")
@@ -209,13 +208,13 @@ class ADI(EPCScheme, TagEncodable):
         part_number_binary, _, *serial_binary = re.split(
             "([0]{6})", truncated_binary[50:]
         )
-        serial_binary = "".join(serial_binary)[:-6]
+        serial_binary_trimmed = "".join(serial_binary)[:-6]
 
         filter_string = binary_to_int(filter_binary)
         cage_code_string = decode_cage_code_six_bits(cage_code_binary)
-        part_number_string = decode_string_six_bits(part_number_binary, math.inf)
+        part_number_string = decode_string_six_bits(part_number_binary, 32)
 
-        serial_string = decode_string_six_bits(serial_binary, math.inf)
+        serial_string = decode_string_six_bits(serial_binary_trimmed, 30)
 
         return cls.from_tag_uri(
             f"{cls.TAG_URI_PREFIX}{binary_coding_scheme.value}:{filter_string}.{cage_code_string}.{part_number_string}.{serial_string}"

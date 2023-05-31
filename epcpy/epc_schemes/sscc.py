@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from enum import Enum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
+from epcpy.epc_schemes.base_scheme import GS1Keyed, TagEncodable
 from epcpy.utils.common import (
     ConvertException,
     binary_to_int,
@@ -91,7 +91,7 @@ class SSCCFilterValue(Enum):
     RESERVED_7 = "7"
 
 
-class SSCC(EPCScheme, TagEncodable, GS1Keyed):
+class SSCC(TagEncodable, GS1Keyed):
     """SSCC EPC scheme implementation.
 
     SSCC pure identities are of the form:
@@ -119,10 +119,11 @@ class SSCC(EPCScheme, TagEncodable, GS1Keyed):
 
     class BinaryHeader(Enum):
         SSCC_96 = "00110001"
+
     gs1_element_string_regex = re.compile(SSCC_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not SSCC_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid SSCC URI {epc_uri}")

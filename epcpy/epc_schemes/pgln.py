@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
+from epcpy.epc_schemes.base_scheme import GS1Keyed
 from epcpy.utils.common import ConvertException, calculate_checksum
 from epcpy.utils.regex import PGLN_GS1_ELEMENT_STRING, PGLN_URI
 
 PGLN_URI_REGEX = re.compile(PGLN_URI)
 
 
-class PGLN(EPCScheme, GS1Keyed):
+class PGLN(GS1Keyed):
     """PGLN EPC scheme implementation.
 
     PGLN pure identities are of the form:
@@ -25,10 +25,11 @@ class PGLN(EPCScheme, GS1Keyed):
         gs1_key (str): GS1 key
         gs1_element_string (str): GS1 element string
     """
+
     gs1_element_string_regex = re.compile(PGLN_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not PGLN_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid PGLN URI {epc_uri}")

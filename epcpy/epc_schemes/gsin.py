@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
+from epcpy.epc_schemes.base_scheme import GS1Keyed
 from epcpy.utils.common import ConvertException
 from epcpy.utils.regex import GSIN_GS1_ELEMENT_STRING, GSIN_URI
 
@@ -18,8 +18,8 @@ def calculate_checksum(digits: str) -> int:
     Returns:
         int: Check digit
     """
-    digits = [int(d) for d in digits]
-    odd, even = digits[1::2], digits[0::2]
+    digit_list = [int(d) for d in digits]
+    odd, even = digit_list[1::2], digit_list[0::2]
 
     val1 = sum(odd)
     val2 = sum(even)
@@ -29,7 +29,7 @@ def calculate_checksum(digits: str) -> int:
     return checksum
 
 
-class GSIN(EPCScheme, GS1Keyed):
+class GSIN(GS1Keyed):
     """GSIN EPC scheme implementation.
 
     GSIN pure identities are of the form:
@@ -49,7 +49,7 @@ class GSIN(EPCScheme, GS1Keyed):
     gs1_element_string_regex = re.compile(GSIN_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not GSIN_URI_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid GSIN URI {epc_uri}")

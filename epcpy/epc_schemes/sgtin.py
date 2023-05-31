@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from enum import Enum, IntEnum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed, TagEncodable
+from epcpy.epc_schemes.base_scheme import GS1Keyed, TagEncodable
 from epcpy.utils.common import (
     ConvertException,
     binary_to_int,
@@ -103,7 +103,7 @@ class GTIN_TYPE(IntEnum):
     GTIN14 = 14
 
 
-class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
+class SGTIN(TagEncodable, GS1Keyed):
     """SGTIN EPC scheme implementation.
 
     SGTIN pure identities are of the form:
@@ -139,7 +139,7 @@ class SGTIN(EPCScheme, TagEncodable, GS1Keyed):
     gs1_element_string_regex = re.compile(SGTIN_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_uri) -> None:
-        super().__init__()
+        super().__init__(epc_uri)
 
         if not SGTIN_REGEX.fullmatch(epc_uri):
             raise ConvertException(message=f"Invalid SGTIN URI {epc_uri}")

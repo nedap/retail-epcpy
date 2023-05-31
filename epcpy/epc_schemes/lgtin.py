@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from enum import IntEnum
 
-from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Keyed
+from epcpy.epc_schemes.base_scheme import GS1Keyed
 from epcpy.utils.common import (
     ConvertException,
     calculate_checksum,
@@ -23,7 +23,7 @@ class GTIN_TYPE(IntEnum):
     GTIN14 = 14
 
 
-class LGTIN(EPCScheme, GS1Keyed):
+class LGTIN(GS1Keyed):
     """LGTIN EPC scheme implementation.
 
     LGTIN pure identities are of the form:
@@ -43,7 +43,7 @@ class LGTIN(EPCScheme, GS1Keyed):
     gs1_element_string_regex = re.compile(LGTIN_GS1_ELEMENT_STRING)
 
     def __init__(self, epc_class) -> None:
-        super().__init__()
+        super().__init__(epc_class)
 
         if not LGTIN_CLASS_REGEX.fullmatch(epc_class):
             raise ConvertException(message=f"Invalid LGTIN CLASS {epc_class}")
