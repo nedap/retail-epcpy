@@ -32,9 +32,8 @@ test = "scripts:test"
 python = "^3.8"
 
 [tool.poetry.dev-dependencies]
-black = "latest"
-coverage = "latest"
-mypy = "latest"
+black = "*"
+coverage = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
