@@ -217,7 +217,7 @@ class TestTagEncodableMeta(type):
                     self.assertEqual(s.epc_uri, epc_uri)
                 except ConvertException:
                     self.fail(
-                        f"{scheme} from hex unexpectedly raised ConvertException for URI {epc_uri}"
+                        f"{scheme} from base64 unexpectedly raised ConvertException for URI {epc_uri}"
                     )
 
             return test
