@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "epcpy"
-version = "0.1.7"
+version = "0.1.8"
 description = "A Python module for creation, validation, and transformation of EPC representations as defined in GS1's EPC Tag Data Standard."
 license = "MIT"
 authors = ["Nedap Retail <sander.meinderts@nedap.com>"]
@@ -32,9 +32,8 @@ test = "scripts:test"
 python = "^3.8"
 
 [tool.poetry.dev-dependencies]
-black = "latest"
-coverage = "latest"
-mypy = "latest"
+black = "*"
+coverage = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

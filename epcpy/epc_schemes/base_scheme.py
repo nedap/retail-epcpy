@@ -4,7 +4,7 @@ import re
 from enum import Enum
 from typing import Dict, Optional, Type, TypeVar
 
-from epcpy.utils.common import ConvertException, hex_to_base64, hex_to_binary
+from epcpy.utils.common import ConvertException, base64_to_hex, hex_to_base64, hex_to_binary
 from epcpy.utils.regex import TAG_URI
 
 T_EPCScheme = TypeVar("T_EPCScheme", bound="EPCScheme")
@@ -164,7 +164,7 @@ class TagEncodable(EPCScheme):
         Returns:
             TagEncodable: Instance of TagEncodable class
         """
-        return cls.from_binary(hex_to_base64(tag_base64_string))
+        return cls.from_hex(base64_to_hex(tag_base64_string))
 
     @classmethod
     def from_tag_uri(

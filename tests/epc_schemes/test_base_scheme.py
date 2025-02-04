@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 
 from epcpy import ConvertException
 from epcpy.epc_schemes.base_scheme import EPCScheme, GS1Element, GS1Keyed, TagEncodable
+from epcpy.utils.common import hex_to_base64
 
 
 class TestEPCSchemeInitMeta(type):
@@ -207,6 +208,20 @@ class TestTagEncodableMeta(type):
 
             return test
 
+        def generate_valid_from_base64_test(
+            scheme: TagEncodable, epc_uri: str, hex_string: str
+        ):
+            def test(self: unittest.TestCase):
+                try:
+                    s: EPCScheme = scheme.from_base64(hex_to_base64(hex_string))
+                    self.assertEqual(s.epc_uri, epc_uri)
+                except ConvertException:
+                    self.fail(
+                        f"{scheme} from base64 unexpectedly raised ConvertException for URI {epc_uri}"
+                    )
+
+            return test
+
         def generate_invalid_tag_encodable_tests(
             scheme: EPCScheme, epc_uri: str, **kwargs
         ):
@@ -237,6 +252,11 @@ class TestTagEncodableMeta(type):
                 **entry["kwargs"] if "kwargs" in entry else {},
             )
             attrs[f"{name}_from_hex"] = generate_valid_from_hex_test(
+                scheme,
+                entry["uri"],
+                entry["hex"],
+            )
+            attrs[f"{name}_from_base64"] = generate_valid_from_base64_test(
                 scheme,
                 entry["uri"],
                 entry["hex"],
